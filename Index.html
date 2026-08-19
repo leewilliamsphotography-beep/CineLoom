@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thursday Film Night</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ===== Theme Variables ===== */
+:root {
+  --bg: #07090d;
+  --bg-elev: #0d1016;
+  --bg-elev-2: #131720;
+  --bg-elev-3: #1a1f2a;
+  --text: #d8dde4;
+  --text-soft: #8a93a0;
+  --text-dim: #4a5260;
+  --accent: #5fb3f5;
+  --accent-soft: rgba(95, 179, 245, 0.15);
+  --accent-glow: rgba(95, 179, 245, 0.4);
+  --line: rgba(255,255,255,0.06);
+  --line-soft: rgba(255,255,255,0.03);
+  --line-strong: rgba(255,255,255,0.12);
+  --error: #ff5c5c;
+  --error-soft: rgba(255, 92, 92, 0.1);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  
+  /* Subtitle Style Variables */
+  --cue-size: 1.4em;
+  --cue-bg: rgba(0, 0, 0, 0.6);
+  --cue-text: #ffffff;
+}
+
+html[data-theme="theater"] {
+  --bg: #0d0807;
+  --bg-elev: #16100d;
+  --bg-elev-2: #1f1713;
+  --bg-elev-3: #2a201a;
+  --text: #e4dcd8;
+  --text-soft: #a0908a;
+  --text-dim: #605550;
+  --accent: #f5a05f;
+  --accent-soft: rgba(245, 160, 95, 0.15);
+  --accent-glow: rgba(245, 160, 95, 0.4);
+}
+
+html[data-theme="midnight"] {
+  --bg: #08060d;
+  --bg-elev: #0f0d16;
+  --bg-elev-2: #16131f;
+  --bg-elev-3: #1d1a2a;
+  --text: #e4d8e4;
+  --text-soft: #a08aa0;
+  --text-dim: #5a505a;
+  --accent: #c98aff;
+  --accent-soft: rgba(201, 138, 255, 0.15);
+  --accent-glow: rgba(201, 138, 255, 0.4);
+}
+
+html[data-theme="mono"] {
+  --bg: #000000;
+  --bg-elev: #0a0a0a;
+  --bg-elev-2: #141414;
+  --bg-elev-3: #1f1f1f;
+  --text: #ffffff;
+  --text-soft: #999999;
+  --text-dim: #4a4a4a;
+  --accent: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.1);
+  --accent-glow: rgba(255, 255, 255, 0.3);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-soft: rgba(255, 255, 255, 0.04);
+  --line-strong: rgba(255, 255, 255, 0.2);
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease);
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, var(--accent-soft), transparent),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(0, 0, 0, 0.5), transparent);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ===== Subtitle (Cue) Styling ===== */
+video::cue {
+  font-size: var(--cue-size);
+  background: var(--cue-bg);
+  color: var(--cue-text);
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  line-height: 1.4;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+  text-shadow: 0px 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2.5rem;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  z-index: 10;
+}
+
+.brand { display: flex; align-items: center; gap: 0.85rem; }
+
+.brand-mark {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow), 0 0 20px var(--accent-glow);
+  animation: pulse 3s ease-in-out infinite;
+  transition: background 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+.brand-text { font-weight: 500; letter-spacing: 0.2em; font-size: 12px; color: var(--text); }
+
+.session-meta { font-size: 11px; color: var(--text-soft); letter-spacing: 0.1em; display: flex; gap: 1.25rem; align-items: center; }
+.session-meta .sep { color: var(--text-dim); }
+@media (max-width: 720px) { .session-meta { display: none; } }
+
+/* Hero */
+.hero { padding: 3rem 2.5rem 2rem; max-width: 1800px; margin: 0 auto; position: relative; }
+.hero-label { font-size: 11px; color: var(--accent); letter-spacing: 0.25em; margin-bottom: 1.25rem; font-weight: 500; transition: color 0.4s var(--ease); }
+.hero h1 { font-weight: 500; font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.2; letter-spacing: -0.01em; }
+.hero h1 em { font-style: normal; color: var(--text-soft); }
+.hero p { color: var(--text-soft); font-size: 14px; margin-top: 1.1rem; max-width: 620px; line-height: 1.75; }
+
+/* Players */
+main { padding: 0 2.5rem 5rem; max-width: 1800px; margin: 0 auto; position: relative; z-index: 5; }
+.players { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 1100px) {
+  .players { grid-template-columns: 1fr; }
+  header { padding: 1.25rem 1.5rem; }
+  .hero, main { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .hero { padding-top: 2.5rem; padding-bottom: 1.5rem; }
+}
+
+.player {
+  background: var(--bg-elev); border: 1px solid var(--line); border-radius: 6px;
+  overflow: hidden; display: flex; flex-direction: column;
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 1s var(--ease), transform 1s var(--ease), background 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+.player.is-in { opacity: 1; transform: none; }
+.player:nth-child(2) { transition-delay: 0.15s; }
+.player:focus-within { border-color: var(--line-strong); }
+
+.player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); background: var(--bg-elev-2); gap: 1rem; transition: background 0.4s var(--ease), border-color 0.4s var(--ease); }
+.screen-label { font-size: 10px; color: var(--accent); letter-spacing: 0.25em; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; font-weight: 600; transition: color 0.4s var(--ease); }
+.screen-label::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent-glow); transition: background 0.4s var(--ease), box-shadow 0.4s var(--ease); }
+.film-title { background: transparent; border: none; color: var(--text); font-family: inherit; font-size: 1rem; font-weight: 500; text-align: right; flex: 1; outline: none; padding: 0.25rem 0; border-bottom: 1px solid transparent; transition: border-color 0.3s var(--ease), color 0.4s var(--ease); min-width: 0; }
+.film-title:focus { border-bottom-color: var(--accent); }
+.film-title::placeholder { color: var(--text-dim); }
+
+.actions-row { display: flex; gap: 0.75rem; padding: 0.85rem 1.25rem; background: var(--bg-elev); border-bottom: 1px solid var(--line); transition: background 0.4s var(--ease), border-color 0.4s var(--ease); }
+.load-btn { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-soft); padding: 0.7rem 0.9rem; font-family: inherit; font-size: 12px; letter-spacing: 0.04em; cursor: pointer; border-radius: 3px; transition: all 0.3s var(--ease); text-align: left; display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.load-btn:hover { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
+.load-btn.has-file { border-color: var(--line-strong); color: var(--text); }
+.load-btn .label { font-size: 9px; color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; }
+.load-btn .filename { font-size: 11px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
+.load-btn .filename.placeholder { color: var(--text-dim); }
+
+.video-stage { position: relative; aspect-ratio: 16/9; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.video-stage video { width: 100%; height: 100%; display: block; background: #000; cursor: pointer; }
+
+.empty-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem; background: radial-gradient(circle at center, var(--bg-elev-2) 0%, #000 80%); transition: opacity 0.4s var(--ease); text-align: center; padding: 1rem; }
+.empty-state.hidden { opacity: 0; pointer-events: none; }
+.empty-state-icon { width: 56px; height: 56px; border: 1px solid var(--line-strong); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-soft); position: relative; }
+.empty-state-icon::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 1px solid var(--line-soft); }
+.empty-state .prompt { color: var(--text-soft); font-size: 1.1rem; font-weight: 500; }
+.empty-state .hint { color: var(--text-dim); font-size: 10px; letter-spacing: 0.2em; margin-top: -0.25rem; text-transform: uppercase; }
+
+.error-state .empty-state-icon { border-color: var(--error); color: var(--error); background: var(--error-soft); }
+.error-state .prompt { color: var(--error); }
+.error-state .hint { color: var(--text-soft); text-transform: none; letter-spacing: 0; max-width: 400px; line-height: 1.5; font-size: 12px; }
+
+.controls { display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1.25rem; background: var(--bg-elev-2); border-top: 1px solid var(--line); transition: background 0.4s var(--ease), border-color 0.4s var(--ease); }
+.btn { background: transparent; border: 1px solid var(--line); color: var(--text); cursor: pointer; border-radius: 3px; transition: all 0.25s var(--ease); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: inherit; }
+.btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+.btn-play { width: 34px; height: 34px; border-radius: 50%; border-color: var(--line-strong); }
+.btn-play svg { width: 11px; height: 11px; }
+.btn-play .icon-pause { display: none; }
+.btn-play.playing .icon-play { display: none; }
+.btn-play.playing .icon-pause { display: block; }
+
+.seek-bar { flex: 1; -webkit-appearance: none; appearance: none; background: transparent; height: 24px; cursor: pointer; display: flex; align-items: center; min-width: 0; }
+.seek-bar::-webkit-slider-runnable-track { height: 3px; background: var(--line-strong); border-radius: 2px; }
+.seek-bar::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); margin-top: -4px; border: none; box-shadow: 0 0 0 3px var(--accent-soft); transition: transform 0.15s var(--ease), background 0.4s var(--ease); }
+.seek-bar:hover::-webkit-slider-thumb { transform: scale(1.4); box-shadow: 0 0 0 4px var(--accent-soft), 0 0 12px var(--accent-glow); }
+.seek-bar::-moz-range-track { height: 3px; background: var(--line-strong); border-radius: 2px; }
+.seek-bar::-moz-range-thumb { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); border: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.timecode { font-size: 11px; color: var(--text-soft); min-width: 100px; text-align: center; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; }
+.btn-cc, .btn-fs { width: 30px; height: 30px; }
+.btn-cc { font-size: 9px; font-weight: 600; letter-spacing: 0.05em; }
+.btn-cc.active { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.btn-fs svg { width: 12px; height: 12px; }
+
+.end-film-row { padding: 1rem 1.25rem; background: var(--bg-elev); border-top: 1px solid var(--line); transition: background 0.4s var(--ease), border-color 0.4s var(--ease); }
+.end-film-btn { width: 100%; background: transparent; border: 1px solid var(--line); color: var(--text-soft); padding: 0.7rem 1rem; font-family: inherit; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all 0.3s var(--ease); font-weight: 600; }
+.end-film-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.end-film-btn:active { transform: scale(0.98); }
+
+.file-input { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.4s var(--ease); }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-box { background: var(--bg-elev-2); border: 1px solid var(--line-strong); padding: 3rem 4rem; border-radius: 8px; text-align: center; transform: scale(0.9); transition: transform 0.4s var(--ease), background 0.4s var(--ease); box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-width: 90vw; }
+.modal-overlay.active .modal-box { transform: scale(1); }
+.modal-message { font-size: 1.5rem; color: var(--text); font-weight: 500; margin-bottom: 1.5rem; letter-spacing: 0.02em; text-transform: uppercase; }
+.modal-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.5rem 1.5rem; font-family: inherit; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all 0.25s var(--ease); font-weight: 600; }
+.modal-close-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+/* ===== Floating Settings Dock ===== */
+.settings-dock { position: fixed; bottom: 20px; right: 20px; z-index: 10001; display: flex; align-items: flex-end; gap: 12px; }
+.settings-panel { background: var(--bg-elev-2); border: 1px solid var(--line-strong); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; opacity: 0; transform: translateY(20px) scale(0.95); pointer-events: none; transition: all 0.3s var(--ease); box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 200px; max-height: 80vh; overflow-y: auto; margin-bottom: 4px; }
+.settings-dock.open .settings-panel { opacity: 1; transform: none; pointer-events: auto; }
+.panel-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; padding: 4px 8px 8px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.panel-label:not(:first-child) { margin-top: 12px; }
+
+.theme-btn { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: transparent; border: 1px solid transparent; color: var(--text-soft); border-radius: 4px; cursor: pointer; transition: all 0.2s var(--ease); font-family: inherit; font-size: 12px; text-align: left; font-weight: 500; width: 100%; }
+.theme-btn:hover { background: var(--accent-soft); color: var(--text); }
+.theme-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.theme-swatch { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; }
+
+/* Subtitle Style Controls */
+.sub-style-row { display: flex; gap: 6px; padding: 0 4px; }
+.style-btn { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-soft); padding: 6px 0; font-family: inherit; font-size: 11px; font-weight: 500; cursor: pointer; border-radius: 3px; transition: all 0.2s var(--ease); }
+.style-btn:hover { border-color: var(--accent); color: var(--text); }
+.style-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.style-btn.small { font-size: 10px; }
+.style-btn.large { font-size: 13px; }
+
+.settings-toggle { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: all 0.3s var(--ease); flex-shrink: 0; }
+.settings-toggle:hover { color: var(--accent); border-color: var(--accent); box-shadow: 0 10px 30px var(--accent-glow); }
+.settings-dock.open .settings-toggle { transform: rotate(90deg); color: var(--accent); border-color: var(--accent); }
+.settings-toggle svg { width: 18px; height: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .player { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="brand-mark"></span>
+    <span class="brand-text">THURSDAY FILM NIGHT</span>
+  </div>
+  <div class="session-meta">
+    <span id="session-num">SESSION 000</span>
+    <span class="sep">·</span>
+    <span id="session-date">—</span>
+    <span class="sep">·</span>
+    <span id="session-time">—</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-label">DOUBLE FEATURE · TONIGHT</div>
+  <h1>Two screens, <em>one room.</em></h1>
+  <p>Load a film, drop in a subtitle file if you've got one, and press play. Both screens run independently.</p>
+</section>
+
+<main>
+  <div class="players">
+    <!-- ===== SCREEN 01 ===== -->
+    <div class="player" data-screen="1" tabindex="0">
+      <div class="player-header">
+        <span class="screen-label">SCREEN 01</span>
+        <input type="text" class="film-title" placeholder="untitled">
+      </div>
+      <div class="actions-row">
+        <button class="load-btn load-video-btn" type="button">
+          <span class="label">Load Film</span>
+          <span class="filename placeholder">no file selected</span>
+        </button>
+        <button class="load-btn load-sub-btn" type="button">
+          <span class="label">Subtitles</span>
+          <span class="filename placeholder">none</span>
+        </button>
+      </div>
+      <div class="video-stage">
+        <video preload="metadata" playsinline></video>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.2">
+              <rect x="3" y="6" width="18" height="12" rx="0.5"/>
+              <path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <div class="prompt">No film loaded.</div>
+          <div class="hint">CLICK LOAD FILM ABOVE</div>
+        </div>
+        <div class="empty-state error-state hidden">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="prompt">Cannot play this file</div>
+          <div class="hint">Your browser doesn't support the codecs inside this file (common with MKVs using HEVC/H.265 or DTS audio). Try converting the video to standard MP4 (H.264/AAC).</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-play" aria-label="Play / Pause">
+          <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+        </button>
+        <input type="range" class="seek-bar" value="0" min="0" max="100" step="0.1" aria-label="Seek">
+        <span class="timecode">0:00 / 0:00</span>
+        <button class="btn btn-cc" disabled aria-label="Toggle subtitles">CC</button>
+        <button class="btn btn-fs" aria-label="Fullscreen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+          </svg>
+        </button>
+      </div>
+      <div class="end-film-row">
+        <button class="end-film-btn" data-message="end of film one">End of Film One</button>
+      </div>
+      <input type="file" class="file-input file-input-video" accept="*/*">
+      <input type="file" class="file-input file-input-sub" accept=".vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream">
+    </div>
+
+    <!-- ===== SCREEN 02 ===== -->
+    <div class="player" data-screen="2" tabindex="0">
+      <div class="player-header">
+        <span class="screen-label">SCREEN 02</span>
+        <input type="text" class="film-title" placeholder="untitled">
+      </div>
+      <div class="actions-row">
+        <button class="load-btn load-video-btn" type="button">
+          <span class="label">Load Film</span>
+          <span class="filename placeholder">no file selected</span>
+        </button>
+        <button class="load-btn load-sub-btn" type="button">
+          <span class="label">Subtitles</span>
+          <span class="filename placeholder">none</span>
+        </button>
+      </div>
+      <div class="video-stage">
+        <video preload="metadata" playsinline></video>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.2">
+              <rect x="3" y="6" width="18" height="12" rx="0.5"/>
+              <path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <div class="prompt">No film loaded.</div>
+          <div class="hint">CLICK LOAD FILM ABOVE</div>
+        </div>
+        <div class="empty-state error-state hidden">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="prompt">Cannot play this file</div>
+          <div class="hint">Your browser doesn't support the codecs inside this file (common with MKVs using HEVC/H.265 or DTS audio). Try converting the video to standard MP4 (H.264/AAC).</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-play" aria-label="Play / Pause">
+          <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+        </button>
+        <input type="range" class="seek-bar" value="0" min="0" max="100" step="0.1" aria-label="Seek">
+        <span class="timecode">0:00 / 0:00</span>
+        <button class="btn btn-cc" disabled aria-label="Toggle subtitles">CC</button>
+        <button class="btn btn-fs" aria-label="Fullscreen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+          </svg>
+        </button>
+      </div>
+      <div class="end-film-row">
+        <button class="end-film-btn" data-message="End of film 2">End of Film Two</button>
+      </div>
+      <input type="file" class="file-input file-input-video" accept="*/*">
+      <input type="file" class="file-input file-input-sub" accept=".vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream">
+    </div>
+  </div>
+</main>
+
+<!-- Custom Pop-up Modal -->
+<div class="modal-overlay" id="popupModal">
+  <div class="modal-box">
+    <div class="modal-message" id="popupMessage"></div>
+    <button class="modal-close-btn" id="modalCloseBtn">Close</button>
+  </div>
+</div>
+
+<!-- Floating Settings Dock -->
+<div class="settings-dock" id="settingsDock">
+  <div class="settings-panel">
+    <div class="panel-label">Color Theme</div>
+    <button class="theme-btn active" data-theme="cyber">
+      <span class="theme-swatch" style="background: #5fb3f5;"></span>
+      <span>Cyber Cinema</span>
+    </button>
+    <button class="theme-btn" data-theme="theater">
+      <span class="theme-swatch" style="background: #f5a05f;"></span>
+      <span>Vintage Theater</span>
+    </button>
+    <button class="theme-btn" data-theme="midnight">
+      <span class="theme-swatch" style="background: #c98aff;"></span>
+      <span>Midnight Neon</span>
+    </button>
+    <button class="theme-btn" data-theme="mono">
+      <span class="theme-swatch" style="background: #ffffff;"></span>
+      <span>Pure Mono</span>
+    </button>
+
+    <div class="panel-label">Subtitle Size</div>
+    <div class="sub-style-row">
+      <button class="style-btn small" data-size="small">S</button>
+      <button class="style-btn active" data-size="medium">M</button>
+      <button class="style-btn large" data-size="large">L</button>
+    </div>
+
+    <div class="panel-label">Subtitle Background</div>
+    <div class="sub-style-row">
+      <button class="style-btn active" data-bg="translucent">Translucent</button>
+      <button class="style-btn" data-bg="solid">Solid</button>
+      <button class="style-btn" data-bg="none">None</button>
+    </div>
+  </div>
+  <button class="settings-toggle" id="settingsToggle" aria-label="Open Settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+  </button>
+</div>
+
+<script>
+// ===== Session Info =====
+(function updateSessionInfo() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).toUpperCase();
+  document.getElementById('session-date').textContent = dateStr;
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  document.getElementById('session-time').textContent = timeStr;
+  const epoch = new Date('2024-01-04');
+  const weeks = Math.floor((now - epoch) / (7 * 24 * 60 * 60 * 1000));
+  document.getElementById('session-num').textContent = 'SESSION ' + String(weeks + 1).padStart(3, '0');
+})();
+
+// ===== Settings & Theme Logic =====
+const dock = document.getElementById('settingsDock');
+const toggleBtn = document.getElementById('settingsToggle');
+
+toggleBtn.addEventListener('click', () => dock.classList.toggle('open'));
+
+// Theme Controls
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const theme = btn.dataset.theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    localStorage.setItem('tfn-theme', theme);
+  });
+});
+
+// Subtitle Size Controls
+document.querySelectorAll('.style-btn[data-size]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const size = btn.dataset.size;
+    const sizeMap = { small: '1.1em', medium: '1.4em', large: '1.8em' };
+    document.documentElement.style.setProperty('--cue-size', sizeMap[size]);
+    document.querySelectorAll('.style-btn[data-size]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    localStorage.setItem('tfn-sub-size', size);
+  });
+});
+
+// Subtitle Background Controls
+document.querySelectorAll('.style-btn[data-bg]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const bg = btn.dataset.bg;
+    const bgMap = { 
+      translucent: 'rgba(0, 0, 0, 0.6)', 
+      solid: 'rgba(0, 0, 0, 0.9)', 
+      none: 'transparent' 
+    };
+    document.documentElement.style.setProperty('--cue-bg', bgMap[bg]);
+    document.querySelectorAll('.style-btn[data-bg]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    localStorage.setItem('tfn-sub-bg', bg);
+  });
+});
+
+// Load Saved Settings on Startup
+const savedTheme = localStorage.getItem('tfn-theme') || 'cyber';
+document.documentElement.setAttribute('data-theme', savedTheme);
+document.querySelectorAll('.theme-btn').forEach(b => {
+  b.classList.toggle('active', b.dataset.theme === savedTheme);
+});
+
+const savedSize = localStorage.getItem('tfn-sub-size') || 'medium';
+const sizeMap = { small: '1.1em', medium: '1.4em', large: '1.8em' };
+document.documentElement.style.setProperty('--cue-size', sizeMap[savedSize]);
+document.querySelectorAll('.style-btn[data-size]').forEach(b => {
+  b.classList.toggle('active', b.dataset.size === savedSize);
+});
+
+const savedBg = localStorage.getItem('tfn-sub-bg') || 'translucent';
+const bgMap = { translucent: 'rgba(0, 0, 0, 0.6)', solid: 'rgba(0, 0, 0, 0.9)', none: 'transparent' };
+document.documentElement.style.setProperty('--cue-bg', bgMap[savedBg]);
+document.querySelectorAll('.style-btn[data-bg]').forEach(b => {
+  b.classList.toggle('active', b.dataset.bg === savedBg);
+});
+
+// ===== Modal Logic =====
+const modal = document.getElementById('popupModal');
+const modalMsg = document.getElementById('popupMessage');
+const modalClose = document.getElementById('modalCloseBtn');
+
+document.querySelectorAll('.end-film-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+    }
+    modalMsg.textContent = btn.dataset.message;
+    modal.classList.add('active');
+  });
+});
+
+modalClose.addEventListener('click', () => modal.classList.remove('active'));
+modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+
+// ===== Helpers =====
+function formatTime(s) {
+  if (isNaN(s) || !isFinite(s)) return '0:00';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = Math.floor(s % 60);
+  const pad = n => String(n).padStart(2, '0');
+  return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
+}
+
+// ===== Unified Subtitle Parsers =====
+function parseSubtitles(filename, content) {
+  const ext = filename.split('.').pop().toLowerCase();
+  
+  if (ext === 'vtt') return content;
+  if (ext === 'srt') return srtToVtt(content);
+  if (ext === 'sbv') return sbvToVtt(content);
+  if (ext === 'ass' || ext === 'ssa') return assToVtt(content);
+  
+  // Fallback attempt as SRT
+  return srtToVtt(content);
+}
+
+function srtToVtt(srt) {
+  let vtt = 'WEBVTT\n\n';
+  vtt += srt.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
+  vtt = vtt.replace(/(^|\n)(\d{2}:\d{2}),(\d{3})/g, '$1$2.$3');
+  return vtt;
+}
+
+function sbvToVtt(content) {
+  let vtt = 'WEBVTT\n\n';
+  const blocks = content.trim().split(/\n\s*\n/);
+  blocks.forEach(block => {
+    const lines = block.split('\n');
+    if (lines.length < 2) return;
+    const times = lines[0].split(',');
+    if (times.length === 2) {
+      const start = formatSbvTime(times[0].trim());
+      const end = formatSbvTime(times[1].trim());
+      vtt += `${start} --> ${end}\n${lines.slice(1).join('\n')}\n\n`;
+    }
+  });
+  return vtt;
+}
+
+function formatSbvTime(t) {
+  // SBV: 0:00:00.000 or 0:00:00,000 -> VTT: 00:00:00.000
+  let parts = t.replace(',', '.').split(':');
+  while(parts.length < 3) parts.unshift('00');
+  return parts.map(p => p.padStart(2, '0')).join(':');
+}
+
+function assToVtt(content) {
+  let vtt = 'WEBVTT\n\n';
+  const lines = content.split('\n');
+  let inEvents = false;
+  let textIdx = -1, startIdx = -1, endIdx = -1;
+
+  for (let line of lines) {
+    if (line.trim().startsWith('[')) inEvents = line.trim().toLowerCase() === '[events]';
+    if (inEvents && line.startsWith('Format:')) {
+      const fmt = line.split(':')[1].split(',').map(s => s.trim());
+      textIdx = fmt.indexOf('Text');
+      startIdx = fmt.indexOf('Start');
+      endIdx = fmt.indexOf('End');
+      continue;
+    }
+    if (inEvents && line.startsWith('Dialogue:') && textIdx !== -1) {
+      const parts = line.substring(9).split(',');
+      if (parts.length > textIdx) {
+        const start = formatAssTime(parts[startIdx]?.trim());
+        const end = formatAssTime(parts[endIdx]?.trim());
+        let text = parts.slice(textIdx).join(',').trim();
+        // Strip ASS formatting tags {\\...}
+        text = text.replace(/\{[^}]+\}/g, '');
+        // Convert ASS line breaks to VTT
+        text = text.replace(/\\N/gi, '\n');
+        if (start && end) {
+          vtt += `${start} --> ${end}\n${text}\n\n`;
+        }
+      }
+    }
+  }
+  return vtt;
+}
+
+function formatAssTime(t) {
+  // ASS: 0:00:00.00 -> VTT: 00:00:00.000
+  if (!t) return '';
+  let parts = t.split(':');
+  while(parts.length < 3) parts.unshift('00');
+  let secParts = parts[2].split('.');
+  let sec = secParts[0].padStart(2, '0');
+  let ms = (secParts[1] || '0').padEnd(3, '0');
+  return `${parts[0].padStart(2,'0')}:${parts[1].padStart(2,'0')}:${sec}.${ms}`;
+}
+
+// ===== Player Setup =====
+document.querySelectorAll('.player').forEach(setupPlayer);
+
+function setupPlayer(player) {
+  const video = player.querySelector('video');
+  const emptyState = player.querySelector('.empty-state:not(.error-state)');
+  const errorState = player.querySelector('.error-state');
+  const fileVideo = player.querySelector('.file-input-video');
+  const fileSub = player.querySelector('.file-input-sub');
+  const loadVideoBtn = player.querySelector('.load-video-btn');
+  const loadSubBtn = player.querySelector('.load-sub-btn');
+  const playBtn = player.querySelector('.btn-play');
+  const seekBar = player.querySelector('.seek-bar');
+  const timecode = player.querySelector('.timecode');
+  const ccBtn = player.querySelector('.btn-cc');
+  const fsBtn = player.querySelector('.btn-fs');
+  const titleInput = player.querySelector('.film-title');
+
+  let currentVideoURL = null;
+  let currentSubURL = null;
+
+  video.addEventListener('error', () => {
+    emptyState.classList.add('hidden');
+    errorState.classList.remove('hidden');
+    playBtn.disabled = true;
+  });
+
+  video.addEventListener('loadeddata', () => {
+    errorState.classList.add('hidden');
+    emptyState.classList.add('hidden');
+    playBtn.disabled = false;
+  });
+
+  loadVideoBtn.addEventListener('click', () => fileVideo.click());
+
+  fileVideo.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (currentVideoURL) URL.revokeObjectURL(currentVideoURL);
+    
+    let mimeType = file.type;
+    const name = file.name.toLowerCase();
+    if (!mimeType || mimeType === '') {
+      if (name.endsWith('.mkv')) mimeType = 'video/x-matroska';
+      else if (name.endsWith('.mp4')) mimeType = 'video/mp4';
+      else if (name.endsWith('.webm')) mimeType = 'video/webm';
+      else if (name.endsWith('.avi')) mimeType = 'video/x-msvideo';
+      else if (name.endsWith('.mov')) mimeType = 'video/quicktime';
+      else mimeType = 'video/mp4';
+    }
+
+    const blob = new Blob([file], { type: mimeType });
+    currentVideoURL = URL.createObjectURL(blob);
+
+    errorState.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    playBtn.disabled = false;
+
+    video.src = currentVideoURL;
+    video.load();
+
+    loadVideoBtn.classList.add('has-file');
+    const fnameEl = loadVideoBtn.querySelector('.filename');
+    fnameEl.textContent = file.name;
+    fnameEl.classList.remove('placeholder');
+
+    const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[._]/g, ' ').replace(/\s+/g, ' ').trim();
+    titleInput.value = cleanName;
+  });
+
+  loadSubBtn.addEventListener('click', () => fileSub.click());
+
+  fileSub.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    let vttContent;
+    try {
+      const rawText = await file.text();
+      vttContent = parseSubtitles(file.name, rawText);
+    } catch (err) {
+      console.error('Failed to read subtitle file:', err);
+      return;
+    }
+
+    const blob = new Blob([vttContent], { type: 'text/vtt' });
+    if (currentSubURL) URL.revokeObjectURL(currentSubURL);
+    currentSubURL = URL.createObjectURL(blob);
+
+    video.querySelectorAll('track').forEach(t => t.remove());
+
+    const track = document.createElement('track');
+    track.kind = 'subtitles';
+    track.label = 'Subtitles';
+    track.srclang = 'en';
+    track.src = currentSubURL;
+    track.default = true;
+    video.appendChild(track);
+
+    track.addEventListener('load', () => enableSubtitles());
+    setTimeout(enableSubtitles, 400);
+
+    function enableSubtitles() {
+      const tracks = video.textTracks;
+      for (let i = 0; i < tracks.length; i++) tracks[i].mode = 'showing';
+      ccBtn.disabled = false;
+      ccBtn.classList.add('active');
+    }
+
+    loadSubBtn.classList.add('has-file');
+    const fnameEl = loadSubBtn.querySelector('.filename');
+    fnameEl.textContent = file.name;
+    fnameEl.classList.remove('placeholder');
+  });
+
+  ccBtn.addEventListener('click', () => {
+    if (ccBtn.disabled) return;
+    const tracks = video.textTracks;
+    if (tracks.length === 0) return;
+    const isShowing = tracks[0].mode === 'showing';
+    tracks[0].mode = isShowing ? 'hidden' : 'showing';
+    ccBtn.classList.toggle('active', !isShowing);
+  });
+
+  playBtn.addEventListener('click', () => {
+    if (!video.src || video.error) return;
+    if (video.paused) video.play().catch(() => {});
+    else video.pause();
+  });
+
+  video.addEventListener('click', () => {
+    if (!video.src || video.error) return;
+    if (video.paused) video.play().catch(() => {});
+    else video.pause();
+  });
+
+  video.addEventListener('play', () => playBtn.classList.add('playing'));
+  video.addEventListener('pause', () => playBtn.classList.remove('playing'));
+  video.addEventListener('ended', () => playBtn.classList.remove('playing'));
+
+  video.addEventListener('loadedmetadata', () => seekBar.max = video.duration || 0);
+  video.addEventListener('durationchange', () => seekBar.max = video.duration || 0);
+  video.addEventListener('timeupdate', () => {
+    if (!isNaN(video.duration) && video.duration > 0) {
+      seekBar.value = video.currentTime;
+      timecode.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
+    }
+  });
+
+  seekBar.addEventListener('input', () => {
+    if (!isNaN(video.duration) && video.duration > 0) video.currentTime = parseFloat(seekBar.value);
+  });
+
+  fsBtn.addEventListener('click', () => {
+    const stage = player.querySelector('.video-stage');
+    const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+    if (!isFs) (stage.requestFullscreen || stage.webkitRequestFullscreen)?.call(stage);
+    else (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+  });
+}
+
+// ===== Entrance Animation =====
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-in');
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.player').forEach(p => io.observe(p));
+</script>
+</body>
+</html>
