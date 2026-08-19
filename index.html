@@ -13,8 +13,8 @@
   --bg-elev: #0d1016;
   --bg-elev-2: #131720;
   --bg-elev-3: #1a1f2a;
-  --text: #ffffff; /* High contrast */
-  --text-soft: #b8c2cf; /* Softer but still readable */
+  --text: #ffffff;
+  --text-soft: #b8c2cf;
   --text-dim: #7a828e;
   --accent: #5fb3f5;
   --accent-soft: rgba(95, 179, 245, 0.15);
@@ -26,7 +26,7 @@
   --error-soft: rgba(255, 92, 92, 0.1);
   --ease: cubic-bezier(.22, 1, .36, 1);
   
-  /* Subtitle Style Variables (Larger default) */
+  /* Subtitle Style Variables */
   --cue-size: 1.8em;
   --cue-bg: rgba(0, 0, 0, 0.85);
   --cue-text: #ffffff;
@@ -77,11 +77,11 @@ html[data-theme="mono"] {
 html, body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Arial', 'Helvetica', sans-serif; /* Clear, standard fonts */
+  font-family: 'Arial', 'Helvetica', sans-serif;
   font-weight: 400;
   min-height: 100vh;
   line-height: 1.6;
-  font-size: 18px; /* Larger base font for readability */
+  font-size: 18px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background 0.4s var(--ease), color 0.4s var(--ease);
@@ -150,7 +150,7 @@ header {
 
 /* Players */
 main { 
-  padding: 0 2rem 6rem; /* Extra bottom padding to clear floating menu */ 
+  padding: 0 2rem 6rem; 
   max-width: 1600px; 
   margin: 0 auto; 
 }
@@ -167,7 +167,7 @@ main {
 .player {
   background: var(--bg-elev); 
   border: 1px solid var(--line); 
-  border-radius: 12px; /* Rounder corners for friendlier look */
+  border-radius: 12px;
   overflow: hidden; 
   display: flex; 
   flex-direction: column;
@@ -213,7 +213,7 @@ main {
   display: flex; 
   flex-direction: column; 
   gap: 0.5rem; 
-  min-height: 80px; /* Large click target */
+  min-height: 80px; 
   justify-content: center;
 }
 .load-btn:hover { 
@@ -238,9 +238,6 @@ main {
   position: relative; 
   aspect-ratio: 16/9; 
   background: #000; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
   overflow: hidden; 
 }
 .video-stage video { 
@@ -248,6 +245,15 @@ main {
   height: 100%; 
   display: block; 
   background: #000; 
+  cursor: pointer;
+}
+
+/* Hide native browser video controls completely */
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-panel {
+  display: none !important;
+  -webkit-appearance: none;
 }
 
 .empty-state { 
@@ -261,6 +267,7 @@ main {
   background: radial-gradient(circle at center, var(--bg-elev-2) 0%, #000 80%); 
   text-align: center; 
   padding: 2rem; 
+  z-index: 1;
 }
 .empty-state.hidden { display: none; }
 .empty-state .prompt { 
@@ -272,14 +279,27 @@ main {
 .error-state .prompt { color: var(--error); font-size: 1.5rem; font-weight: 700; }
 .error-state .hint { color: var(--text-soft); font-size: 1.1rem; max-width: 400px; line-height: 1.5; }
 
-/* Controls */
+/* Controls (Overlay) */
 .controls { 
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex; 
   align-items: center; 
   gap: 1rem; 
   padding: 1.5rem; 
-  background: var(--bg-elev-2); 
-  border-top: 1px solid var(--line); 
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+
+/* Show controls if hovered, focused, or forced visible via JS */
+.controls.visible,
+.controls:hover,
+.controls:focus-within {
+  opacity: 1;
 }
 
 .btn { 
@@ -293,7 +313,8 @@ main {
   align-items: center; 
   justify-content: center; 
   min-width: 48px; 
-  min-height: 48px; /* Accessible touch target */
+  min-height: 48px; 
+  background: rgba(0,0,0,0.4); 
 }
 .btn:hover { 
   border-color: var(--accent); 
@@ -306,7 +327,7 @@ main {
 
 .btn-play { 
   width: 56px; 
-  height: 56px; /* Larger play button */
+  height: 56px; 
   border-radius: 50%; 
 }
 .btn-play svg { width: 24px; height: 24px; }
@@ -332,10 +353,11 @@ main {
 
 .timecode { 
   font-size: 1.1rem; 
-  color: var(--text-soft); 
+  color: var(--text); 
   min-width: 120px; 
   text-align: center; 
   font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
 
 .btn-cc { font-size: 1.1rem; font-weight: 700; }
@@ -485,20 +507,22 @@ main {
           <div class="prompt">Cannot play this video</div>
           <div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div>
         </div>
-      </div>
-      <div class="controls">
-        <button class="btn btn-play" aria-label="Play or Pause Screen 1">
-          <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-          <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
-        </button>
-        <input type="range" class="seek-bar" value="0" min="0" max="100" step="0.1" aria-label="Seek video for Screen 1">
-        <span class="timecode">0:00 / 0:00</span>
-        <button class="btn btn-cc" disabled aria-label="Turn Subtitles On or Off for Screen 1">CC</button>
-        <button class="btn btn-fs" aria-label="Fullscreen for Screen 1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
-          </svg>
-        </button>
+        
+        <!-- Controls are now inside the video stage to appear in fullscreen -->
+        <div class="controls">
+          <button class="btn btn-play" aria-label="Play or Pause Screen 1">
+            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+          </button>
+          <input type="range" class="seek-bar" value="0" min="0" max="100" step="0.1" aria-label="Seek video for Screen 1">
+          <span class="timecode">0:00 / 0:00</span>
+          <button class="btn btn-cc" disabled aria-label="Turn Subtitles On or Off for Screen 1">CC</button>
+          <button class="btn btn-fs" aria-label="Fullscreen for Screen 1">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="end-film-row">
         <button class="end-film-btn" data-message="End of film one">Film One Finished</button>
@@ -531,20 +555,22 @@ main {
           <div class="prompt">Cannot play this video</div>
           <div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div>
         </div>
-      </div>
-      <div class="controls">
-        <button class="btn btn-play" aria-label="Play or Pause Screen 2">
-          <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-          <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
-        </button>
-        <input type="range" class="seek-bar" value="0" min="0" max="100" step="0.1" aria-label="Seek video for Screen 2">
-        <span class="timecode">0:00 / 0:00</span>
-        <button class="btn btn-cc" disabled aria-label="Turn Subtitles On or Off for Screen 2">CC</button>
-        <button class="btn btn-fs" aria-label="Fullscreen for Screen 2">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
-          </svg>
-        </button>
+        
+        <!-- Controls are now inside the video stage to appear in fullscreen -->
+        <div class="controls">
+          <button class="btn btn-play" aria-label="Play or Pause Screen 2">
+            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+          </button>
+          <input type="range" class="seek-bar" value="0" min="0" max="100" step="0.1" aria-label="Seek video for Screen 2">
+          <span class="timecode">0:00 / 0:00</span>
+          <button class="btn btn-cc" disabled aria-label="Turn Subtitles On or Off for Screen 2">CC</button>
+          <button class="btn btn-fs" aria-label="Fullscreen for Screen 2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="end-film-row">
         <button class="end-film-btn" data-message="End of film 2">Film Two Finished</button>
@@ -674,6 +700,21 @@ document.querySelectorAll('.style-btn[data-bg]').forEach(b => {
   b.classList.toggle('active', b.dataset.bg === savedBg);
 });
 
+// ===== Fullscreen Settings Dock Logic =====
+// This moves the settings dock INTO the fullscreen element so it can be seen and interacted with.
+function handleFullscreenChange() {
+  const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+  if (fsElement && fsElement.classList.contains('video-stage')) {
+    // We are entering fullscreen on a video stage, move the dock into it
+    fsElement.appendChild(dock);
+  } else if (!fsElement && dock.parentElement !== document.body) {
+    // We are exiting fullscreen, move it back to the body
+    document.body.appendChild(dock);
+  }
+}
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
 // ===== Modal Logic =====
 const modal = document.getElementById('popupModal');
 const modalMsg = document.getElementById('popupMessage');
@@ -794,8 +835,10 @@ document.querySelectorAll('.player').forEach(setupPlayer);
 
 function setupPlayer(player) {
   const video = player.querySelector('video');
-  const emptyState = player.querySelector('.empty-state:not(.error-state)');
-  const errorState = player.querySelector('.error-state');
+  const stage = player.querySelector('.video-stage');
+  const controls = player.querySelector('.controls');
+  const emptyState = stage.querySelector('.empty-state:not(.error-state)');
+  const errorState = stage.querySelector('.error-state');
   const fileVideo = player.querySelector('.file-input-video');
   const fileSub = player.querySelector('.file-input-sub');
   const loadVideoBtn = player.querySelector('.load-video-btn');
@@ -808,6 +851,37 @@ function setupPlayer(player) {
 
   let currentVideoURL = null;
   let currentSubURL = null;
+  let hideControlsTimer;
+
+  // === Auto-hide Controls Logic ===
+  function showControls() {
+    controls.classList.add('visible');
+    clearTimeout(hideControlsTimer);
+    // If the video is playing, set a timer to hide them after 3 seconds of inactivity
+    if (!video.paused && !video.ended) {
+      hideControlsTimer = setTimeout(() => {
+        controls.classList.remove('visible');
+      }, 3000);
+    }
+  }
+
+  stage.addEventListener('mousemove', showControls);
+  stage.addEventListener('touchstart', showControls); // Show on tap for touchscreens
+  stage.addEventListener('mouseleave', () => {
+    if (!video.paused) {
+      controls.classList.remove('visible');
+    }
+  });
+
+  video.addEventListener('play', showControls);
+  video.addEventListener('pause', () => {
+    controls.classList.add('visible'); // Keep visible when paused
+    clearTimeout(hideControlsTimer);
+  });
+  video.addEventListener('ended', () => {
+    controls.classList.add('visible');
+    clearTimeout(hideControlsTimer);
+  });
 
   video.addEventListener('error', () => {
     emptyState.classList.add('hidden');
@@ -908,13 +982,18 @@ function setupPlayer(player) {
     ccBtn.classList.toggle('active', !isShowing);
   });
 
-  playBtn.addEventListener('click', () => {
+  // === Play / pause click logic ===
+  // We attach it to the stage so they can click anywhere on the video to play/pause
+  // but we ignore clicks that originate from inside the controls bar
+  stage.addEventListener('click', (e) => {
+    if (e.target.closest('.controls')) return;
     if (!video.src || video.error) return;
     if (video.paused) video.play().catch(() => {});
     else video.pause();
   });
 
-  video.addEventListener('click', () => {
+  playBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent stage click from double-triggering
     if (!video.src || video.error) return;
     if (video.paused) video.play().catch(() => {});
     else video.pause();
@@ -938,7 +1017,6 @@ function setupPlayer(player) {
   });
 
   fsBtn.addEventListener('click', () => {
-    const stage = player.querySelector('.video-stage');
     const isFs = document.fullscreenElement || document.webkitFullscreenElement;
     if (!isFs) (stage.requestFullscreen || stage.webkitRequestFullscreen)?.call(stage);
     else (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
