@@ -3,20 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thursday Film Night</title>
+<title>Welcome to Film Night</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ===== Theme Variables ===== */
 :root {
-  --bg: #07090d;
-  --bg-elev: #0d1016;
-  --bg-elev-2: #131720;
-  --bg-elev-3: #1a1f2a;
+  --bg: #05070a;
+  --bg-elev: rgba(13, 16, 22, 0.6); /* Liquid Glass */
+  --bg-elev-2: rgba(19, 23, 32, 0.7); /* Liquid Glass */
+  --bg-elev-3: rgba(26, 31, 42, 0.8);
   --text: #ffffff;
-  --text-soft: #b8c2cf;
-  --text-dim: #7a828e;
+  --text-soft: #d8dde4;
+  --text-dim: #8a93a0;
   --accent: #5fb3f5;
+  --accent-2: #9d5ff5; /* Secondary color for background blobs */
   --accent-soft: rgba(95, 179, 245, 0.15);
   --accent-glow: rgba(95, 179, 245, 0.4);
   --line: rgba(255,255,255,0.1);
@@ -26,47 +27,49 @@
   --error-soft: rgba(255, 92, 92, 0.1);
   --ease: cubic-bezier(.22, 1, .36, 1);
   
-  /* Subtitle Style Variables */
   --cue-size: 1.8em;
   --cue-bg: rgba(0, 0, 0, 0.85);
   --cue-text: #ffffff;
 }
 
 html[data-theme="theater"] {
-  --bg: #0d0807;
-  --bg-elev: #16100d;
-  --bg-elev-2: #1f1713;
-  --bg-elev-3: #2a201a;
+  --bg: #0a0606;
+  --bg-elev: rgba(22, 16, 13, 0.6);
+  --bg-elev-2: rgba(31, 23, 19, 0.7);
+  --bg-elev-3: rgba(42, 32, 26, 0.8);
   --text: #ffffff;
-  --text-soft: #d4c8c0;
+  --text-soft: #e4dcd8;
   --text-dim: #8a7a70;
   --accent: #f5a05f;
+  --accent-2: #f55f7a;
   --accent-soft: rgba(245, 160, 95, 0.15);
   --accent-glow: rgba(245, 160, 95, 0.4);
 }
 
 html[data-theme="midnight"] {
-  --bg: #08060d;
-  --bg-elev: #0f0d16;
-  --bg-elev-2: #16131f;
-  --bg-elev-3: #1d1a2a;
+  --bg: #060410;
+  --bg-elev: rgba(15, 13, 22, 0.6);
+  --bg-elev-2: rgba(22, 19, 31, 0.7);
+  --bg-elev-3: rgba(29, 26, 42, 0.8);
   --text: #ffffff;
-  --text-soft: #d4c8d4;
+  --text-soft: #e4d8e4;
   --text-dim: #7a6e7a;
   --accent: #c98aff;
+  --accent-2: #5f7aff;
   --accent-soft: rgba(201, 138, 255, 0.15);
   --accent-glow: rgba(201, 138, 255, 0.4);
 }
 
 html[data-theme="mono"] {
   --bg: #000000;
-  --bg-elev: #0a0a0a;
-  --bg-elev-2: #141414;
-  --bg-elev-3: #1f1f1f;
+  --bg-elev: rgba(20, 20, 20, 0.6);
+  --bg-elev-2: rgba(30, 30, 30, 0.7);
+  --bg-elev-3: rgba(45, 45, 45, 0.8);
   --text: #ffffff;
-  --text-soft: #b3b3b3;
-  --text-dim: #666666;
+  --text-soft: #e0e0e0;
+  --text-dim: #808080;
   --accent: #ffffff;
+  --accent-2: #888888;
   --accent-soft: rgba(255, 255, 255, 0.1);
   --accent-glow: rgba(255, 255, 255, 0.3);
   --line: rgba(255, 255, 255, 0.15);
@@ -75,7 +78,6 @@ html[data-theme="mono"] {
 }
 
 html, body {
-  background: var(--bg);
   color: var(--text);
   font-family: 'Arial', 'Helvetica', sans-serif;
   font-weight: 400;
@@ -85,12 +87,33 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background 0.4s var(--ease), color 0.4s var(--ease);
+  background: var(--bg);
+  overflow-x: hidden;
 }
 
-body {
-  background-image: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(0, 0, 0, 0.5), transparent);
-  position: relative;
-  overflow-x: hidden;
+/* ===== Animated Liquid Background ===== */
+.bg-blobs {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--bg);
+}
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  animation: float 25s ease-in-out infinite;
+}
+.blob-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; left: -100px; }
+.blob-2 { width: 500px; height: 500px; background: var(--accent-2); bottom: -150px; right: -100px; animation-delay: -5s; animation-duration: 30s; }
+.blob-3 { width: 400px; height: 400px; background: var(--accent); top: 40%; left: 50%; animation-delay: -10s; animation-duration: 35s; opacity: 0.2; }
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 40px) scale(0.9); }
 }
 
 /* ===== W3C Accessibility: Visible Focus States ===== */
@@ -116,15 +139,17 @@ header {
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  border-bottom: 1px solid var(--line);
+  position: relative;
+  z-index: 10;
 }
 
 .brand-text { 
   font-weight: 700; 
   letter-spacing: 0.1em; 
-  font-size: 1.5rem; 
+  font-size: 1.8rem; 
   color: var(--text); 
   text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
 /* Hero */
@@ -133,12 +158,15 @@ header {
   max-width: 1200px; 
   margin: 0 auto; 
   text-align: center; 
+  position: relative;
+  z-index: 10;
 }
 .hero h1 { 
-  font-size: clamp(1.8rem, 4vw, 2.8rem); 
+  font-size: clamp(2rem, 5vw, 3.5rem); 
   line-height: 1.2; 
   font-weight: 700;
   margin-bottom: 1rem;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.6);
 }
 .hero p { 
   color: var(--text-soft); 
@@ -153,6 +181,8 @@ main {
   padding: 0 2rem 6rem; 
   max-width: 1600px; 
   margin: 0 auto; 
+  position: relative;
+  z-index: 10;
 }
 .players { 
   display: grid; 
@@ -164,13 +194,18 @@ main {
   .players { grid-template-columns: 1fr; }
 }
 
+/* Liquid Glass Player Container */
 .player {
   background: var(--bg-elev); 
   border: 1px solid var(--line); 
-  border-radius: 12px;
+  border-radius: 24px;
   overflow: hidden; 
   display: flex; 
   flex-direction: column;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  transition: background 0.4s var(--ease), border-color 0.4s var(--ease);
 }
 
 .player-header { 
@@ -179,13 +214,13 @@ main {
   justify-content: center; 
   padding: 1.5rem; 
   border-bottom: 1px solid var(--line); 
-  background: var(--bg-elev-2); 
 }
 .screen-label { 
   font-size: 1.2rem; 
   color: var(--accent); 
   font-weight: 700; 
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Action row */
@@ -193,21 +228,20 @@ main {
   display: flex; 
   gap: 1rem; 
   padding: 1.5rem; 
-  background: var(--bg-elev); 
   border-bottom: 1px solid var(--line); 
 }
 
 .load-btn { 
   flex: 1; 
   background: var(--bg-elev-2); 
-  border: 2px solid var(--line-strong); 
+  border: 1px solid var(--line-strong); 
   color: var(--text); 
   padding: 1.2rem 1rem; 
   font-family: inherit; 
   font-size: 1.1rem; 
   font-weight: 700;
   cursor: pointer; 
-  border-radius: 8px; 
+  border-radius: 12px; 
   transition: all 0.2s var(--ease); 
   text-align: center; 
   display: flex; 
@@ -215,23 +249,16 @@ main {
   gap: 0.5rem; 
   min-height: 80px; 
   justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 .load-btn:hover { 
   border-color: var(--accent); 
   background: var(--accent-soft); 
+  transform: translateY(-2px);
 }
-.load-btn .label { 
-  font-size: 1.2rem; 
-  text-transform: uppercase;
-}
-.load-btn .filename { 
-  font-size: 1rem; 
-  color: var(--text-soft); 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  white-space: nowrap; 
-  font-weight: 400; 
-}
+.load-btn .label { font-size: 1.2rem; text-transform: uppercase; }
+.load-btn .filename { font-size: 1rem; color: var(--text-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
 
 /* Video stage */
 .video-stage { 
@@ -240,15 +267,8 @@ main {
   background: #000; 
   overflow: hidden; 
 }
-.video-stage video { 
-  width: 100%; 
-  height: 100%; 
-  display: block; 
-  background: #000; 
-  cursor: pointer;
-}
+.video-stage video { width: 100%; height: 100%; display: block; background: #000; cursor: pointer; }
 
-/* Hide native browser video controls completely */
 video::-webkit-media-controls,
 video::-webkit-media-controls-enclosure,
 video::-webkit-media-controls-panel {
@@ -270,16 +290,12 @@ video::-webkit-media-controls-panel {
   z-index: 1;
 }
 .empty-state.hidden { display: none; }
-.empty-state .prompt { 
-  color: var(--text-soft); 
-  font-size: 1.5rem; 
-  font-weight: 700; 
-}
+.empty-state .prompt { color: var(--text-soft); font-size: 1.5rem; font-weight: 700; }
 
 .error-state .prompt { color: var(--error); font-size: 1.5rem; font-weight: 700; }
 .error-state .hint { color: var(--text-soft); font-size: 1.1rem; max-width: 400px; line-height: 1.5; }
 
-/* Controls (Overlay) */
+/* Controls (Liquid Glass Overlay) */
 .controls { 
   position: absolute;
   bottom: 0;
@@ -289,90 +305,67 @@ video::-webkit-media-controls-panel {
   align-items: center; 
   gap: 1rem; 
   padding: 1.5rem; 
-  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 10;
   opacity: 0;
   transition: opacity 0.3s var(--ease);
 }
 
-/* Show controls if hovered, focused, or forced visible via JS */
 .controls.visible,
 .controls:hover,
 .controls:focus-within {
   opacity: 1;
 }
 
+/* Liquid Glass Buttons */
 .btn { 
-  background: transparent; 
-  border: 2px solid var(--line-strong); 
+  background: rgba(255, 255, 255, 0.08); 
+  border: 1px solid rgba(255, 255, 255, 0.15); 
   color: var(--text); 
   cursor: pointer; 
-  border-radius: 8px; 
+  border-radius: 12px; 
   transition: all 0.2s var(--ease); 
   display: flex; 
   align-items: center; 
   justify-content: center; 
   min-width: 48px; 
   min-height: 48px; 
-  background: rgba(0,0,0,0.4); 
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 .btn:hover { 
+  background: rgba(255, 255, 255, 0.15); 
   border-color: var(--accent); 
   color: var(--accent); 
 }
-.btn:disabled { 
-  opacity: 0.3; 
-  cursor: not-allowed; 
-}
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-.btn-play { 
-  width: 56px; 
-  height: 56px; 
-  border-radius: 50%; 
-}
+.btn-play { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #000; }
+.btn-play:hover { background: var(--text); border-color: var(--text); transform: scale(1.05); }
 .btn-play svg { width: 24px; height: 24px; }
 .btn-play .icon-pause { display: none; }
 .btn-play.playing .icon-play { display: none; }
 .btn-play.playing .icon-pause { display: block; }
 
-.seek-bar { 
-  flex: 1; 
-  -webkit-appearance: none; 
-  appearance: none; 
-  background: transparent; 
-  height: 48px; 
-  cursor: pointer; 
-}
-.seek-bar::-webkit-slider-runnable-track { height: 8px; background: var(--line-strong); border-radius: 4px; }
-.seek-bar::-webkit-slider-thumb { 
-  -webkit-appearance: none; appearance: none; width: 24px; height: 24px; 
-  border-radius: 50%; background: var(--accent); margin-top: -8px; border: none; 
-}
-.seek-bar::-moz-range-track { height: 8px; background: var(--line-strong); border-radius: 4px; }
-.seek-bar::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); border: none; }
+.seek-bar { flex: 1; -webkit-appearance: none; appearance: none; background: transparent; height: 48px; cursor: pointer; }
+.seek-bar::-webkit-slider-runnable-track { height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; }
+.seek-bar::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); margin-top: -8px; border: none; box-shadow: 0 0 10px var(--accent-glow); }
+.seek-bar::-moz-range-track { height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; }
+.seek-bar::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); border: none; box-shadow: 0 0 10px var(--accent-glow); }
 
-.timecode { 
-  font-size: 1.1rem; 
-  color: var(--text); 
-  min-width: 120px; 
-  text-align: center; 
-  font-weight: 700;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-}
-
+.timecode { font-size: 1.1rem; color: var(--text); min-width: 120px; text-align: center; font-weight: 700; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
 .btn-cc { font-size: 1.1rem; font-weight: 700; }
 .btn-cc.active { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
 .btn-fs svg { width: 20px; height: 20px; }
 
 /* End Film Buttons */
-.end-film-row { 
-  padding: 1.5rem; 
-  background: var(--bg-elev); 
-}
+.end-film-row { padding: 1.5rem; }
 .end-film-btn { 
   width: 100%; 
-  background: transparent; 
-  border: 2px solid var(--line-strong); 
+  background: var(--bg-elev-2); 
+  border: 1px solid var(--line-strong); 
   color: var(--text); 
   padding: 1.2rem; 
   font-family: inherit; 
@@ -380,104 +373,111 @@ video::-webkit-media-controls-panel {
   font-weight: 700;
   text-transform: uppercase; 
   cursor: pointer; 
-  border-radius: 8px; 
+  border-radius: 12px; 
   transition: all 0.2s var(--ease); 
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 .end-film-btn:hover { 
   border-color: var(--accent); 
   color: var(--accent); 
   background: var(--accent-soft); 
+  transform: translateY(-2px);
 }
 
 .file-input { position: absolute; width: 0; height: 0; opacity: 0; }
 
 /* Modal */
-.modal-overlay { 
-  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); 
-  display: flex; align-items: center; justify-content: center; z-index: 10000; 
-  opacity: 0; pointer-events: none; transition: opacity 0.3s var(--ease); 
-}
+.modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s var(--ease); }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
 .modal-box { 
-  background: var(--bg-elev-2); border: 2px solid var(--accent); 
-  padding: 3rem; border-radius: 16px; text-align: center; 
-  transform: scale(0.9); transition: transform 0.3s var(--ease); 
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-width: 90vw; 
+  background: var(--bg-elev-3); 
+  border: 1px solid var(--line-strong); 
+  padding: 3rem; border-radius: 24px; 
+  text-align: center; 
+  transform: scale(0.9); 
+  transition: transform 0.3s var(--ease); 
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5); 
+  max-width: 90vw; 
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 .modal-overlay.active .modal-box { transform: scale(1); }
-.modal-message { 
-  font-size: 2rem; color: var(--text); font-weight: 700; 
-  margin-bottom: 2rem; letter-spacing: 0.02em; text-transform: uppercase; 
-}
+.modal-message { font-size: 2rem; color: var(--text); font-weight: 700; margin-bottom: 2rem; letter-spacing: 0.02em; text-transform: uppercase; }
 .modal-close-btn { 
-  background: var(--accent); border: none; color: var(--bg); 
-  padding: 1rem 3rem; font-family: inherit; font-size: 1.2rem; 
-  font-weight: 700; text-transform: uppercase; cursor: pointer; 
-  border-radius: 8px; transition: all 0.2s var(--ease); 
+  background: var(--accent); 
+  border: none; color: #000; 
+  padding: 1rem 3rem; 
+  font-family: inherit; 
+  font-size: 1.2rem; font-weight: 700; text-transform: uppercase; cursor: pointer; 
+  border-radius: 12px; transition: all 0.2s var(--ease); 
 }
-.modal-close-btn:hover { background: var(--text); }
+.modal-close-btn:hover { background: var(--text); transform: translateY(-2px); }
 
 /* ===== Floating Settings Dock ===== */
 .settings-dock { position: fixed; bottom: 24px; right: 24px; z-index: 10001; display: flex; align-items: flex-end; gap: 12px; }
 .settings-panel { 
-  background: var(--bg-elev-2); border: 2px solid var(--line-strong); 
-  border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; 
+  background: var(--bg-elev-3); 
+  border: 1px solid var(--line-strong); 
+  border-radius: 16px; padding: 16px; 
+  display: flex; flex-direction: column; gap: 12px; 
   opacity: 0; transform: translateY(20px) scale(0.95); pointer-events: none; 
   transition: all 0.3s var(--ease); box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
   min-width: 240px; margin-bottom: 8px; 
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 .settings-dock.open .settings-panel { opacity: 1; transform: none; pointer-events: auto; }
-.panel-label { 
-  font-size: 1rem; color: var(--text-dim); text-transform: uppercase; 
-  font-weight: 700; padding: 4px 8px 8px; border-bottom: 1px solid var(--line); 
-}
+.panel-label { font-size: 1rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; padding: 4px 8px 8px; border-bottom: 1px solid var(--line); }
 .panel-label:not(:first-child) { margin-top: 12px; }
 
-.theme-btn { 
-  display: flex; align-items: center; gap: 12px; padding: 12px; 
-  background: transparent; border: 2px solid transparent; color: var(--text-soft); 
-  border-radius: 8px; cursor: pointer; transition: all 0.2s var(--ease); 
-  font-family: inherit; font-size: 1.1rem; text-align: left; font-weight: 700; width: 100%; 
-}
-.theme-btn:hover { background: var(--accent-soft); color: var(--text); }
+.theme-btn { display: flex; align-items: center; gap: 12px; padding: 12px; background: transparent; border: 1px solid transparent; color: var(--text-soft); border-radius: 12px; cursor: pointer; transition: all 0.2s var(--ease); font-family: inherit; font-size: 1.1rem; text-align: left; font-weight: 700; width: 100%; }
+.theme-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
 .theme-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .theme-swatch { width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; }
 
 .sub-style-row { display: flex; gap: 8px; padding: 0 4px; }
-.style-btn { 
-  flex: 1; background: transparent; border: 2px solid var(--line); 
-  color: var(--text-soft); padding: 10px 0; font-family: inherit; 
-  font-size: 1.1rem; font-weight: 700; cursor: pointer; border-radius: 8px; transition: all 0.2s var(--ease); 
-}
+.style-btn { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-soft); padding: 10px 0; font-family: inherit; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-radius: 8px; transition: all 0.2s var(--ease); }
 .style-btn:hover { border-color: var(--accent); color: var(--text); }
 .style-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
 .settings-toggle { 
-  width: 56px; height: 56px; border-radius: 50%; background: var(--bg-elev-2); 
-  border: 2px solid var(--line-strong); color: var(--text); cursor: pointer; 
+  width: 56px; height: 56px; border-radius: 50%; 
+  background: var(--bg-elev-3); 
+  border: 1px solid var(--line-strong); color: var(--text); cursor: pointer; 
   display: flex; align-items: center; justify-content: center; 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: all 0.3s var(--ease); flex-shrink: 0; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+  transition: all 0.3s var(--ease); flex-shrink: 0; 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
-.settings-toggle:hover { color: var(--accent); border-color: var(--accent); }
-.settings-dock.open .settings-toggle { transform: rotate(90deg); color: var(--accent); border-color: var(--accent); }
+.settings-toggle:hover { color: var(--accent); border-color: var(--accent); transform: rotate(45deg); }
 .settings-toggle svg { width: 24px; height: 24px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .blob { animation: none; }
 }
 </style>
 </head>
 <body>
 
+<!-- Animated Background Elements -->
+<div class="bg-blobs" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
 <header>
   <div class="brand">
-    <span class="brand-text">Thursday Film Night</span>
+    <span class="brand-text">Welcome to Film Night</span>
   </div>
 </header>
 
 <main>
   <section class="hero" aria-labelledby="hero-title">
-    <h1 id="hero-title">Watch Your Films</h1>
+    <h1 id="hero-title">Welcome to Film Night</h1>
     <p>Click the "Load Film" button below to choose a movie. You can also add subtitles if you need them.</p>
   </section>
 
@@ -508,7 +508,6 @@ video::-webkit-media-controls-panel {
           <div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div>
         </div>
         
-        <!-- Controls are now inside the video stage to appear in fullscreen -->
         <div class="controls">
           <button class="btn btn-play" aria-label="Play or Pause Screen 1">
             <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
@@ -556,7 +555,6 @@ video::-webkit-media-controls-panel {
           <div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div>
         </div>
         
-        <!-- Controls are now inside the video stage to appear in fullscreen -->
         <div class="controls">
           <button class="btn btn-play" aria-label="Play or Pause Screen 2">
             <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
@@ -701,14 +699,11 @@ document.querySelectorAll('.style-btn[data-bg]').forEach(b => {
 });
 
 // ===== Fullscreen Settings Dock Logic =====
-// This moves the settings dock INTO the fullscreen element so it can be seen and interacted with.
 function handleFullscreenChange() {
   const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
   if (fsElement && fsElement.classList.contains('video-stage')) {
-    // We are entering fullscreen on a video stage, move the dock into it
     fsElement.appendChild(dock);
   } else if (!fsElement && dock.parentElement !== document.body) {
-    // We are exiting fullscreen, move it back to the body
     document.body.appendChild(dock);
   }
 }
@@ -727,14 +722,13 @@ document.querySelectorAll('.end-film-btn').forEach(btn => {
     }
     modalMsg.textContent = btn.dataset.message;
     modal.classList.add('active');
-    modalClose.focus(); // Move focus to the close button for accessibility
+    modalClose.focus();
   });
 });
 
 modalClose.addEventListener('click', () => modal.classList.remove('active'));
 modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
 
-// Close modal on Escape key press
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && modal.classList.contains('active')) {
     modal.classList.remove('active');
@@ -853,11 +847,9 @@ function setupPlayer(player) {
   let currentSubURL = null;
   let hideControlsTimer;
 
-  // === Auto-hide Controls Logic ===
   function showControls() {
     controls.classList.add('visible');
     clearTimeout(hideControlsTimer);
-    // If the video is playing, set a timer to hide them after 3 seconds of inactivity
     if (!video.paused && !video.ended) {
       hideControlsTimer = setTimeout(() => {
         controls.classList.remove('visible');
@@ -866,7 +858,7 @@ function setupPlayer(player) {
   }
 
   stage.addEventListener('mousemove', showControls);
-  stage.addEventListener('touchstart', showControls); // Show on tap for touchscreens
+  stage.addEventListener('touchstart', showControls); 
   stage.addEventListener('mouseleave', () => {
     if (!video.paused) {
       controls.classList.remove('visible');
@@ -875,7 +867,7 @@ function setupPlayer(player) {
 
   video.addEventListener('play', showControls);
   video.addEventListener('pause', () => {
-    controls.classList.add('visible'); // Keep visible when paused
+    controls.classList.add('visible'); 
     clearTimeout(hideControlsTimer);
   });
   video.addEventListener('ended', () => {
@@ -982,9 +974,6 @@ function setupPlayer(player) {
     ccBtn.classList.toggle('active', !isShowing);
   });
 
-  // === Play / pause click logic ===
-  // We attach it to the stage so they can click anywhere on the video to play/pause
-  // but we ignore clicks that originate from inside the controls bar
   stage.addEventListener('click', (e) => {
     if (e.target.closest('.controls')) return;
     if (!video.src || video.error) return;
@@ -993,7 +982,7 @@ function setupPlayer(player) {
   });
 
   playBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent stage click from double-triggering
+    e.stopPropagation(); 
     if (!video.src || video.error) return;
     if (video.paused) video.play().catch(() => {});
     else video.pause();
