@@ -154,11 +154,15 @@ video::cue {
 /* ===== Header & Settings ===== */
 header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start; /* Force left alignment */
   align-items: center;
-  padding: 2rem 2.5rem;
+  padding: 2rem 2rem;
   position: relative;
   z-index: 100;
+}
+.brand {
+  display: flex;
+  align-items: center;
 }
 .brand-logo svg {
   height: 60px;
@@ -170,7 +174,10 @@ header {
   transition: fill 0.4s var(--ease);
 }
 
-.header-actions { position: relative; }
+.header-actions { 
+  margin-left: auto; /* Push settings button to the far right */
+  position: relative; 
+}
 .settings-btn {
   background: var(--bg-elev-2);
   border: 1px solid var(--line-strong);
@@ -184,6 +191,7 @@ header {
   cursor: pointer;
   transition: all 0.2s var(--ease);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .settings-btn:hover, .settings-btn.active {
   border-color: var(--accent);
@@ -573,15 +581,23 @@ video::-webkit-media-controls-panel {
 
 /* Poster Preview Area */
 .poster-preview-wrap {
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 2rem 0;
+  display: grid;
+  place-items: start center;
   background: repeating-conic-gradient(var(--line-soft) 0% 25%, transparent 0% 50%) 50% / 24px 24px;
   overflow: auto;
 }
 
-/* ===== A4 Poster Sheet ===== */
+.zoom-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+.zoom-controls .style-btn { padding: 8px 12px; }
+#zoomReset { flex: 1; }
+
+/* ===== A4 Poster Sheet Base ===== */
 .poster-sheet {
   background: #ffffff;
   color: #111;
@@ -594,12 +610,16 @@ video::-webkit-media-controls-panel {
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
   position: relative;
   transform-origin: top center;
+  margin: 0 auto;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  transition: transform 0.3s var(--ease);
 }
 .poster-sheet .ps-top {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  border-bottom: 2px solid #111;
+  border-bottom: 2px solid currentColor;
   padding-bottom: 0.6rem;
   margin-bottom: 1.5rem;
 }
@@ -608,12 +628,11 @@ video::-webkit-media-controls-panel {
   font-weight: 900;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #111;
 }
 .poster-sheet .ps-event {
   font-size: 0.85rem;
   letter-spacing: 0.1em;
-  color: #555;
+  opacity: 0.6;
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -634,7 +653,7 @@ video::-webkit-media-controls-panel {
   font-size: 0.9rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: #888;
+  opacity: 0.5;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
@@ -643,7 +662,6 @@ video::-webkit-media-controls-panel {
   font-size: 4.5rem;
   line-height: 1.05;
   font-weight: 700;
-  color: #111;
   word-break: break-word;
   margin-bottom: 0.5rem;
 }
@@ -651,31 +669,28 @@ video::-webkit-media-controls-panel {
   font-family: 'Georgia', 'Times New Roman', serif;
   font-size: 1.3rem;
   font-style: italic;
-  color: #444;
+  opacity: 0.7;
   max-width: 90%;
   line-height: 1.4;
 }
 
 /* Double Feature Adjustments */
-.poster-sheet.double-feature .ps-title {
-  font-size: 3.2rem;
-}
-.poster-sheet.double-feature .ps-tagline {
-  font-size: 1.1rem;
-}
+.poster-sheet.double-feature .ps-title { font-size: 3.2rem; }
+.poster-sheet.double-feature .ps-tagline { font-size: 1.1rem; }
+
 .poster-sheet .ps-divider {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin: 0.5rem 0;
-  color: #888;
+  opacity: 0.4;
 }
 .poster-sheet .ps-divider::before,
 .poster-sheet .ps-divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: #ccc;
+  background: currentColor;
 }
 .poster-sheet .ps-divider span {
   font-size: 0.8rem;
@@ -687,7 +702,7 @@ video::-webkit-media-controls-panel {
 .ps-meta {
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(0,0,0,0.1);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
@@ -697,40 +712,101 @@ video::-webkit-media-controls-panel {
   text-transform: uppercase;
   letter-spacing: 0.15em;
   font-size: 0.7rem;
-  color: #888;
+  opacity: 0.5;
   font-weight: 700;
   margin-bottom: 0.2rem;
 }
 .ps-meta-item .v {
   font-size: 1rem;
-  color: #111;
   font-weight: 600;
 }
 
 .ps-notes {
   font-size: 0.9rem;
   line-height: 1.5;
-  color: #555;
+  opacity: 0.6;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(0,0,0,0.1);
 }
 
 .ps-footer {
   margin-top: auto;
   padding-top: 1.5rem;
-  border-top: 2px solid #111;
+  border-top: 2px solid currentColor;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.75rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #555;
+  opacity: 0.6;
 }
 .ps-footer .ps-mark {
   font-weight: 900;
+  opacity: 1;
+}
+
+/* ===== Theme: Minimal (Default) ===== */
+.poster-sheet.theme-minimal {
+  background: #ffffff;
   color: #111;
+}
+
+/* ===== Theme: Neon Stream (Fun & Professional) ===== */
+.poster-sheet.theme-neon {
+  background: #0b0e17;
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.poster-sheet.theme-neon .ps-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-weight: 900;
+  background: linear-gradient(135deg, #4A00E0, #E94057, #F27121);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -1px;
+}
+.poster-sheet.theme-neon .ps-tagline {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-weight: 300;
+  color: #c4e8ff;
+  opacity: 0.9;
+}
+.poster-sheet.theme-neon .ps-top, .poster-sheet.theme-neon .ps-footer {
+  border-color: rgba(255,255,255,0.2);
+}
+.poster-sheet.theme-neon .ps-meta, .poster-sheet.theme-neon .ps-notes {
+  border-color: rgba(255,255,255,0.1);
+}
+.poster-sheet.theme-neon .ps-label, .poster-sheet.theme-neon .ps-event, 
+.poster-sheet.theme-neon .ps-divider span, .poster-sheet.theme-neon .ps-meta-item .k {
+  color: #5fb3f5;
+  opacity: 1;
+}
+.poster-sheet.theme-neon .ps-divider::before, .poster-sheet.theme-neon .ps-divider::after {
+  background: rgba(95, 179, 245, 0.3);
+}
+
+/* ===== Theme: Cinema Noir ===== */
+.poster-sheet.theme-noir {
+  background: #111;
+  color: #f5f5f5;
+}
+.poster-sheet.theme-noir .ps-title {
+  color: #f5f5f5;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.poster-sheet.theme-noir .ps-tagline {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  color: #ccc;
+  opacity: 0.8;
 }
 
 /* ===== Print Styles ===== */
@@ -796,7 +872,7 @@ video::-webkit-media-controls-panel {
     <button class="settings-btn" id="settingsToggle" aria-label="Open Settings" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
       </svg>
     </button>
     <div class="settings-dropdown" id="settingsPanel" role="region" aria-label="Site Settings">
@@ -893,6 +969,13 @@ video::-webkit-media-controls-panel {
       <p class="poster-subtitle">Leave Film 2 blank for a single feature poster.</p>
       <div class="poster-fields">
         
+        <div class="section-divider">Poster Theme</div>
+        <div class="sub-style-row" style="padding: 0 0 0.5rem;">
+          <button class="style-btn active" data-poster-theme="theme-minimal">Minimal</button>
+          <button class="style-btn" data-poster-theme="theme-neon">Neon Stream</button>
+          <button class="style-btn" data-poster-theme="theme-noir">Cinema Noir</button>
+        </div>
+        
         <div class="section-divider">Film One</div>
         <label>Film 1 Title
           <input type="text" id="posterTitle1" placeholder="The Grand Feature">
@@ -926,6 +1009,13 @@ video::-webkit-media-controls-panel {
           <input type="text" id="posterFooter" placeholder="CineLoom">
         </label>
         
+        <div class="section-divider">Preview Zoom</div>
+        <div class="zoom-controls">
+          <button class="style-btn" id="zoomOut">-</button>
+          <button class="style-btn" id="zoomReset">Auto</button>
+          <button class="style-btn" id="zoomIn">+</button>
+        </div>
+        
       </div>
       <div class="poster-actions">
         <button class="poster-print-btn" id="posterPrintBtn">Print Poster</button>
@@ -933,7 +1023,7 @@ video::-webkit-media-controls-panel {
       </div>
     </div>
     <div class="poster-preview-wrap">
-      <div class="poster-sheet" id="posterSheet">
+      <div class="poster-sheet theme-minimal" id="posterSheet">
         <div class="ps-top">
           <div class="ps-brand">CineLoom Presents</div>
           <div class="ps-event" id="psEvent">Film Night</div>
@@ -1122,6 +1212,46 @@ function updatePosterPreview() {
 Object.values(posterFields).forEach(input => {
   input.addEventListener('input', updatePosterPreview);
 });
+
+// Poster Theme Switching
+document.querySelectorAll('.style-btn[data-poster-theme]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const themeClass = btn.dataset.posterTheme;
+    posterSheet.classList.remove('theme-minimal', 'theme-neon', 'theme-noir');
+    posterSheet.classList.add(themeClass);
+    document.querySelectorAll('.style-btn[data-poster-theme]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// Poster Zoom Controls
+let posterZoom = 0.75;
+const zoomInBtn = document.getElementById('zoomIn');
+const zoomOutBtn = document.getElementById('zoomOut');
+const zoomResetBtn = document.getElementById('zoomReset');
+
+function applyZoom() {
+  posterSheet.style.transform = `scale(${posterZoom})`;
+  zoomResetBtn.textContent = `${Math.round(posterZoom * 100)}%`;
+}
+
+zoomInBtn.addEventListener('click', () => {
+  posterZoom = Math.min(2, posterZoom + 0.1);
+  applyZoom();
+});
+
+zoomOutBtn.addEventListener('click', () => {
+  posterZoom = Math.max(0.25, posterZoom - 0.1);
+  applyZoom();
+});
+
+zoomResetBtn.addEventListener('click', () => {
+  posterZoom = 0.75;
+  applyZoom();
+});
+
+// Initialize zoom on load
+applyZoom();
 
 function openPosterMaker() {
   const player = document.querySelector('.player');
