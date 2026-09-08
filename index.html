@@ -1064,7 +1064,7 @@ main {
         </button>
       </div>
       <div class="video-stage">
-        <video id="player" playsinline crossorigin></video>
+        <video id="player" playsinline></video>
         <div class="empty-state">
           <div class="prompt">Please load a film to begin.</div>
         </div>
@@ -1511,22 +1511,39 @@ function setupPlayer() {
     controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'],
     settings: ['captions', 'speed', 'quality'],
     ratio: '16:9',
+    volume: 1,
+    muted: false,
     invertTime: false,
     toggleInvertTime: false
   });
 
-  // Explicitly ensure volume is up and unmuted
-  player.volume = 1;
-  player.muted = false;
-
-  player.on('error', () => {
-    emptyState.classList.add('hidden');
-    errorState.classList.remove('hidden');
+  // Forced volume checks across multiple events
+  player.on('ready', () => {
+    player.volume = 1;
+    player.muted = false;
+    video.volume = 1.0;
+    video.muted = false;
   });
 
   player.on('loadedmetadata', () => {
     errorState.classList.add('hidden');
     emptyState.classList.add('hidden');
+    player.volume = 1;
+    player.muted = false;
+    video.volume = 1.0;
+    video.muted = false;
+  });
+
+  player.on('canplay', () => {
+    player.volume = 1;
+    player.muted = false;
+    video.volume = 1.0;
+    video.muted = false;
+  });
+
+  player.on('error', () => {
+    emptyState.classList.add('hidden');
+    errorState.classList.remove('hidden');
   });
 
   loadVideoBtn.addEventListener('click', () => fileVideo.click());
@@ -1572,6 +1589,12 @@ function setupPlayer() {
       sources: [{ src: currentVideoURL, type: mimeType }],
       tracks: tracks
     };
+
+    // Re-apply volume explicitly after source update
+    player.volume = 1;
+    player.muted = false;
+    video.volume = 1.0;
+    video.muted = false;
 
     loadVideoBtn.classList.add('has-file');
     loadVideoBtn.querySelector('.filename').textContent = file.name;
