@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Welcome to Film Night</title>
+<title>CineLoom</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -163,7 +163,7 @@ html[data-theme="mono"] {
 
 html, body {
   color: var(--text);
-  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
   font-weight: 400;
   min-height: 100vh;
   line-height: 1.6;
@@ -210,7 +210,7 @@ video::cue {
   font-size: var(--cue-size);
   background: var(--cue-bg);
   color: var(--cue-text);
-  font-family: 'Arial', sans-serif;
+  font-family: Arial, sans-serif;
   line-height: 1.4;
   padding: 0.1em 0.3em;
 }
@@ -224,13 +224,14 @@ header {
   position: relative;
   z-index: 10;
 }
-.brand-text { 
-  font-weight: 700; 
-  letter-spacing: 0.1em; 
-  font-size: 1.8rem; 
-  color: var(--text); 
-  text-transform: uppercase;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+.brand-logo svg {
+  height: 65px;
+  width: auto;
+  display: block;
+}
+.logo-cine {
+  fill: var(--text);
+  transition: fill 0.4s var(--ease);
 }
 
 /* Hero - overlaps with players below */
@@ -275,13 +276,10 @@ main {
 .player { 
   position: relative;
 }
-/* Screen 1 sits forward */
 .player[data-screen="1"] {
   z-index: 3;
   margin-right: -3rem;
-  transform: translateY(0);
 }
-/* Screen 2 sits back and offset down — creates the overlap */
 .player[data-screen="2"] {
   z-index: 2;
   margin-top: 3rem;
@@ -627,15 +625,15 @@ video::-webkit-media-controls-panel {
   margin-bottom: 2.5rem;
 }
 .poster-sheet .ps-brand {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
   font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.3em;
+  font-weight: 900;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #111;
 }
 .poster-sheet .ps-num {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
   font-size: 0.85rem;
   letter-spacing: 0.2em;
   color: #555;
@@ -673,7 +671,7 @@ video::-webkit-media-controls-panel {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.6rem 1.5rem;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
   font-size: 1.05rem;
   margin-bottom: 2rem;
 }
@@ -690,7 +688,7 @@ video::-webkit-media-controls-panel {
   font-weight: 600;
 }
 .poster-sheet .ps-notes {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
   font-size: 0.95rem;
   line-height: 1.7;
   color: #333;
@@ -704,14 +702,14 @@ video::-webkit-media-controls-panel {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
   font-size: 0.75rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #888;
 }
 .poster-sheet .ps-footer .ps-mark {
-  font-weight: 700;
+  font-weight: 900;
   color: #111;
 }
 
@@ -810,13 +808,34 @@ video::-webkit-media-controls-panel {
 
 <header>
   <div class="brand">
-    <span class="brand-text">Welcome to Film Night</span>
+    <div class="brand-logo">
+      <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg" aria-label="CineLoom Logo">
+        <defs>
+          <!-- Vibrant Streaming Gradient for "Loom" -->
+          <linearGradient id="loomGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4A00E0"/>
+            <stop offset="50%" stop-color="#E94057"/>
+            <stop offset="100%" stop-color="#F27121"/>
+          </linearGradient>
+        </defs>
+        <g transform="translate(0, 10)">
+          <!-- "Cine" - Dynamically fills with theme text color via CSS class -->
+          <text x="18" y="50" font-family="'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-size="48" text-anchor="start">
+            <tspan class="logo-cine" font-weight="300" letter-spacing="6">CINE</tspan>
+          </text>
+          <!-- "Loom" - Aligned at x=20, creating a flush left edge -->
+          <text x="20" y="95" font-family="'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-size="48" text-anchor="start">
+            <tspan font-weight="900" fill="url(#loomGrad)" letter-spacing="-1">LOOM</tspan>
+          </text>
+        </g>
+      </svg>
+    </div>
   </div>
 </header>
 
 <main>
   <section class="hero" aria-labelledby="hero-title">
-    <h1 id="hero-title">Welcome to Film Night</h1>
+    <h1 id="hero-title">CineLoom</h1>
     <p>Click the "Load Film" button below to choose a movie. You can also add subtitles if you need them.</p>
   </section>
 
@@ -948,7 +967,7 @@ video::-webkit-media-controls-panel {
           <textarea id="posterNotes" placeholder="Bring snacks. BYOB. Doors open 30 minutes before showtime."></textarea>
         </label>
         <label>Footer Label
-          <input type="text" id="posterFooter" placeholder="Thursday Film Night">
+          <input type="text" id="posterFooter" placeholder="CineLoom">
         </label>
       </div>
       <div class="poster-actions">
@@ -959,7 +978,7 @@ video::-webkit-media-controls-panel {
     <div class="poster-preview-wrap">
       <div class="poster-sheet" id="posterSheet">
         <div class="ps-top">
-          <div class="ps-brand">Thursday Film Night</div>
+          <div class="ps-brand">CineLoom</div>
           <div class="ps-num" id="psScreen">Screen 01</div>
         </div>
         <div class="ps-title-wrap">
@@ -974,8 +993,8 @@ video::-webkit-media-controls-panel {
         </div>
         <div class="ps-notes" id="psNotes"></div>
         <div class="ps-footer">
-          <span class="ps-mark" id="psFooter">Thursday Film Night</span>
-          <span>www.filmnight.example</span>
+          <span class="ps-mark" id="psFooter">CineLoom</span>
+          <span>www.cineloom.app</span>
         </div>
       </div>
     </div>
@@ -1062,7 +1081,7 @@ document.querySelectorAll('.theme-btn').forEach(btn => {
     document.documentElement.setAttribute('data-theme', theme);
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    localStorage.setItem('tfn-theme', theme);
+    localStorage.setItem('cl-theme', theme); // Updated storage key
   });
 });
 
@@ -1073,7 +1092,7 @@ document.querySelectorAll('.style-btn[data-size]').forEach(btn => {
     document.documentElement.style.setProperty('--cue-size', sizeMap[size]);
     document.querySelectorAll('.style-btn[data-size]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    localStorage.setItem('tfn-sub-size', size);
+    localStorage.setItem('cl-sub-size', size);
   });
 });
 
@@ -1084,23 +1103,23 @@ document.querySelectorAll('.style-btn[data-bg]').forEach(btn => {
     document.documentElement.style.setProperty('--cue-bg', bgMap[bg]);
     document.querySelectorAll('.style-btn[data-bg]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    localStorage.setItem('tfn-sub-bg', bg);
+    localStorage.setItem('cl-sub-bg', bg);
   });
 });
 
 // Load Saved Settings
-const savedTheme = localStorage.getItem('tfn-theme') || 'cyber';
+const savedTheme = localStorage.getItem('cl-theme') || 'cyber';
 document.documentElement.setAttribute('data-theme', savedTheme);
 document.querySelectorAll('.theme-btn').forEach(b => {
   b.classList.toggle('active', b.dataset.theme === savedTheme);
 });
-const savedSize = localStorage.getItem('tfn-sub-size') || 'medium';
+const savedSize = localStorage.getItem('cl-sub-size') || 'medium';
 const sizeMap = { small: '1.2em', medium: '1.8em', large: '2.5em' };
 document.documentElement.style.setProperty('--cue-size', sizeMap[savedSize]);
 document.querySelectorAll('.style-btn[data-size]').forEach(b => {
   b.classList.toggle('active', b.dataset.size === savedSize);
 });
-const savedBg = localStorage.getItem('tfn-sub-bg') || 'translucent';
+const savedBg = localStorage.getItem('cl-sub-bg') || 'translucent';
 const bgMap = { translucent: 'rgba(0, 0, 0, 0.85)', none: 'transparent' };
 document.documentElement.style.setProperty('--cue-bg', bgMap[savedBg]);
 document.querySelectorAll('.style-btn[data-bg]').forEach(b => {
@@ -1154,7 +1173,7 @@ function updatePosterPreview() {
   posterPreview.venue.textContent = posterFields.venue.value || '—';
   posterPreview.screen.textContent = posterFields.screen.value || 'Screen 01';
   posterPreview.notes.textContent = posterFields.notes.value || '';
-  posterPreview.footer.textContent = posterFields.footer.value || 'Thursday Film Night';
+  posterPreview.footer.textContent = posterFields.footer.value || 'CineLoom'; // Updated default
 }
 
 Object.values(posterFields).forEach(input => {
@@ -1166,7 +1185,7 @@ function openPosterMaker(screenNum) {
   const filenameEl = player.querySelector('.load-video-btn .filename');
   const filename = filenameEl.textContent.trim();
   const cleanName = (filename && filename !== 'No file chosen') 
-    ? filename.replace(/\.[^/.]+$/, '').replace(/[._]/g, ' ') 
+    ? filename.replace(/\.[^/.]+$/, "").replace(/[._]/g, " ") 
     : '';
   
   if (cleanName && !posterFields.title.value) {
@@ -1194,7 +1213,6 @@ posterOverlay.addEventListener('click', (e) => {
 
 posterPrintBtn.addEventListener('click', () => {
   updatePosterPreview();
-  // Small delay to ensure DOM is updated before print
   setTimeout(() => window.print(), 100);
 });
 
