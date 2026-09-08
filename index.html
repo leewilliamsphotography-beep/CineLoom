@@ -473,7 +473,7 @@ video::-webkit-media-controls-panel {
   border-radius: 24px;
   width: 100%;
   max-width: 1200px;
-  max-height: 92vh;
+  height: 92vh; /* Strict height to force internal scrolling */
   display: grid;
   grid-template-columns: 380px 1fr;
   overflow: hidden;
@@ -488,6 +488,7 @@ video::-webkit-media-controls-panel {
   overflow-y: auto;
   border-right: 1px solid var(--line);
   background: var(--bg-elev-2);
+  min-height: 0; /* Crucial for grid scrolling */
 }
 .poster-editor h2 {
   font-size: 1.6rem;
@@ -512,6 +513,13 @@ video::-webkit-media-controls-panel {
   letter-spacing: 0.1em;
   color: var(--accent);
   font-weight: 700;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 1rem;
 }
 
 .poster-fields label {
@@ -581,11 +589,11 @@ video::-webkit-media-controls-panel {
 
 /* Poster Preview Area */
 .poster-preview-wrap {
-  padding: 2rem 0;
-  display: grid;
-  place-items: start center;
+  padding: 2rem;
   background: repeating-conic-gradient(var(--line-soft) 0% 25%, transparent 0% 50%) 50% / 24px 24px;
-  overflow: auto;
+  overflow: auto; /* Enables scroll */
+  min-height: 0; /* Crucial for grid scrolling */
+  text-align: center; /* Centers the inline-flex child */
 }
 
 .zoom-controls {
@@ -604,8 +612,9 @@ video::-webkit-media-controls-panel {
   width: 210mm;
   min-height: 297mm;
   padding: 22mm 20mm;
-  display: flex;
+  display: inline-flex; /* Allows text-align center on parent to work while preserving flex layout */
   flex-direction: column;
+  text-align: left; /* Reset text alignment for poster content */
   font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
   position: relative;
@@ -809,6 +818,101 @@ video::-webkit-media-controls-panel {
   opacity: 0.8;
 }
 
+/* ===== Theme: Golden Hour ===== */
+.poster-sheet.theme-golden {
+  background: #fdfbf7;
+  color: #3e2723;
+}
+.poster-sheet.theme-golden .ps-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  color: #bf360c;
+  font-weight: 700;
+}
+.poster-sheet.theme-golden .ps-top,
+.poster-sheet.theme-golden .ps-footer {
+  border-color: #d7ccc8;
+}
+.poster-sheet.theme-golden .ps-meta,
+.poster-sheet.theme-golden .ps-notes {
+  border-color: #efebe9;
+}
+.poster-sheet.theme-golden .ps-label,
+.poster-sheet.theme-golden .ps-meta-item .k,
+.poster-sheet.theme-golden .ps-event,
+.poster-sheet.theme-golden .ps-divider span {
+  color: #8d6e63;
+  opacity: 1;
+}
+.poster-sheet.theme-golden .ps-divider::before,
+.poster-sheet.theme-golden .ps-divider::after {
+  background: #d7ccc8;
+}
+
+/* ===== Theme: Midnight Marquee ===== */
+.poster-sheet.theme-marquee {
+  background: #050505;
+  color: #ffd700;
+  border: 1px solid #222;
+}
+.poster-sheet.theme-marquee .ps-title {
+  font-family: 'Impact', 'Arial Black', sans-serif;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.poster-sheet.theme-marquee .ps-top,
+.poster-sheet.theme-marquee .ps-footer {
+  border-color: #ffd700;
+}
+.poster-sheet.theme-marquee .ps-meta,
+.poster-sheet.theme-marquee .ps-notes {
+  border-color: #333;
+}
+.poster-sheet.theme-marquee .ps-label,
+.poster-sheet.theme-marquee .ps-event,
+.poster-sheet.theme-marquee .ps-meta-item .k,
+.poster-sheet.theme-marquee .ps-divider span {
+  color: #ffd700;
+  opacity: 0.8;
+}
+.poster-sheet.theme-marquee .ps-divider::before,
+.poster-sheet.theme-marquee .ps-divider::after {
+  background: #333;
+}
+
+/* ===== Theme: Retro Pop ===== */
+.poster-sheet.theme-retro {
+  background: #ff4081;
+  color: #ffffff;
+}
+.poster-sheet.theme-retro .ps-title {
+  font-family: 'Arial Black', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  color: #ffeb3b;
+  text-shadow: 3px 3px 0px #000000;
+}
+.poster-sheet.theme-retro .ps-top,
+.poster-sheet.theme-retro .ps-footer {
+  border-color: #ffffff;
+}
+.poster-sheet.theme-retro .ps-meta,
+.poster-sheet.theme-retro .ps-notes {
+  border-color: rgba(255,255,255,0.3);
+}
+.poster-sheet.theme-retro .ps-label,
+.poster-sheet.theme-retro .ps-event,
+.poster-sheet.theme-retro .ps-meta-item .k,
+.poster-sheet.theme-retro .ps-divider span {
+  color: #ffeb3b;
+  opacity: 1;
+}
+.poster-sheet.theme-retro .ps-divider::before,
+.poster-sheet.theme-retro .ps-divider::after {
+  background: #ffffff;
+}
+
 /* ===== Print Styles ===== */
 @media print {
   @page { size: A4; margin: 0; }
@@ -819,9 +923,10 @@ video::-webkit-media-controls-panel {
     left: 0; top: 0;
     box-shadow: none;
     transform: none !important;
+    margin: 0 !important;
   }
   .poster-overlay { position: static !important; background: none !important; backdrop-filter: none !important; padding: 0 !important; }
-  .poster-modal, .poster-editor, .poster-preview-wrap { display: contents !important; background: none !important; border: none !important; padding: 0 !important; }
+  .poster-modal, .poster-editor, .poster-preview-wrap { display: contents !important; background: none !important; border: none !important; padding: 0 !important; text-align: left !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -830,9 +935,8 @@ video::-webkit-media-controls-panel {
 }
 
 @media (max-width: 900px) {
-  .poster-modal { grid-template-columns: 1fr; max-height: 95vh; }
+  .poster-modal { grid-template-columns: 1fr; height: 95vh; }
   .poster-editor { border-right: none; border-bottom: 1px solid var(--line); max-height: 40vh; }
-  .poster-sheet { transform: scale(0.6); transform-origin: top center; }
   header { padding: 1.5rem; }
 }
 </style>
@@ -970,10 +1074,13 @@ video::-webkit-media-controls-panel {
       <div class="poster-fields">
         
         <div class="section-divider">Poster Theme</div>
-        <div class="sub-style-row" style="padding: 0 0 0.5rem;">
+        <div class="theme-grid">
           <button class="style-btn active" data-poster-theme="theme-minimal">Minimal</button>
           <button class="style-btn" data-poster-theme="theme-neon">Neon Stream</button>
           <button class="style-btn" data-poster-theme="theme-noir">Cinema Noir</button>
+          <button class="style-btn" data-poster-theme="theme-golden">Golden Hour</button>
+          <button class="style-btn" data-poster-theme="theme-marquee">Marquee</button>
+          <button class="style-btn" data-poster-theme="theme-retro">Retro Pop</button>
         </div>
         
         <div class="section-divider">Film One</div>
@@ -1207,6 +1314,9 @@ function updatePosterPreview() {
     posterPreview.film2Block.style.display = 'none';
     posterPreview.filmDivider.style.display = 'none';
   }
+  
+  // Adjust zoom bounds dynamically as content changes
+  applyZoom();
 }
 
 Object.values(posterFields).forEach(input => {
@@ -1217,10 +1327,11 @@ Object.values(posterFields).forEach(input => {
 document.querySelectorAll('.style-btn[data-poster-theme]').forEach(btn => {
   btn.addEventListener('click', () => {
     const themeClass = btn.dataset.posterTheme;
-    posterSheet.classList.remove('theme-minimal', 'theme-neon', 'theme-noir');
+    posterSheet.classList.remove('theme-minimal', 'theme-neon', 'theme-noir', 'theme-golden', 'theme-marquee', 'theme-retro');
     posterSheet.classList.add(themeClass);
     document.querySelectorAll('.style-btn[data-poster-theme]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    setTimeout(applyZoom, 10); // ensure zoom updates if theme changes padding/layout
   });
 });
 
@@ -1231,6 +1342,11 @@ const zoomOutBtn = document.getElementById('zoomOut');
 const zoomResetBtn = document.getElementById('zoomReset');
 
 function applyZoom() {
+  // Calculate the unscaled height to dynamically remove empty space left by transform
+  const unscaledHeight = posterSheet.offsetHeight;
+  const emptySpace = unscaledHeight * (1 - posterZoom);
+  
+  posterSheet.style.marginBottom = `-${emptySpace}px`;
   posterSheet.style.transform = `scale(${posterZoom})`;
   zoomResetBtn.textContent = `${Math.round(posterZoom * 100)}%`;
 }
@@ -1250,9 +1366,6 @@ zoomResetBtn.addEventListener('click', () => {
   applyZoom();
 });
 
-// Initialize zoom on load
-applyZoom();
-
 function openPosterMaker() {
   const player = document.querySelector('.player');
   const filenameEl = player.querySelector('.load-video-btn .filename');
@@ -1266,6 +1379,7 @@ function openPosterMaker() {
   }
   updatePosterPreview();
   posterOverlay.classList.add('active');
+  setTimeout(applyZoom, 50); // ensure layout is settled before applying zoom
 }
 
 document.querySelector('[data-screen-poster]').addEventListener('click', openPosterMaker);
