@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CineLoom</title>
+
+<!-- Plyr Open Source Video Player CSS -->
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -31,6 +35,19 @@
   --cue-text: #ffffff;
   --blob-opacity: 0.4;
   --shadow-card: 0 8px 32px rgba(0,0,0,0.3);
+  
+  /* ===== Plyr Integration Variables ===== */
+  --plyr-color-main: var(--accent);
+  --plyr-video-background: rgba(0,0,0,0.9);
+  --plyr-menu-background: var(--bg-elev-3);
+  --plyr-menu-color: var(--text);
+  --plyr-menu-border-color: var(--line);
+  --plyr-control-icon-size: 18px;
+  --plyr-control-spacing: 12px;
+  --plyr-control-radius: 8px;
+  --plyr-font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
+  --plyr-font-size-small: 13px;
+  --plyr-font-size-base: 15px;
 }
 
 /* ===== Light Mode ===== */
@@ -142,6 +159,7 @@ html, body {
   border-radius: 4px;
 }
 
+/* ===== Plyr Custom Subtitle Styling ===== */
 video::cue {
   font-size: var(--cue-size);
   background: var(--cue-bg);
@@ -150,11 +168,20 @@ video::cue {
   line-height: 1.4;
   padding: 0.1em 0.3em;
 }
+.plyr__captions span {
+  font-size: var(--cue-size) !important;
+  background: var(--cue-bg) !important;
+  color: var(--cue-text) !important;
+  font-family: Arial, sans-serif !important;
+  line-height: 1.4 !important;
+  padding: 0.1em 0.3em !important;
+  border-radius: 4px;
+}
 
 /* ===== Header & Settings ===== */
 header {
   display: flex;
-  justify-content: flex-start; /* Force left alignment */
+  justify-content: flex-start;
   align-items: center;
   padding: 2rem 2rem;
   position: relative;
@@ -163,19 +190,24 @@ header {
 .brand {
   display: flex;
   align-items: center;
+  gap: 1rem;
 }
 .brand-logo svg {
-  height: 60px;
+  height: 48px;
   width: auto;
   display: block;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
 }
-.logo-cine {
-  fill: var(--text);
-  transition: fill 0.4s var(--ease);
+.brand-text {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  transition: color 0.4s var(--ease);
 }
 
 .header-actions { 
-  margin-left: auto; /* Push settings button to the far right */
+  margin-left: auto; 
   position: relative; 
 }
 .settings-btn {
@@ -353,20 +385,32 @@ main {
 .load-btn .label { font-size: 1.1rem; text-transform: uppercase; }
 .load-btn .filename { font-size: 0.95rem; color: var(--text-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
 
-/* Video stage */
+/* Video stage & Plyr Customization */
 .video-stage { 
   position: relative; 
   aspect-ratio: 16/9; 
   background: #000; 
   overflow: hidden; 
 }
+.video-stage .plyr {
+  height: 100%;
+  width: 100%;
+}
 .video-stage video { width: 100%; height: 100%; display: block; background: #000; cursor: pointer; }
 
-video::-webkit-media-controls,
-video::-webkit-media-controls-enclosure,
-video::-webkit-media-controls-panel {
-  display: none !important;
-  -webkit-appearance: none;
+.plyr--video .plyr__controls {
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+  padding: 1.5rem 1rem 0.75rem;
+  backdrop-filter: blur(8px);
+}
+.plyr--video .plyr__control--overlaid {
+  background: var(--accent);
+  color: #000;
+  border-radius: 50%;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.plyr--video .plyr__control--overlaid:hover {
+  background: var(--text);
 }
 
 .empty-state { 
@@ -380,72 +424,13 @@ video::-webkit-media-controls-panel {
   background: radial-gradient(circle at center, var(--bg-elev-2) 0%, #000 80%); 
   text-align: center; 
   padding: 2rem; 
-  z-index: 1;
+  z-index: 5; 
 }
 .empty-state.hidden { display: none; }
-.empty-state .prompt { color: var(--text-soft); font-size: 1.5rem; font-weight: 700; }
+.empty-state .prompt { color: var(--text-soft); font-size: 1.5rem; font-weight: 700; z-index: 10; text-align: center; }
 
 .error-state .prompt { color: var(--error); font-size: 1.5rem; font-weight: 700; }
 .error-state .hint { color: var(--text-soft); font-size: 1.1rem; max-width: 400px; line-height: 1.5; }
-
-/* Controls */
-.controls { 
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex; 
-  align-items: center; 
-  gap: 1rem; 
-  padding: 1.5rem; 
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 10;
-  opacity: 0;
-  transition: opacity 0.3s var(--ease);
-}
-.controls.visible,
-.controls:hover,
-.controls:focus-within { opacity: 1; }
-
-.btn { 
-  background: rgba(255, 255, 255, 0.08); 
-  border: 1px solid rgba(255, 255, 255, 0.15); 
-  color: var(--text); 
-  cursor: pointer; 
-  border-radius: 12px; 
-  transition: all 0.2s var(--ease); 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  min-width: 48px; 
-  min-height: 48px; 
-}
-.btn:hover { 
-  background: rgba(255, 255, 255, 0.15); 
-  border-color: var(--accent); 
-  color: var(--accent); 
-}
-.btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-.btn-play { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #000; border: none; }
-.btn-play:hover { background: var(--text); color: #000; transform: scale(1.05); }
-.btn-play svg { width: 24px; height: 24px; }
-.btn-play .icon-pause { display: none; }
-.btn-play.playing .icon-play { display: none; }
-.btn-play.playing .icon-pause { display: block; }
-
-.seek-bar { flex: 1; -webkit-appearance: none; appearance: none; background: transparent; height: 48px; cursor: pointer; }
-.seek-bar::-webkit-slider-runnable-track { height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; }
-.seek-bar::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); margin-top: -8px; border: none; box-shadow: 0 0 10px var(--accent-glow); }
-.seek-bar::-moz-range-track { height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; }
-.seek-bar::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); border: none; box-shadow: 0 0 10px var(--accent-glow); }
-
-.timecode { font-size: 1.1rem; color: var(--text); min-width: 120px; text-align: center; font-weight: 700; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
-.btn-cc { font-size: 1.1rem; font-weight: 700; }
-.btn-cc.active { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
-.btn-fs svg { width: 20px; height: 20px; }
 
 .file-input { position: absolute; width: 0; height: 0; opacity: 0; }
 
@@ -473,7 +458,7 @@ video::-webkit-media-controls-panel {
   border-radius: 24px;
   width: 100%;
   max-width: 1200px;
-  height: 92vh; /* Strict height to force internal scrolling */
+  height: 92vh;
   display: grid;
   grid-template-columns: 380px 1fr;
   overflow: hidden;
@@ -488,7 +473,7 @@ video::-webkit-media-controls-panel {
   overflow-y: auto;
   border-right: 1px solid var(--line);
   background: var(--bg-elev-2);
-  min-height: 0; /* Crucial for grid scrolling */
+  min-height: 0;
 }
 .poster-editor h2 {
   font-size: 1.6rem;
@@ -591,9 +576,9 @@ video::-webkit-media-controls-panel {
 .poster-preview-wrap {
   padding: 2rem;
   background: repeating-conic-gradient(var(--line-soft) 0% 25%, transparent 0% 50%) 50% / 24px 24px;
-  overflow: auto; /* Enables scroll */
-  min-height: 0; /* Crucial for grid scrolling */
-  text-align: center; /* Centers the inline-flex child */
+  overflow: auto;
+  min-height: 0;
+  text-align: center;
 }
 
 .zoom-controls {
@@ -612,9 +597,9 @@ video::-webkit-media-controls-panel {
   width: 210mm;
   min-height: 297mm;
   padding: 22mm 20mm;
-  display: inline-flex; /* Allows text-align center on parent to work while preserving flex layout */
+  display: inline-flex; 
   flex-direction: column;
-  text-align: left; /* Reset text alignment for poster content */
+  text-align: left; 
   font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif;
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
   position: relative;
@@ -744,7 +729,7 @@ video::-webkit-media-controls-panel {
   padding-top: 1.5rem;
   border-top: 2px solid currentColor;
   display: flex;
-  justify-content: flex-start; /* Left aligned as URL is removed */
+  justify-content: flex-start; 
   align-items: center;
   font-size: 0.75rem;
   letter-spacing: 0.2em;
@@ -762,7 +747,7 @@ video::-webkit-media-controls-panel {
   color: #111;
 }
 
-/* ===== Theme: Neon Stream (Fun & Professional) ===== */
+/* ===== Theme: Neon Stream ===== */
 .poster-sheet.theme-neon {
   background: #0b0e17;
   color: #ffffff;
@@ -938,6 +923,8 @@ video::-webkit-media-controls-panel {
   .poster-modal { grid-template-columns: 1fr; height: 95vh; }
   .poster-editor { border-right: none; border-bottom: 1px solid var(--line); max-height: 40vh; }
   header { padding: 1.5rem; }
+  .brand-text { font-size: 1.4rem; }
+  .brand-logo svg { height: 40px; }
 }
 </style>
 </head>
@@ -952,24 +939,67 @@ video::-webkit-media-controls-panel {
 <header>
   <div class="brand">
     <div class="brand-logo">
-      <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg" aria-label="CineLoom Logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Film Site Logo">
         <defs>
-          <linearGradient id="loomGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#4A00E0"/>
-            <stop offset="50%" stop-color="#E94057"/>
-            <stop offset="100%" stop-color="#F27121"/>
+          <linearGradient id="filmbgGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#FFFFFF"/>
+            <stop offset="0.5" stop-color="#FEF2F2"/>
+            <stop offset="1" stop-color="#FEE2E2"/>
           </linearGradient>
+          <radialGradient id="filmpinGrad" cx="0.35" cy="0.3" r="0.8">
+            <stop offset="0" stop-color="#FCA5A5"/>
+            <stop offset="1" stop-color="#DC2626"/>
+          </radialGradient>
+          <filter id="filmshadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#1A1D21" flood-opacity="0.2"/>
+          </filter>
         </defs>
-        <g transform="translate(0, 10)">
-          <text x="18" y="50" font-family="'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-size="48" text-anchor="start">
-            <tspan class="logo-cine" font-weight="300" letter-spacing="6">CINE</tspan>
-          </text>
-          <text x="20" y="95" font-family="'Helvetica Neue', 'Segoe UI', system-ui, sans-serif" font-size="48" text-anchor="start">
-            <tspan font-weight="900" fill="url(#loomGrad)" letter-spacing="-1">LOOM</tspan>
-          </text>
+        
+        <rect width="120" height="120" rx="28" fill="url(#filmbgGrad)"/>
+        <rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="#1A1D21" stroke-opacity="0.05"/>
+        
+        <!-- Red Strings -->
+        <path d="M38 42 L60 24" fill="none" stroke="#DC2626" stroke-width="3" stroke-linecap="round"/>
+        <path d="M82 42 L60 24" fill="none" stroke="#DC2626" stroke-width="3" stroke-linecap="round"/>
+        
+        <!-- Red String Pins -->
+        <circle cx="38" cy="42" r="2.5" fill="#DC2626"/>
+        <circle cx="82" cy="42" r="2.5" fill="#DC2626"/>
+        
+        <!-- White Poster Sheet -->
+        <rect x="32" y="38" width="56" height="64" rx="10" fill="#FFFFFF" filter="url(#filmshadow)"/>
+        
+        <!-- Faded Red Circle Background -->
+        <circle cx="60" cy="62" r="16" fill="#FFF5F5"/>
+        
+        <!-- Film Strip Icon -->
+        <g fill="none" stroke="#991B1B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="54" y="51" width="12" height="22" rx="2"/>
+          <!-- Sprocket holes -->
+          <rect x="56" y="53" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          <rect x="56" y="58" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          <rect x="56" y="63" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          <rect x="56" y="68" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          
+          <rect x="62" y="53" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          <rect x="62" y="58" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          <rect x="62" y="63" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          <rect x="62" y="68" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          
+          <!-- Center frame area -->
+          <rect x="58.5" y="55" width="3" height="14" fill="#DC2626" stroke="none"/>
         </g>
+        
+        <!-- Bottom Text Lines -->
+        <rect x="42" y="86" width="36" height="5" rx="2.5" fill="#1A1D21"/>
+        <rect x="48" y="94" width="24" height="5" rx="2.5" fill="#DC2626"/>
+        
+        <!-- Red Pushpin -->
+        <circle cx="60" cy="20" r="7" fill="url(#filmpinGrad)" filter="url(#filmshadow)"/>
+        <circle cx="57.5" cy="17.5" r="1.8" fill="#FFFFFF" opacity="0.7"/>
       </svg>
     </div>
+    <span class="brand-text">CineLoom</span>
   </div>
   
   <div class="header-actions">
@@ -1035,28 +1065,13 @@ video::-webkit-media-controls-panel {
         </button>
       </div>
       <div class="video-stage">
-        <video preload="metadata" playsinline aria-label="Video player"></video>
+        <video id="player" playsinline crossorigin></video>
         <div class="empty-state">
           <div class="prompt">Please load a film to begin.</div>
         </div>
         <div class="empty-state error-state hidden" role="alert">
           <div class="prompt">Cannot play this video</div>
           <div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div>
-        </div>
-        
-        <div class="controls">
-          <button class="btn btn-play" aria-label="Play or Pause">
-            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
-          </button>
-          <input type="range" class="seek-bar" value="0" min="0" max="100" step="0.1" aria-label="Seek video">
-          <span class="timecode">0:00 / 0:00</span>
-          <button class="btn btn-cc" disabled aria-label="Turn Subtitles On or Off">CC</button>
-          <button class="btn btn-fs" aria-label="Fullscreen">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
-            </svg>
-          </button>
         </div>
       </div>
       <input type="file" class="file-input file-input-video" accept="*/*" aria-hidden="true" tabindex="-1">
@@ -1179,6 +1194,8 @@ video::-webkit-media-controls-panel {
   </div>
 </div>
 
+<!-- Plyr Open Source Video Player JS -->
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
 // ===== Settings Dropdown Logic =====
 const settingsToggle = document.getElementById('settingsToggle');
@@ -1301,7 +1318,6 @@ function updatePosterPreview() {
   posterPreview.notes.textContent = posterFields.notes.value || '';
   posterPreview.footer.textContent = posterFields.footer.value || 'CineLoom';
 
-  // Handle Double Feature formatting
   if (posterFields.title2.value.trim() !== '') {
     posterSheet.classList.add('double-feature');
     posterPreview.film2Block.style.display = 'flex';
@@ -1314,7 +1330,6 @@ function updatePosterPreview() {
     posterPreview.filmDivider.style.display = 'none';
   }
   
-  // Adjust zoom bounds dynamically as content changes
   applyZoom();
 }
 
@@ -1330,7 +1345,7 @@ document.querySelectorAll('.style-btn[data-poster-theme]').forEach(btn => {
     posterSheet.classList.add(themeClass);
     document.querySelectorAll('.style-btn[data-poster-theme]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    setTimeout(applyZoom, 10); // ensure zoom updates if theme changes padding/layout
+    setTimeout(applyZoom, 10);
   });
 });
 
@@ -1341,10 +1356,8 @@ const zoomOutBtn = document.getElementById('zoomOut');
 const zoomResetBtn = document.getElementById('zoomReset');
 
 function applyZoom() {
-  // Calculate the unscaled height to dynamically remove empty space left by transform
   const unscaledHeight = posterSheet.offsetHeight;
   const emptySpace = unscaledHeight * (1 - posterZoom);
-  
   posterSheet.style.marginBottom = `-${emptySpace}px`;
   posterSheet.style.transform = `scale(${posterZoom})`;
   zoomResetBtn.textContent = `${Math.round(posterZoom * 100)}%`;
@@ -1378,7 +1391,7 @@ function openPosterMaker() {
   }
   updatePosterPreview();
   posterOverlay.classList.add('active');
-  setTimeout(applyZoom, 50); // ensure layout is settled before applying zoom
+  setTimeout(applyZoom, 50);
 }
 
 document.querySelector('[data-screen-poster]').addEventListener('click', openPosterMaker);
@@ -1400,15 +1413,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ===== Helpers =====
-function formatTime(s) {
-  if (isNaN(s) || !isFinite(s)) return '0:00';
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = Math.floor(s % 60);
-  const pad = n => String(n).padStart(2, '0');
-  return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
-}
-
 // ===== Unified Subtitle Parsers =====
 function parseSubtitles(filename, content) {
   const ext = filename.split('.').pop().toLowerCase();
@@ -1488,63 +1492,38 @@ function formatAssTime(t) {
   return `${parts[0].padStart(2,'0')}:${parts[1].padStart(2,'0')}:${sec}.${ms}`;
 }
 
-// ===== Player Setup =====
-const player = document.querySelector('.player');
-
-function setupPlayer(player) {
-  const video = player.querySelector('video');
-  const stage = player.querySelector('.video-stage');
-  const controls = player.querySelector('.controls');
-  const emptyState = stage.querySelector('.empty-state:not(.error-state)');
-  const errorState = stage.querySelector('.error-state');
-  const fileVideo = player.querySelector('.file-input-video');
-  const fileSub = player.querySelector('.file-input-sub');
-  const loadVideoBtn = player.querySelector('.load-video-btn');
-  const loadSubBtn = player.querySelector('.load-sub-btn');
-  const playBtn = player.querySelector('.btn-play');
-  const seekBar = player.querySelector('.seek-bar');
-  const timecode = player.querySelector('.timecode');
-  const ccBtn = player.querySelector('.btn-cc');
-  const fsBtn = player.querySelector('.btn-fs');
+// ===== Plyr Video Player Setup =====
+const playerContainer = document.querySelector('.player');
+function setupPlayer() {
+  const video = playerContainer.querySelector('video');
+  const emptyState = playerContainer.querySelector('.empty-state:not(.error-state)');
+  const errorState = playerContainer.querySelector('.error-state');
+  const fileVideo = playerContainer.querySelector('.file-input-video');
+  const fileSub = playerContainer.querySelector('.file-input-sub');
+  const loadVideoBtn = playerContainer.querySelector('.load-video-btn');
+  const loadSubBtn = playerContainer.querySelector('.load-sub-btn');
 
   let currentVideoURL = null;
   let currentSubURL = null;
-  let hideControlsTimer;
-
-  function showControls() {
-    controls.classList.add('visible');
-    clearTimeout(hideControlsTimer);
-    if (!video.paused && !video.ended) {
-      hideControlsTimer = setTimeout(() => controls.classList.remove('visible'), 3000);
-    }
-  }
-
-  stage.addEventListener('mousemove', showControls);
-  stage.addEventListener('touchstart', showControls); 
-  stage.addEventListener('mouseleave', () => {
-    if (!video.paused) controls.classList.remove('visible');
+  let currentVideoMime = 'video/mp4';
+  
+  // Initialize Plyr
+  const player = new Plyr(video, {
+    controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'],
+    settings: ['captions', 'speed', 'quality'],
+    ratio: '16:9',
+    invertTime: false,
+    toggleInvertTime: false
   });
 
-  video.addEventListener('play', showControls);
-  video.addEventListener('pause', () => {
-    controls.classList.add('visible'); 
-    clearTimeout(hideControlsTimer);
-  });
-  video.addEventListener('ended', () => {
-    controls.classList.add('visible');
-    clearTimeout(hideControlsTimer);
-  });
-
-  video.addEventListener('error', () => {
+  player.on('error', () => {
     emptyState.classList.add('hidden');
     errorState.classList.remove('hidden');
-    playBtn.disabled = true;
   });
 
-  video.addEventListener('loadeddata', () => {
+  player.on('loadedmetadata', () => {
     errorState.classList.add('hidden');
     emptyState.classList.add('hidden');
-    playBtn.disabled = false;
   });
 
   loadVideoBtn.addEventListener('click', () => fileVideo.click());
@@ -1565,20 +1544,34 @@ function setupPlayer(player) {
       else if (name.endsWith('.mov')) mimeType = 'video/quicktime';
       else mimeType = 'video/mp4';
     }
+    currentVideoMime = mimeType;
 
     const blob = new Blob([file], { type: mimeType });
     currentVideoURL = URL.createObjectURL(blob);
 
     errorState.classList.add('hidden');
     emptyState.classList.remove('hidden');
-    playBtn.disabled = false;
 
-    video.src = currentVideoURL;
-    video.load();
+    let tracks = [];
+    if (currentSubURL) {
+      tracks.push({
+        kind: 'subtitles',
+        label: 'Subtitles',
+        srclang: 'en',
+        src: currentSubURL,
+        default: true
+      });
+    }
+
+    player.source = {
+      type: 'video',
+      title: file.name,
+      sources: [{ src: currentVideoURL, type: mimeType }],
+      tracks: tracks
+    };
 
     loadVideoBtn.classList.add('has-file');
-    const fnameEl = loadVideoBtn.querySelector('.filename');
-    fnameEl.textContent = file.name;
+    loadVideoBtn.querySelector('.filename').textContent = file.name;
   });
 
   loadSubBtn.addEventListener('click', () => fileSub.click());
@@ -1600,6 +1593,7 @@ function setupPlayer(player) {
     if (currentSubURL) URL.revokeObjectURL(currentSubURL);
     currentSubURL = URL.createObjectURL(blob);
 
+    // To avoid restarting the video, we add the track directly to the underlying video element
     video.querySelectorAll('track').forEach(t => t.remove());
 
     const track = document.createElement('track');
@@ -1610,69 +1604,20 @@ function setupPlayer(player) {
     track.default = true;
     video.appendChild(track);
 
-    track.addEventListener('load', () => enableSubtitles());
-    setTimeout(enableSubtitles, 400);
-
-    function enableSubtitles() {
+    setTimeout(() => {
       const tracks = video.textTracks;
       for (let i = 0; i < tracks.length; i++) tracks[i].mode = 'showing';
-      ccBtn.disabled = false;
-      ccBtn.classList.add('active');
-    }
+      // Update Plyr's internal caption state to match
+      player.toggleCaptions(true);
+      player.elements.buttons.captions?.setAttribute('aria-checked', true);
+    }, 400);
 
     loadSubBtn.classList.add('has-file');
-    const fnameEl = loadSubBtn.querySelector('.filename');
-    fnameEl.textContent = file.name;
-  });
-
-  ccBtn.addEventListener('click', () => {
-    if (ccBtn.disabled) return;
-    const tracks = video.textTracks;
-    if (tracks.length === 0) return;
-    const isShowing = tracks[0].mode === 'showing';
-    tracks[0].mode = isShowing ? 'hidden' : 'showing';
-    ccBtn.classList.toggle('active', !isShowing);
-  });
-
-  stage.addEventListener('click', (e) => {
-    if (e.target.closest('.controls')) return;
-    if (!video.src || video.error) return;
-    if (video.paused) video.play().catch(() => {});
-    else video.pause();
-  });
-
-  playBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); 
-    if (!video.src || video.error) return;
-    if (video.paused) video.play().catch(() => {});
-    else video.pause();
-  });
-
-  video.addEventListener('play', () => playBtn.classList.add('playing'));
-  video.addEventListener('pause', () => playBtn.classList.remove('playing'));
-  video.addEventListener('ended', () => playBtn.classList.remove('playing'));
-
-  video.addEventListener('loadedmetadata', () => seekBar.max = video.duration || 0);
-  video.addEventListener('durationchange', () => seekBar.max = video.duration || 0);
-  video.addEventListener('timeupdate', () => {
-    if (!isNaN(video.duration) && video.duration > 0) {
-      seekBar.value = video.currentTime;
-      timecode.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
-    }
-  });
-
-  seekBar.addEventListener('input', () => {
-    if (!isNaN(video.duration) && video.duration > 0) video.currentTime = parseFloat(seekBar.value);
-  });
-
-  fsBtn.addEventListener('click', () => {
-    const isFs = document.fullscreenElement || document.webkitFullscreenElement;
-    if (!isFs) (stage.requestFullscreen || stage.webkitRequestFullscreen)?.call(stage);
-    else (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+    loadSubBtn.querySelector('.filename').textContent = file.name;
   });
 }
 
-setupPlayer(player);
+setupPlayer();
 </script>
 </body>
 </html>
