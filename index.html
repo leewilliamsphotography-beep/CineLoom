@@ -744,7 +744,7 @@ video::-webkit-media-controls-panel {
   padding-top: 1.5rem;
   border-top: 2px solid currentColor;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start; /* Left aligned as URL is removed */
   align-items: center;
   font-size: 0.75rem;
   letter-spacing: 0.2em;
@@ -1173,7 +1173,6 @@ video::-webkit-media-controls-panel {
         
         <div class="ps-footer">
           <span class="ps-mark" id="psFooter">CineLoom</span>
-          <span>www.cineloom.app</span>
         </div>
       </div>
     </div>
