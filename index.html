@@ -939,64 +939,63 @@ main {
 <header>
   <div class="brand">
     <div class="brand-logo">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Film Site Logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="CineLoom Logo">
         <defs>
           <linearGradient id="filmbgGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#FFFFFF"/>
-            <stop offset="0.5" stop-color="#FEF2F2"/>
-            <stop offset="1" stop-color="#FEE2E2"/>
+            <stop offset="0" stop-color="var(--bg-elev-3)"/>
+            <stop offset="1" stop-color="var(--bg-elev-2)"/>
           </linearGradient>
           <radialGradient id="filmpinGrad" cx="0.35" cy="0.3" r="0.8">
-            <stop offset="0" stop-color="#FCA5A5"/>
-            <stop offset="1" stop-color="#DC2626"/>
+            <stop offset="0" stop-color="var(--accent-glow)"/>
+            <stop offset="1" stop-color="var(--accent)"/>
           </radialGradient>
           <filter id="filmshadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#1A1D21" flood-opacity="0.2"/>
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.2"/>
           </filter>
         </defs>
         
         <rect width="120" height="120" rx="28" fill="url(#filmbgGrad)"/>
-        <rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="#1A1D21" stroke-opacity="0.05"/>
+        <rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="var(--line-strong)" stroke-opacity="0.5"/>
         
-        <!-- Red Strings -->
-        <path d="M38 42 L60 24" fill="none" stroke="#DC2626" stroke-width="3" stroke-linecap="round"/>
-        <path d="M82 42 L60 24" fill="none" stroke="#DC2626" stroke-width="3" stroke-linecap="round"/>
+        <!-- Accent Strings -->
+        <path d="M38 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M82 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
         
-        <!-- Red String Pins -->
-        <circle cx="38" cy="42" r="2.5" fill="#DC2626"/>
-        <circle cx="82" cy="42" r="2.5" fill="#DC2626"/>
+        <!-- Accent String Pins -->
+        <circle cx="38" cy="42" r="2.5" fill="var(--accent)"/>
+        <circle cx="82" cy="42" r="2.5" fill="var(--accent)"/>
         
-        <!-- White Poster Sheet -->
-        <rect x="32" y="38" width="56" height="64" rx="10" fill="#FFFFFF" filter="url(#filmshadow)"/>
+        <!-- Poster Sheet (Inverts with theme text color) -->
+        <rect x="32" y="38" width="56" height="64" rx="10" fill="var(--text)" filter="url(#filmshadow)"/>
         
-        <!-- Faded Red Circle Background -->
-        <circle cx="60" cy="62" r="16" fill="#FFF5F5"/>
+        <!-- Faded Accent Circle Background -->
+        <circle cx="60" cy="62" r="16" fill="var(--accent-soft)"/>
         
-        <!-- Film Strip Icon -->
-        <g fill="none" stroke="#991B1B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Film Strip Icon (Inverts with dim text) -->
+        <g fill="none" stroke="var(--text-dim)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="54" y="51" width="12" height="22" rx="2"/>
           <!-- Sprocket holes -->
-          <rect x="56" y="53" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
-          <rect x="56" y="58" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
-          <rect x="56" y="63" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
-          <rect x="56" y="68" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          <rect x="56" y="53" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/>
+          <rect x="56" y="58" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/>
+          <rect x="56" y="63" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/>
+          <rect x="56" y="68" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/>
           
-          <rect x="62" y="53" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
-          <rect x="62" y="58" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
-          <rect x="62" y="63" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
-          <rect x="62" y="68" width="2" height="2" rx="0.5" fill="#991B1B" stroke="none"/>
+          <rect x="62" y="53" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/>
+          <rect x="62" y="58" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/>
+          <rect x="62" y="63" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/>
+          <rect x="62" y="68" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/>
           
           <!-- Center frame area -->
-          <rect x="58.5" y="55" width="3" height="14" fill="#DC2626" stroke="none"/>
+          <rect x="58.5" y="55" width="3" height="14" fill="var(--accent)" stroke="none"/>
         </g>
         
-        <!-- Bottom Text Lines -->
-        <rect x="42" y="86" width="36" height="5" rx="2.5" fill="#1A1D21"/>
-        <rect x="48" y="94" width="24" height="5" rx="2.5" fill="#DC2626"/>
+        <!-- Bottom Text Lines (Inverts with background/foreground) -->
+        <rect x="42" y="86" width="36" height="5" rx="2.5" fill="var(--bg-elev-3)"/>
+        <rect x="48" y="94" width="24" height="5" rx="2.5" fill="var(--accent)"/>
         
-        <!-- Red Pushpin -->
+        <!-- Pushpin -->
         <circle cx="60" cy="20" r="7" fill="url(#filmpinGrad)" filter="url(#filmshadow)"/>
-        <circle cx="57.5" cy="17.5" r="1.8" fill="#FFFFFF" opacity="0.7"/>
+        <circle cx="57.5" cy="17.5" r="1.8" fill="var(--text)" opacity="0.7"/>
       </svg>
     </div>
     <span class="brand-text">CineLoom</span>
@@ -1004,9 +1003,9 @@ main {
   
   <div class="header-actions">
     <button class="settings-btn" id="settingsToggle" aria-label="Open Settings" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
       </svg>
     </button>
     <div class="settings-dropdown" id="settingsPanel" role="region" aria-label="Site Settings">
@@ -1515,6 +1514,10 @@ function setupPlayer() {
     invertTime: false,
     toggleInvertTime: false
   });
+
+  // Explicitly ensure volume is up and unmuted
+  player.volume = 1;
+  player.muted = false;
 
   player.on('error', () => {
     emptyState.classList.add('hidden');
