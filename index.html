@@ -249,6 +249,8 @@ header {
   pointer-events: none;
   transition: all 0.3s var(--ease);
   z-index: 1000;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 .settings-dropdown.open {
   opacity: 1;
@@ -1022,6 +1024,13 @@ main {
       <button class="theme-btn" data-theme="autumn"><span class="theme-swatch" style="background: #e87a3e;" aria-hidden="true"></span><span>Autumn</span></button>
       <button class="theme-btn" data-theme="winter"><span class="theme-swatch" style="background: #5fb3d8;" aria-hidden="true"></span><span>Winter</span></button>
 
+      <div class="panel-label">Volume Boost</div>
+      <div class="sub-style-row">
+        <button class="style-btn" data-boost="1">100%</button>
+        <button class="style-btn active" data-boost="3">300%</button>
+        <button class="style-btn" data-boost="5">500%</button>
+      </div>
+
       <div class="panel-label">Subtitle Size</div>
       <div class="sub-style-row">
         <button class="style-btn" data-size="small">Small</button>
@@ -1506,6 +1515,28 @@ function setupPlayer() {
   let currentSubURL = null;
   let currentVideoMime = 'video/mp4';
   
+  // ===== Web Audio API for Volume Boost =====
+  let audioContext, gainNode, audioInitialized = false;
+
+  function initAudioBoost() {
+    if (audioInitialized) return;
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaElementSource(video);
+      gainNode = audioContext.createGain();
+      source.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Load saved boost or default to 3.0 (300%)
+      const savedBoost = localStorage.getItem('cl-boost') || '3.0';
+      gainNode.gain.value = parseFloat(savedBoost);
+      
+      audioInitialized = true;
+    } catch (e) {
+      console.warn("Audio boost unavailable (browser security policy):", e);
+    }
+  }
+  
   // Initialize Plyr
   const player = new Plyr(video, {
     controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'],
@@ -1517,28 +1548,17 @@ function setupPlayer() {
     toggleInvertTime: false
   });
 
-  // Forced volume checks across multiple events
-  player.on('ready', () => {
-    player.volume = 1;
-    player.muted = false;
-    video.volume = 1.0;
-    video.muted = false;
+  // Initialize audio context strictly on the first play attempt to bypass browser autoplay restrictions
+  video.addEventListener('play', () => {
+    if (!audioInitialized) initAudioBoost();
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
   });
 
   player.on('loadedmetadata', () => {
     errorState.classList.add('hidden');
     emptyState.classList.add('hidden');
-    player.volume = 1;
-    player.muted = false;
-    video.volume = 1.0;
-    video.muted = false;
-  });
-
-  player.on('canplay', () => {
-    player.volume = 1;
-    player.muted = false;
-    video.volume = 1.0;
-    video.muted = false;
   });
 
   player.on('error', () => {
@@ -1590,12 +1610,6 @@ function setupPlayer() {
       tracks: tracks
     };
 
-    // Re-apply volume explicitly after source update
-    player.volume = 1;
-    player.muted = false;
-    video.volume = 1.0;
-    video.muted = false;
-
     loadVideoBtn.classList.add('has-file');
     loadVideoBtn.querySelector('.filename').textContent = file.name;
   });
@@ -1619,27 +1633,54 @@ function setupPlayer() {
     if (currentSubURL) URL.revokeObjectURL(currentSubURL);
     currentSubURL = URL.createObjectURL(blob);
 
-    // To avoid restarting the video, we add the track directly to the underlying video element
-    video.querySelectorAll('track').forEach(t => t.remove());
+    // Save playback state to restore after source update
+    const currentTime = player.currentTime;
+    const isPlaying = !video.paused;
 
-    const track = document.createElement('track');
-    track.kind = 'subtitles';
-    track.label = 'Subtitles';
-    track.srclang = 'en';
-    track.src = currentSubURL;
-    track.default = true;
-    video.appendChild(track);
+    // Update Plyr source to properly register the new caption track in its menu
+    player.source = {
+        type: 'video',
+        title: loadVideoBtn.querySelector('.filename').textContent || 'CineLoom',
+        sources: [{ src: currentVideoURL, type: currentVideoMime }],
+        tracks: [{
+            kind: 'subtitles',
+            label: 'Subtitles',
+            srclang: 'en',
+            src: currentSubURL,
+            default: true
+        }]
+    };
 
-    setTimeout(() => {
-      const tracks = video.textTracks;
-      for (let i = 0; i < tracks.length; i++) tracks[i].mode = 'showing';
-      // Update Plyr's internal caption state to match
-      player.toggleCaptions(true);
-      player.elements.buttons.captions?.setAttribute('aria-checked', true);
-    }, 400);
+    // Restore playback state without restarting the movie
+    const onLoaded = () => {
+        player.currentTime = currentTime;
+        if (isPlaying) player.play().catch(()=>{});
+        player.toggleCaptions(true); // Force captions on
+        video.removeEventListener('loadedmetadata', onLoaded);
+    };
+    video.addEventListener('loadedmetadata', onLoaded);
 
     loadSubBtn.classList.add('has-file');
     loadSubBtn.querySelector('.filename').textContent = file.name;
+  });
+
+  // Volume Boost Controls
+  document.querySelectorAll('.style-btn[data-boost]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const boost = parseFloat(btn.dataset.boost);
+      if (gainNode) {
+        gainNode.gain.value = boost;
+      }
+      localStorage.setItem('cl-boost', boost);
+      document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Load saved boost UI state
+  const savedBoost = localStorage.getItem('cl-boost') || '3.0';
+  document.querySelectorAll('.style-btn[data-boost]').forEach(b => {
+    b.classList.toggle('active', b.dataset.boost === savedBoost);
   });
 }
 
