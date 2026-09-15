@@ -623,45 +623,79 @@ const torrentResults = document.getElementById('torrentResults');
 
 async function searchTorrents(query) {
     if (!query || query.trim().length < 3) return;
-    try {
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://yts.mx/api/v2/list_movies.json?query_term=' + encodeURIComponent(query))}`;
-        const res = await fetch(proxyUrl);
-        const data = await res.json();
-        
-        torrentResults.innerHTML = '';
-        if (data.data && data.data.movies) {
-            data.data.movies.slice(0, 6).forEach(movie => {
-                const torrent = movie.torrents.find(t => t.quality === '1080p') || movie.torrents.find(t => t.quality === '720p');
-                if (!torrent) return;
-                
-                const item = document.createElement('div');
-                item.className = 'torrent-item';
-                item.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                    <div class="torrent-info">
-                        <span class="torrent-title">${movie.title} (${movie.year}) - ${torrent.quality}</span>
-                        <span class="torrent-meta">${torrent.type} • ${Math.round(torrent.size / 1048576)} MB</span>
-                    </div>
-                `;
-                item.addEventListener('click', () => {
-                    const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.openbittorrent.com:80&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.openwebtorrent.com`;
-                    torrentInput.value = magnet;
-                    torrentResults.classList.remove('show');
-                    startTorrentStream(magnet);
-                });
-                torrentResults.appendChild(item);
-            });
-            torrentResults.classList.add('show');
-        } else {
+    
+    torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><div class="torrent-info"><span class="torrent-title">Searching...</span></div></div>';
+    torrentResults.classList.add('show');
+    
+    const apiUrl = `https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=10`;
+    
+    // Array of CORS proxies to try
+    const proxies = [
+        url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+        url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        url => `https://thingproxy.freeboard.io/fetch/${url}`
+    ];
+    
+    let data = null;
+    let success = false;
+    let lastError = null;
+    
+    for (const proxy of proxies) {
+        try {
+            const res = await fetch(proxy(apiUrl));
+            if (!res.ok) throw new Error(`Proxy failed: ${res.statusText}`);
+            
+            data = await res.json();
+            if (data && data.status === 'ok') {
+                success = true;
+                break; // Exit loop on success
+            }
+        } catch (e) {
+            console.warn("Proxy failed, trying next:", e.message);
+            lastError = e;
+        }
+    }
+
+    torrentResults.innerHTML = '';
+    
+    if (success && data.data.movies && data.data.movies.length > 0) {
+        data.data.movies.forEach(movie => {
+            // Prefer 1080p Web, then 1080p, then 720p
+            const torrent = movie.torrents.find(t => t.quality === '1080p' && t.type === 'web') || 
+                            movie.torrents.find(t => t.quality === '1080p') || 
+                            movie.torrents.find(t => t.quality === '720p');
+            if (!torrent) return;
+            
             const item = document.createElement('div');
             item.className = 'torrent-item';
-            item.style.cursor = 'default';
-            item.innerHTML = `<div class="torrent-info"><span class="torrent-title">No torrents found.</span></div>`;
+            item.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                <div class="torrent-info">
+                    <span class="torrent-title">${movie.title_long} (${torrent.quality})</span>
+                    <span class="torrent-meta">${torrent.type} • ${torrent.size} ${torrent.size_unit}</span>
+                </div>
+            `;
+            item.addEventListener('click', () => {
+                const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.openbittorrent.com:80&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.openwebtorrent.com`;
+                torrentInput.value = magnet;
+                torrentResults.classList.remove('show');
+                startTorrentStream(magnet);
+            });
             torrentResults.appendChild(item);
-            torrentResults.classList.add('show');
-        }
-    } catch (e) {
-        console.error("Torrent search failed:", e);
+        });
+    } else if (success && (!data.data.movies || data.data.movies.length === 0)) {
+        const item = document.createElement('div');
+        item.className = 'torrent-item';
+        item.style.cursor = 'default';
+        item.innerHTML = `<div class="torrent-info"><span class="torrent-title">No torrents found.</span></div>`;
+        torrentResults.appendChild(item);
+    } else {
+        const item = document.createElement('div');
+        item.className = 'torrent-item';
+        item.style.cursor = 'default';
+        item.innerHTML = `<div class="torrent-info"><span class="torrent-title">Search failed (All proxies offline/blocked)</span></div>`;
+        torrentResults.appendChild(item);
+        console.error("All CORS proxies failed. Last error:", lastError);
     }
 }
 
@@ -672,7 +706,7 @@ torrentSearchBtn.addEventListener('click', () => {
     else searchTorrents(query);
 });
 
-torrentInput.addEventListener('keypress', (e) => {
+torrentInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         e.preventDefault();
         torrentSearchBtn.click();
