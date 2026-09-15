@@ -38,6 +38,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .site-footer { text-align: center; padding: 2rem 1rem; color: var(--text-dim); font-size: 0.75rem; opacity: 0.7; margin-top: auto; border-top: 1px solid var(--line); }
 .countdown-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 25; display: none; align-items: center; justify-content: center; } .countdown-overlay.active { display: flex; } .countdown-text { font-size: 12rem; font-weight: 900; color: #fff; text-shadow: 0 0 40px var(--accent); } @keyframes count-pulse { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
 .qr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10003; display: none; align-items: center; justify-content: center; padding: 2rem; } .qr-overlay.active { display: flex; } .qr-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px; display: flex; flex-direction: column; align-items: center; } .qr-box h3 { font-size: 1.5rem; margin-bottom: 1rem; } .qr-box p { color: var(--text-soft); margin-bottom: 1.5rem; } .remote-code-display { font-size: 2.5rem; font-weight: 800; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 1.5rem; font-family: 'Courier New', monospace; text-shadow: 0 0 15px var(--accent-glow); } .qr-code-img { width: 250px; height: 250px; border-radius: 12px; margin: 0 auto 1.5rem; display: block; background: #fff; padding: 10px; } .qr-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; }
+.host-status { margin-top: 1rem; font-size: 0.8rem; color: var(--text-dim); }
 @media (max-width: 900px) { header { padding: 1rem 1.5rem; } main { padding: 0 1rem 2rem; } }
 </style>
 </head>
@@ -108,7 +109,8 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
     <div class="remote-code-display" id="remoteCodeDisplay">------</div>
     <p>Enter this code in the mobile app, or scan the QR code.</p>
     <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code">
-    <button class="qr-close-btn" id="qrCloseBtn">Close</button>
+    <div class="host-status" id="hostStatus">Initializing host...</div>
+    <button class="qr-close-btn" id="qrCloseBtn" style="margin-top: 1.5rem;">Close</button>
   </div>
 </div>
 
@@ -221,82 +223,133 @@ document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target
 // OMDb Key
 const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
 
-// MQTT Remote
-const qrOverlay = document.getElementById('qrOverlay'); const qrCloseBtn = document.getElementById('qrCloseBtn'); const remoteCodeDisplay = document.getElementById('remoteCodeDisplay'); let mqttClient = null; let timeUpdateInterval = null;
+// MQTT Remote Host Logic
+const qrOverlay = document.getElementById('qrOverlay'); const qrCloseBtn = document.getElementById('qrCloseBtn'); const remoteCodeDisplay = document.getElementById('remoteCodeDisplay'); const hostStatus = document.getElementById('hostStatus'); let mqttClient = null; let timeUpdateInterval = null;
+
+function connectToBroker(statusEl, onConnect) {
+    const brokers = [
+        'wss://broker.emqx.io:8084/mqtt',
+        'wss://broker.hivemq.com:8884/mqtt',
+        'wss://test.mosquitto.org:8081/mqtt'
+    ];
+    let brokerIndex = 0;
+    let connected = false;
+    
+    function tryNext() {
+        if (brokerIndex >= brokers.length || connected) {
+            if (!connected) {
+                statusEl.textContent = "Connection Failed. Check network.";
+                statusEl.style.color = "#ef4444";
+            }
+            return;
+        }
+        
+        const url = brokers[brokerIndex];
+        statusEl.textContent = `Connecting to broker ${brokerIndex + 1}...`;
+        
+        const clientId = 'cineloom-host-' + Math.random().toString(16).substr(2, 8);
+        const client = mqtt.connect(url, { 
+            clientId: clientId,
+            connectTimeout: 3000,
+            reconnectPeriod: 0
+        });
+        
+        client.on('connect', () => {
+            connected = true;
+            statusEl.textContent = "Host Connected!";
+            statusEl.style.color = "#41d636";
+            console.log('Host Session ID:', clientId);
+            onConnect(client);
+        });
+        
+        client.on('error', (err) => {
+            console.error('Broker error:', err);
+            client.end();
+        });
+        
+        client.on('close', () => {
+            if (!connected) {
+                brokerIndex++;
+                tryNext();
+            }
+        });
+    }
+    
+    tryNext();
+}
+
 document.getElementById('remoteToggle').addEventListener('click', () => {
   const roomCode = Math.floor(100000 + Math.random() * 900000); remoteCodeDisplay.textContent = roomCode;
+  console.log('Generated Room Code:', roomCode);
+  
   const currentPath = window.location.href; const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
   document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${baseUrl}remote.html?room=${roomCode}`)}`;
   qrOverlay.classList.add('active');
   
-  console.log('Connecting to MQTT...');
-  // Bulletproof connection with fallback options
-  mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
-    connectTimeout: 5000,
-    reconnectPeriod: 1000,
-    clean: true
-  });
-  
-  const cmdTopic = `cineloom/${roomCode}/cmd`; const timeTopic = `cineloom/${roomCode}/time`;
-  
-  mqttClient.on('connect', () => { 
-    console.log('MQTT Host Connected'); 
+  connectToBroker(hostStatus, (client) => {
+    mqttClient = client;
+    const cmdTopic = `cineloom/${roomCode}/cmd`; const timeTopic = `cineloom/${roomCode}/time`;
+    
     mqttClient.subscribe(cmdTopic, (err) => {
       if (err) console.error('Subscription error:', err);
-    }); 
-  });
-  
-  mqttClient.on('message', (topic, message) => {
-    if (topic === cmdTopic) {
-      const data = JSON.parse(message.toString());
-      console.log('Received command:', data);
-      
-      // Directly target the raw video element for bulletproof execution
-      const videoEl = document.getElementById('player');
-      if (!videoEl) return;
-      
-      try {
-        if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); videoEl.play(); }
-        if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); videoEl.play(); }
-        if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
-        if (data.action === 'playPause') { 
-          if (videoEl.paused) videoEl.play(); else videoEl.pause(); 
+    });
+    
+    mqttClient.on('message', (topic, message) => {
+      if (topic === cmdTopic) {
+        const data = JSON.parse(message.toString());
+        console.log('Received command:', data);
+        
+        const videoEl = document.getElementById('player');
+        if (!videoEl) return;
+        
+        try {
+          if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); videoEl.play(); }
+          if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); videoEl.play(); }
+          if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
+          if (data.action === 'playPause') { 
+            if (videoEl.paused) videoEl.play(); else videoEl.pause(); 
+          }
+          if (data.action === 'fullscreen') { 
+            if (videoEl.requestFullscreen) videoEl.requestFullscreen(); 
+            else if (videoEl.webkitRequestFullscreen) videoEl.webkitRequestFullscreen();
+          }
+          if (data.action === 'seekBack') { 
+            videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); 
+          }
+          if (data.action === 'seekFwd') { 
+            videoEl.currentTime = videoEl.currentTime + 10; 
+          }
+          if (data.action === 'showtime') { document.getElementById('countdownBtn').click(); }
+        } catch (e) {
+          console.error('Remote Command Failed:', e);
         }
-        if (data.action === 'fullscreen') { 
-          if (videoEl.requestFullscreen) videoEl.requestFullscreen(); 
-          else if (videoEl.webkitRequestFullscreen) videoEl.webkitRequestFullscreen();
-        }
-        if (data.action === 'seekBack') { 
-          videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); 
-        }
-        if (data.action === 'seekFwd') { 
-          videoEl.currentTime = videoEl.currentTime + 10; 
-        }
-        if (data.action === 'showtime') { document.getElementById('countdownBtn').click(); }
-      } catch (e) {
-        console.error('Remote Command Failed:', e);
       }
-    }
-  });
-  
-  timeUpdateInterval = setInterval(() => {
-    if (mqttClient && mqttClient.connected) {
-      const videoEl = document.getElementById('player');
-      let timeStr = "Paused";
-      if (videoEl && !videoEl.paused && videoEl.duration) {
-        let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
-        const hrs = Math.floor(remaining / 3600); const mins = Math.floor((remaining % 3600) / 60); const secs = Math.floor(remaining % 60);
-        timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
-      } else if (videoEl && videoEl.duration && videoEl.paused) {
-        let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
-        const mins = Math.floor((remaining % 3600) / 60); const secs = Math.floor(remaining % 60);
-        timeStr = `Paused (${mins}m ${secs}s left)`;
+    });
+    
+    timeUpdateInterval = setInterval(() => {
+      if (mqttClient && mqttClient.connected) {
+        const videoEl = document.getElementById('player');
+        let timeStr = "Paused";
+        if (videoEl && !videoEl.paused && videoEl.duration) {
+          let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
+          const hrs = Math.floor(remaining / 3600); const mins = Math.floor((remaining % 3600) / 60); const secs = Math.floor(remaining % 60);
+          timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
+        } else if (videoEl && videoEl.duration && videoEl.paused) {
+          let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
+          const mins = Math.floor((remaining % 3600) / 60); const secs = Math.floor(remaining % 60);
+          timeStr = `Paused (${mins}m ${secs}s left)`;
+        }
+        mqttClient.publish(timeTopic, JSON.stringify({timeStr: timeStr}));
       }
-      mqttClient.publish(timeTopic, JSON.stringify({timeStr: timeStr}));
-    }
-  }, 1000);
+    }, 1000);
+  });
 });
-qrCloseBtn.addEventListener('click', () => { qrOverlay.classList.remove('active'); if (mqttClient) { mqttClient.end(); mqttClient = null; } if (timeUpdateInterval) { clearInterval(timeUpdateInterval); timeUpdateInterval = null; } });
+
+qrCloseBtn.addEventListener('click', () => { 
+  qrOverlay.classList.remove('active'); 
+  if (mqttClient) { mqttClient.end(); mqttClient = null; } 
+  if (timeUpdateInterval) { clearInterval(timeUpdateInterval); timeUpdateInterval = null; } 
+});
 
 // Torrents
 async function searchTorrents(query) {
@@ -355,4 +408,4 @@ window.addEventListener('beforeunload', (event) => {
 });
 </script>
 </body>
-</html> 
+</html>
