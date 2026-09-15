@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>CineLoom Remote</title>
 <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
 <style>
@@ -80,18 +83,20 @@
 </div>
 
 <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  let roomCode = urlParams.get('room');
-  const entryScreen = document.getElementById('entryScreen');
-  const remoteApp = document.getElementById('remoteApp');
-  const codeInput = document.getElementById('codeInput');
-  const connectBtn = document.getElementById('connectBtn');
-  const entryStatus = document.getElementById('entryStatus');
-  const remoteStatus = document.getElementById('remoteStatus');
-  let client = null;
-  let cmdTopic = '';
+console.log("CineLoom Remote v1.0.9 loaded");
 
-  function sendCmd(action, e) {
+const urlParams = new URLSearchParams(window.location.search);
+let roomCode = urlParams.get('room');
+const entryScreen = document.getElementById('entryScreen');
+const remoteApp = document.getElementById('remoteApp');
+const codeInput = document.getElementById('codeInput');
+const connectBtn = document.getElementById('connectBtn');
+const entryStatus = document.getElementById('entryStatus');
+const remoteStatus = document.getElementById('remoteStatus');
+let client = null;
+let cmdTopic = '';
+
+function sendCmd(action, e) {
     if (client && client.connected) {
       client.publish(cmdTopic, JSON.stringify({action: action}));
       if (e && e.currentTarget) {
@@ -104,71 +109,71 @@
         setTimeout(() => { e.currentTarget.style.boxShadow = ''; }, 300);
       }
     }
-  }
+}
 
-  // Attach listeners once
-  document.getElementById('rPlay1').addEventListener('click', (e) => sendCmd('play1', e));
-  document.getElementById('rPlay2').addEventListener('click', (e) => sendCmd('play2', e));
-  document.getElementById('rSwapFilms').addEventListener('click', (e) => sendCmd('swapFilms', e));
-  document.getElementById('rPlayPause').addEventListener('click', (e) => sendCmd('playPause', e));
-  document.getElementById('rFullscreen').addEventListener('click', (e) => sendCmd('fullscreen', e));
-  document.getElementById('rSeekBack').addEventListener('click', (e) => sendCmd('seekBack', e));
-  document.getElementById('rSeekFwd').addEventListener('click', (e) => sendCmd('seekFwd', e));
-  document.getElementById('rShowtime').addEventListener('click', (e) => sendCmd('showtime', e));
+// Attach listeners once
+document.getElementById('rPlay1').addEventListener('click', (e) => sendCmd('play1', e));
+document.getElementById('rPlay2').addEventListener('click', (e) => sendCmd('play2', e));
+document.getElementById('rSwapFilms').addEventListener('click', (e) => sendCmd('swapFilms', e));
+document.getElementById('rPlayPause').addEventListener('click', (e) => sendCmd('playPause', e));
+document.getElementById('rFullscreen').addEventListener('click', (e) => sendCmd('fullscreen', e));
+document.getElementById('rSeekBack').addEventListener('click', (e) => sendCmd('seekBack', e));
+document.getElementById('rSeekFwd').addEventListener('click', (e) => sendCmd('seekFwd', e));
+document.getElementById('rShowtime').addEventListener('click', (e) => sendCmd('showtime', e));
 
-  function connectToBroker(statusEl, onConnect) {
-      const brokers = [
-          'wss://broker.emqx.io:8084/mqtt',
-          'wss://broker.hivemq.com:8884/mqtt',
-          'wss://test.mosquitto.org:8081/mqtt'
-      ];
-      let brokerIndex = 0;
-      let connected = false;
-      
-      function tryNext() {
-          if (brokerIndex >= brokers.length || connected) {
-              if (!connected) {
-                  statusEl.textContent = "Connection Failed. Check network.";
-                  statusEl.style.color = "#ef4444";
-              }
-              return;
-          }
-          
-          const url = brokers[brokerIndex];
-          statusEl.textContent = `Connecting to network...`;
-          
-          const clientId = 'cineloom-remote-' + Math.random().toString(16).substr(2, 8);
-          const client = mqtt.connect(url, { 
-              clientId: clientId,
-              connectTimeout: 3000,
-              reconnectPeriod: 0
-          });
-          
-          client.on('connect', () => {
-              connected = true;
-              statusEl.textContent = "Connected to network!";
-              statusEl.style.color = "#41d636";
-              console.log('Remote Session ID:', clientId);
-              onConnect(client);
-          });
-          
-          client.on('error', (err) => {
-              console.error('Broker error:', err);
-              client.end();
-          });
-          
-          client.on('close', () => {
-              if (!connected) {
-                  brokerIndex++;
-                  tryNext();
-              }
-          });
-      }
-      
-      tryNext();
-  }
+function connectToBroker(statusEl, onConnect) {
+    const brokers = [
+        'wss://broker.emqx.io:8084/mqtt',
+        'wss://broker.hivemq.com:8884/mqtt',
+        'wss://test.mosquitto.org:8081/mqtt'
+    ];
+    let brokerIndex = 0;
+    let connected = false;
+    
+    function tryNext() {
+        if (brokerIndex >= brokers.length || connected) {
+            if (!connected) {
+                statusEl.textContent = "Connection Failed. Check network.";
+                statusEl.style.color = "#ef4444";
+            }
+            return;
+        }
+        
+        const url = brokers[brokerIndex];
+        statusEl.textContent = `Connecting to network...`;
+        
+        const clientId = 'cineloom-remote-' + Math.random().toString(16).substr(2, 8);
+        const client = mqtt.connect(url, { 
+            clientId: clientId,
+            connectTimeout: 3000,
+            reconnectPeriod: 0
+        });
+        
+        client.on('connect', () => {
+            connected = true;
+            statusEl.textContent = "Connected to network!";
+            statusEl.style.color = "#41d636";
+            console.log('Remote Session ID:', clientId);
+            onConnect(client);
+        });
+        
+        client.on('error', (err) => {
+            console.error('Broker error:', err);
+            client.end();
+        });
+        
+        client.on('close', () => {
+            if (!connected) {
+                brokerIndex++;
+                tryNext();
+            }
+        });
+    }
+    
+    tryNext();
+}
 
-  function connectToHost(code) {
+function connectToHost(code) {
     if (!code || code.length !== 6) {
       entryStatus.textContent = "Invalid code. Must be 6 digits.";
       entryStatus.style.color = "#ef4444";
@@ -225,14 +230,14 @@
       client.subscribe(timeTopic);
       client.publish(cmdTopic, JSON.stringify({action: 'hello'}));
     });
-  }
+}
 
-  if (roomCode && roomCode.length === 6) {
+if (roomCode && roomCode.length === 6) {
     connectToHost(roomCode);
-  } else {
+} else {
     connectBtn.addEventListener('click', () => connectToHost(codeInput.value.trim()));
     codeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') connectToHost(codeInput.value.trim()); });
-  }
+}
 </script>
 </body>
 </html>
