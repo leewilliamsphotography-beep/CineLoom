@@ -21,7 +21,8 @@ video::cue { font-size: 1.8em; background: rgba(0,0,0,0.85); color: #fff; text-s
 header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 1000; background: transparent; border-bottom: 1px solid transparent; } header.scrolled { background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(16px); border-bottom-color: var(--line); }
 .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; } .brand-logo svg { height: 36px; width: auto; display: block; } .brand-text { font-size: 1.25rem; font-weight: 700; }
 .header-actions { margin-left: auto; position: relative; display: flex; gap: 0.5rem; align-items: center; }
-.settings-btn, .remote-btn, .nav-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s var(--ease); flex-shrink: 0; text-decoration: none; } .settings-btn:hover, .remote-btn:hover, .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .settings-btn svg, .remote-btn svg, .nav-btn svg { width: 18px; height: 18px; }
+.settings-btn, .remote-btn, .nav-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s var(--ease); flex-shrink: 0; text-decoration: none; position: relative; } .settings-btn:hover, .remote-btn:hover, .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .settings-btn svg, .remote-btn svg, .nav-btn svg { width: 18px; height: 18px; }
+.remote-active-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #41d636; border-radius: 50%; display: none; box-shadow: 0 0 5px #41d636; } .remote-active-dot.show { display: block; }
 .hero { padding: 4rem 2rem 2rem; max-width: 800px; margin: 0 auto; text-align: center; position: relative; z-index: 5; } .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.1; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 0.75rem; text-shadow: 0 4px 20px rgba(0,0,0,0.6); } .hero p { color: var(--text-soft); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
 main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relative; z-index: 10; flex: 1; width: 100%; }
 .player { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(16px); box-shadow: var(--shadow-card); }
@@ -50,7 +51,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
   <a href="index.html" class="brand"><div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="rgba(34, 37, 43, 0.95)"/><path d="M38 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><path d="M82 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><rect x="32" y="38" width="56" height="64" rx="10" fill="#fff"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="#3b82f6"/><circle cx="60" cy="20" r="7" fill="#3b82f6"/></svg></div><span class="brand-text">CineLoom</span></a>
   <div class="header-actions">
     <a href="poster.html" class="nav-btn" aria-label="Open Poster Maker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></a>
-    <button class="remote-btn" id="remoteToggle" aria-label="Open Remote Control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
+    <button class="remote-btn" id="remoteToggle" aria-label="Open Remote Control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><div class="remote-active-dot" id="remoteActiveDot"></div></button>
     <button class="settings-btn" id="settingsToggle" aria-label="Open Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
     <div class="settings-dropdown" id="settingsPanel" style="position: absolute; top: calc(100% + 8px); right: 0; width: 300px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 12px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); backdrop-filter: blur(24px); opacity: 0; transform: translateY(-10px) scale(0.95); pointer-events: none; transition: all 0.2s var(--ease); z-index: 1000;">
       <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; padding: 8px 8px 8px; letter-spacing: 0.05em;">OMDb API Key</div>
@@ -224,7 +225,15 @@ document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target
 const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
 
 // MQTT Remote Host Logic
-const qrOverlay = document.getElementById('qrOverlay'); const qrCloseBtn = document.getElementById('qrCloseBtn'); const remoteCodeDisplay = document.getElementById('remoteCodeDisplay'); const hostStatus = document.getElementById('hostStatus'); let mqttClient = null; let timeUpdateInterval = null;
+const qrOverlay = document.getElementById('qrOverlay'); 
+const qrCloseBtn = document.getElementById('qrCloseBtn'); 
+const remoteCodeDisplay = document.getElementById('remoteCodeDisplay'); 
+const hostStatus = document.getElementById('hostStatus');
+const remoteActiveDot = document.getElementById('remoteActiveDot');
+
+let mqttClient = null; 
+let timeUpdateInterval = null;
+let currentRoomCode = null;
 
 function connectToBroker(statusEl, onConnect) {
     const brokers = [
@@ -245,7 +254,7 @@ function connectToBroker(statusEl, onConnect) {
         }
         
         const url = brokers[brokerIndex];
-        statusEl.textContent = `Connecting to broker ${brokerIndex + 1}...`;
+        statusEl.textContent = `Connecting to network...`;
         
         const clientId = 'cineloom-host-' + Math.random().toString(16).substr(2, 8);
         const client = mqtt.connect(url, { 
@@ -256,8 +265,9 @@ function connectToBroker(statusEl, onConnect) {
         
         client.on('connect', () => {
             connected = true;
-            statusEl.textContent = "Host Connected!";
+            statusEl.textContent = "Host Active! You can close this window.";
             statusEl.style.color = "#41d636";
+            remoteActiveDot.classList.add('show');
             console.log('Host Session ID:', clientId);
             onConnect(client);
         });
@@ -279,16 +289,27 @@ function connectToBroker(statusEl, onConnect) {
 }
 
 document.getElementById('remoteToggle').addEventListener('click', () => {
-  const roomCode = Math.floor(100000 + Math.random() * 900000); remoteCodeDisplay.textContent = roomCode;
-  console.log('Generated Room Code:', roomCode);
+  // If already connected, just show the popup again with the existing code
+  if (mqttClient && mqttClient.connected) {
+    qrOverlay.classList.add('active');
+    hostStatus.textContent = "Host Active! You can close this window.";
+    hostStatus.style.color = "#41d636";
+    return;
+  }
+
+  // Generate new code and start connection
+  currentRoomCode = Math.floor(100000 + Math.random() * 900000); 
+  remoteCodeDisplay.textContent = currentRoomCode;
   
   const currentPath = window.location.href; const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
-  document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${baseUrl}remote.html?room=${roomCode}`)}`;
+  document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${baseUrl}remote.html?room=${currentRoomCode}`)}`;
   qrOverlay.classList.add('active');
+  hostStatus.textContent = "Initializing host...";
   
   connectToBroker(hostStatus, (client) => {
     mqttClient = client;
-    const cmdTopic = `cineloom/${roomCode}/cmd`; const timeTopic = `cineloom/${roomCode}/time`;
+    const cmdTopic = `cineloom/${currentRoomCode}/cmd`; 
+    const timeTopic = `cineloom/${currentRoomCode}/time`;
     
     mqttClient.subscribe(cmdTopic, (err) => {
       if (err) console.error('Subscription error:', err);
@@ -326,6 +347,7 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
       }
     });
     
+    // Start broadcasting heartbeat in the background (persists after closing modal)
     timeUpdateInterval = setInterval(() => {
       if (mqttClient && mqttClient.connected) {
         const videoEl = document.getElementById('player');
@@ -345,10 +367,9 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
   });
 });
 
+// Close modal but KEEP connection alive
 qrCloseBtn.addEventListener('click', () => { 
   qrOverlay.classList.remove('active'); 
-  if (mqttClient) { mqttClient.end(); mqttClient = null; } 
-  if (timeUpdateInterval) { clearInterval(timeUpdateInterval); timeUpdateInterval = null; } 
 });
 
 // Torrents
