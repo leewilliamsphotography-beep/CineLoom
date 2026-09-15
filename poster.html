@@ -106,6 +106,8 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 <div class="poster-overlay" id="posterOverlay">
   <div class="poster-modal">
     <div class="poster-editor">
+      <div class="input-group"><label>OMDb API Key</label><input type="text" id="omdbKeyInput" placeholder="Enter API Key..."></div>
+      
       <div class="autocomplete-container">
         <label>Film 1 Search</label>
         <input type="text" id="search1" placeholder="Search OMDb...">
@@ -198,18 +200,16 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 </div>
 
 <script>
-// Check for snapshot
-const snapshot = sessionStorage.getItem('cineloom-snapshot');
-if (snapshot) {
-  posterSheet.style.backgroundImage = `url('${snapshot}')`;
-  sessionStorage.removeItem('cineloom-snapshot');
-}
+// OMDb API Key Logic
+const omdbKeyInput = document.getElementById('omdbKeyInput'); 
+const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; 
+omdbKeyInput.value = savedOmdbKey; 
+localStorage.setItem('cl-omdb-key', savedOmdbKey); 
+omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
 
-const posterOverlay = document.getElementById('posterOverlay'); const posterCloseBtn = document.getElementById('posterCloseBtn'); const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
+const posterOverlay = document.getElementById('posterOverlay'); const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
 const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
 const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), film2Block: document.getElementById('psFilm2'), filmDivider: document.getElementById('psFilmDivider'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), event: document.getElementById('psEvent') };
-
-function updateBroadcastMarquee() { const marqueeContent = document.getElementById('marqueeContent'); if (!marqueeContent) return; let feedText = "Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. "; if (posterFields.title1.value) { feedText += `TONIGHT: ${posterFields.title1.value}. `; if (posterFields.tagline1.value) feedText += `Genre/Rating: ${posterFields.tagline1.value}. `; if (posterFields.plot1.value) feedText += `Plot: ${posterFields.plot1.value} `; } if (posterFields.title2.value) { feedText += `ALSO SHOWING: ${posterFields.title2.value}. `; if (posterFields.plot2.value) feedText += `Plot: ${posterFields.plot2.value} `; } marqueeContent.innerHTML = `<span>${feedText}</span><span>${feedText}</span>`; }
 
 function updatePosterPreview() {
   posterPreview.title1.textContent = posterFields.title1.value || 'Film Title';
@@ -238,7 +238,6 @@ function updatePosterPreview() {
     posterPreview.film2Block.style.display = 'none';
     posterPreview.filmDivider.style.display = 'none';
   }
-  updateBroadcastMarquee();
   applyZoom();
 }
 
@@ -263,7 +262,6 @@ Object.keys(posterFields).forEach(key => {
     });
   }
 });
-posterPreview.event.addEventListener('input', () => updateBroadcastMarquee());
 
 const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
 const subtitleStyles = { 'theme-minimal': { color: '#fff', bg: 'rgba(0,0,0,0.85)', font: 'Inter' }, 'theme-neon': { color: '#00ffff', bg: 'rgba(11,14,23,0.9)', font: 'Inter' }, 'theme-noir': { color: '#fff', bg: 'rgba(0,0,0,0.9)', font: 'Courier New' }, 'theme-halloween': { color: '#41d636', bg: 'rgba(26,11,46,0.9)', font: 'Georgia' }, 'theme-christmas': { color: '#ffd700', bg: 'rgba(139,0,0,0.9)', font: 'Georgia' }, 'theme-valentine': { color: '#ff69b4', bg: 'rgba(255,240,245,0.9)', font: 'Georgia' }, 'theme-typewriter': { color: '#333', bg: 'rgba(240,240,240,0.9)', font: 'Courier New' }, 'theme-vhs': { color: '#ff00ff', bg: 'rgba(26,26,46,0.9)', font: 'Arial Black' }, 'theme-retro': { color: '#ffeb3b', bg: 'rgba(255,64,129,0.9)', font: 'Arial Black' } };
@@ -271,7 +269,7 @@ function updateSubtitleStyle(themeClass) { const style = subtitleStyles[themeCla
 
 function mapGenreToTheme(genreString) { if (!genreString) return null; const genres = genreString.toLowerCase(); if (genres.includes('horror')) return 'theme-halloween'; if (genres.includes('romance')) return 'theme-valentine'; if (genres.includes('sci-fi')) return 'theme-neon'; if (genres.includes('fantasy')) return 'theme-artdeco'; if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir'; if (genres.includes('comedy')) return 'theme-orange'; if (genres.includes('western')) return 'theme-golden'; if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter'; if (genres.includes('family') || genres.includes('animation')) return 'theme-retro'; if (genres.includes('musical')) return 'theme-marquee'; if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue'; return null; }
 let applyCustomTheme = () => {}; // Dummy function to prevent errors
-function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } updateSubtitleStyle(themeClass); setTimeout(applyZoom, 10); }
+function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } updateSubtitleStyle(themeClass); setTimeout(applyZoom, 10); }
 
 const fontDropdown = document.getElementById('fontDropdown'); const fontToggle = document.getElementById('fontToggle'); const fontMenu = document.getElementById('fontMenu'); const fontLabel = document.getElementById('fontLabel');
 fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontDropdown.classList.toggle('open'); });
@@ -288,10 +286,26 @@ posterFields.qrLink.addEventListener('input', () => { if (qrToggle.classList.con
 document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if (btn.dataset.format === '916') posterSheet.classList.add('format-916'); else posterSheet.classList.remove('format-916'); applyZoom(); }));
 
 function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
-async function fetchSuggestions(query, target) { const apiKey = localStorage.getItem('cl-omdb-key'); if (!apiKey || query.trim().length < 3) { hideResults(target); return; } try { const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; if (data.Response === 'True' && data.Search) { data.Search.slice(0, 5).forEach(movie => { const item = document.createElement('div'); item.className = 'autocomplete-item'; item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); resultsContainer.appendChild(item); }); resultsContainer.classList.add('show'); } else { hideResults(target); } } catch (e) { hideResults(target); } }
+async function fetchSuggestions(query, target) { 
+  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319'; 
+  if (!apiKey || query.trim().length < 3) { hideResults(target); return; } 
+  try { 
+    const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); 
+    const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; 
+    if (data.Response === 'True' && data.Search) { 
+      data.Search.slice(0, 5).forEach(movie => { 
+        const item = document.createElement('div'); item.className = 'autocomplete-item'; 
+        item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; 
+        item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); 
+        resultsContainer.appendChild(item); 
+      }); resultsContainer.classList.add('show'); 
+    } else { hideResults(target); } 
+  } catch (e) { hideResults(target); } 
+}
 function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
+
 async function fetchMovieDetails(imdbID, target) {
-  const apiKey = localStorage.getItem('cl-omdb-key');
+  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
   try {
     const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`);
     const data = await res.json();
@@ -316,6 +330,7 @@ async function fetchMovieDetails(imdbID, target) {
 document.getElementById('search1').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '1'), 300));
 document.getElementById('search2').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '2'), 300));
 document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
+
 let currentBackdropURL = null;
 backdropInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = URL.createObjectURL(file); posterSheet.style.backgroundImage = `url(${currentBackdropURL})`; });
 clearBackdropBtn.addEventListener('click', () => { if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = ''; });
@@ -341,6 +356,13 @@ posterExportBtn.addEventListener('click', () => {
     posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform;
   }).catch(err => { console.error('Export failed', err); alert('Export failed due to CORS restrictions on the poster image. Try the Print option or use a custom backdrop upload.'); posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; });
 });
+
+// Check for snapshot
+const snapshot = sessionStorage.getItem('cineloom-snapshot');
+if (snapshot) {
+  posterSheet.style.backgroundImage = `url('${snapshot}')`;
+  sessionStorage.removeItem('cineloom-snapshot');
+}
 
 updatePosterPreview();
 </script>
