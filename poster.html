@@ -13,41 +13,27 @@
   --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95);
   --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6;
   --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4);
-  --line: rgba(255,255,255,0.08); --line-soft: rgba(255,255,255,0.04); --line-strong: rgba(255,255,255,0.15);
+  --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15);
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --cue-text: #ffffff; --cue-bg: rgba(0,0,0,0.85); --cue-font: 'Inter', sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 16px; background: var(--bg); display: flex; flex-direction: column; }
-header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg-elev); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(16px); }
+header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg-elev); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(16px); height: 73px; box-sizing: border-box; }
 .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; } .brand svg { width: 36px; height: 36px; } .brand-text { font-size: 1.25rem; font-weight: 700; }
 .header-actions { display: flex; gap: 0.5rem; align-items: center; }
 .btn { background: var(--accent); color: #fff; border: none; padding: 0.6rem 1.2rem; font-family: inherit; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; text-decoration: none; font-size: 0.9rem; } .btn:hover { background: var(--accent-2); } .btn-secondary { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); } .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
-/* Poster Maker UI */
-.poster-overlay { position: relative; flex: 1; background: var(--bg); overflow: hidden; display: flex; }
-.poster-modal { display: grid; grid-template-columns: 400px 1fr; width: 100%; height: 100%; }
-.poster-editor { border-right: 1px solid var(--line); overflow-y: auto; padding: 1.5rem; background: var(--bg-elev); display: flex; flex-direction: column; gap: 1.5rem; }
-.poster-preview-wrap { overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; align-items: center; background: rgba(8,9,11,0.5); }
+.main-container { display: grid; grid-template-columns: 380px 1fr; width: 100%; flex: 1; overflow: hidden; height: calc(100vh - 73px); }
+.editor-panel { border-right: 1px solid var(--line); overflow-y: auto; padding: 1.5rem; background: var(--bg-elev); display: flex; flex-direction: column; gap: 1.5rem; }
+.preview-panel { overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; align-items: center; background: rgba(8,9,11,0.5); position: sticky; top: 0; height: 100%; }
 
-.input-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; }
-.input-group label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
-.input-group input, .input-group textarea, .input-group select { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; outline: none; transition: border 0.2s; width: 100%; }
-.input-group input:focus, .input-group textarea:focus, .input-group select:focus { border-color: var(--accent); }
+.input-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; } .input-group label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; } .input-group input, .input-group textarea, .input-group select { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; outline: none; transition: border 0.2s; width: 100%; } .input-group input:focus, .input-group textarea:focus, .input-group select:focus { border-color: var(--accent); }
+.autocomplete-container { position: relative; } .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 10; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; margin-top: 4px; } .autocomplete-results.show { display: flex; } .autocomplete-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 4px; cursor: pointer; } .autocomplete-item:hover { background: var(--accent-soft); } .autocomplete-item img { width: 30px; height: 45px; object-fit: cover; border-radius: 2px; } .auto-info { display: flex; flex-direction: column; } .auto-title { font-size: 0.85rem; color: var(--text); } .auto-year { font-size: 0.75rem; color: var(--text-dim); }
 
-.autocomplete-container { position: relative; }
-.autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 10; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; margin-top: 4px; }
-.autocomplete-results.show { display: flex; }
-.autocomplete-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 4px; cursor: pointer; }
-.autocomplete-item:hover { background: var(--accent-soft); }
-.autocomplete-item img { width: 30px; height: 45px; object-fit: cover; border-radius: 2px; }
-.auto-info { display: flex; flex-direction: column; } .auto-title { font-size: 0.85rem; color: var(--text); } .auto-year { font-size: 0.75rem; color: var(--text-dim); }
-
-/* Dropdowns */
 .dropdown { position: relative; display: inline-block; width: 100%; }
 .dropdown-toggle { background: var(--bg); border: 1px solid var(--line); color: var(--text-soft); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; cursor: pointer; width: 100%; display: flex; justify-content: space-between; align-items: center; } .dropdown-toggle:hover { border-color: var(--accent); }
-.dropdown-menu { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 10; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; margin-top: 4px; }
-.dropdown-menu.open { display: flex; }
+.dropdown-menu { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 10; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; margin-top: 4px; } .dropdown-menu.open { display: flex; }
 .dropdown-item { background: transparent; border: none; color: var(--text-soft); padding: 0.5rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; border-radius: 4px; text-align: left; } .dropdown-item:hover { background: var(--accent-soft); color: var(--accent); } .dropdown-item.active { background: var(--accent-soft); color: var(--accent); }
 
 .btn-row { display: flex; gap: 0.5rem; } .btn-row .btn { flex: 1; padding: 0.6rem; font-size: 0.8rem; }
@@ -73,10 +59,26 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .ps-footer-wrap { padding: 20px 40px; border-top: 1px solid rgba(255,255,255,0.2); display: none; }
 .ps-footer { font-size: 0.8rem; text-align: center; opacity: 0.5; }
 
-.zoom-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 0.5rem; background: var(--bg-elev-3); padding: 0.5rem; border-radius: 12px; border: 1px solid var(--line-strong); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.zoom-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 0.5rem; background: var(--bg-elev-3); padding: 0.5rem; border-radius: 12px; border: 1px solid var(--line-strong); box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; }
 .zoom-btn { background: var(--bg-elev-2); border: none; color: var(--text); width: 36px; height: 36px; border-radius: 6px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; } .zoom-btn:hover { background: var(--accent-soft); color: var(--accent); }
 
-/* Film Grain Overlay */
+/* Theme Styles */
+.poster-sheet.theme-minimal { font-family: 'Inter', sans-serif; }
+.poster-sheet.theme-noir { font-family: 'Courier New', monospace; filter: grayscale(100%) contrast(1.2); }
+.poster-sheet.theme-neon { font-family: 'Inter', sans-serif; box-shadow: 0 0 50px rgba(0, 255, 255, 0.4); }
+.poster-sheet.theme-halloween { font-family: 'Georgia', serif; background-color: #1a0b2e; }
+.poster-sheet.theme-christmas { font-family: 'Georgia', serif; background-color: #8b0000; }
+.poster-sheet.theme-valentine { font-family: 'Georgia', serif; background-color: #ffb6c1; color: #800000; }
+.poster-sheet.theme-typewriter { font-family: 'Courier New', monospace; background-color: #f0f0f0; color: #333; }
+.poster-sheet.theme-vhs { font-family: 'Arial Black', sans-serif; background-color: #1a1a2e; color: #ff00ff; }
+.poster-sheet.theme-retro { font-family: 'Arial Black', sans-serif; background-color: #ff4081; color: #ffeb3b; }
+.poster-sheet.theme-golden { font-family: 'Georgia', serif; background-color: #2a1a0a; color: #ffd700; }
+.poster-sheet.theme-marquee { font-family: 'Impact', sans-serif; background-color: #000; color: #fff; border: 10px solid #fff; }
+.poster-sheet.theme-blueprint { font-family: 'Courier New', monospace; background-color: #001f3f; color: #7fdbff; }
+.poster-sheet.theme-artdeco { font-family: 'Georgia', serif; background-color: #2c2c2c; color: #d4af37; border: 2px solid #d4af37; }
+.poster-sheet.theme-orange { font-family: 'Arial Black', sans-serif; background-color: #1a1a1a; color: #ff5722; }
+.poster-sheet.theme-midblue { font-family: 'Inter', sans-serif; background-color: #001021; color: #7fdbff; }
+
 .film-grain { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 2; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.5"/></svg>'); }
 .film-grain.show { opacity: 0.15; }
 
@@ -96,97 +98,93 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
   </div>
 </header>
 
-<div class="poster-overlay">
-  <div class="poster-modal">
-    <div class="poster-editor">
-      <div class="autocomplete-container">
-        <label>Film 1 Search</label>
-        <input type="text" id="search1" placeholder="Search OMDb...">
-        <div class="autocomplete-results" id="search1Results"></div>
-      </div>
-      <div class="input-group"><label>Film 1 Title</label><input type="text" id="posterTitle1"></div>
-      <div class="input-group"><label>Film 1 Tagline</label><input type="text" id="posterTagline1"></div>
-      <div class="input-group"><label>Film 1 Plot</label><textarea id="posterPlot1" rows="3"></textarea></div>
-      
-      <div class="autocomplete-container">
-        <label>Film 2 Search (Optional)</label>
-        <input type="text" id="search2" placeholder="Search OMDb...">
-        <div class="autocomplete-results" id="search2Results"></div>
-      </div>
-      <div class="input-group"><label>Film 2 Title</label><input type="text" id="posterTitle2"></div>
-      <div class="input-group"><label>Film 2 Tagline</label><input type="text" id="posterTagline2"></div>
-      <div class="input-group"><label>Film 2 Plot</label><textarea id="posterPlot2" rows="3"></textarea></div>
-
-      <div class="input-group"><label>Date</label><input type="text" id="posterDate" placeholder="e.g., 25th Dec"></div>
-      <div class="input-group"><label>Time</label><input type="text" id="posterTime" placeholder="e.g., 20:00"></div>
-      <div class="input-group"><label>Venue</label><input type="text" id="posterVenue" placeholder="e.g., The Living Room"></div>
-      <div class="input-group"><label>Blurb</label><textarea id="posterBlurb" rows="2"></textarea></div>
-      
-      <div class="input-group"><label>Custom Backdrop Upload</label><input type="file" id="posterBackdrop" accept="image/*"></div>
-      <button class="btn btn-secondary" id="posterClearBackdrop" style="width: 100%; padding: 0.6rem; font-size: 0.8rem;">Clear Backdrop</button>
-
-      <div class="input-group">
-        <label>Poster Theme</label>
-        <div class="dropdown">
-          <button class="dropdown-toggle" id="posterThemeToggle"><span class="dropdown-label">Minimal</span> ▼</button>
-          <div class="dropdown-menu" id="posterThemeMenu"></div>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label>Title Font</label>
-        <div class="dropdown">
-          <button class="dropdown-toggle" id="fontToggle"><span class="dropdown-label" id="fontLabel">Default</span> ▼</button>
-          <div class="dropdown-menu" id="fontMenu"></div>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label>Format</label>
-        <div class="btn-row">
-          <button class="format-btn active" data-format="a4">A4 (Portrait)</button>
-          <button class="format-btn" data-format="916">9:16 (Story)</button>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label>Extra Options</label>
-        <div class="btn-row">
-          <button class="btn btn-secondary" id="grainToggle">Film Grain</button>
-          <button class="btn btn-secondary" id="qrToggle">QR Code</button>
-        </div>
-      </div>
-      <div class="input-group" id="customColorPicker" style="display:none;"><label>Custom Accent</label><input type="color" id="customColor" value="#3b82f6"></div>
-      <div class="input-group"><label>QR Link</label><input type="text" id="posterQRLink" placeholder="https://..."></div>
-      <div class="input-group"><label>Notes</label><input type="text" id="posterNotes" placeholder="e.g., No latecomers"></div>
-      <div class="input-group"><label>Footer Text</label><input type="text" id="posterFooter" placeholder="e.g., Presented by..."></div>
+<div class="main-container">
+  <div class="editor-panel">
+    <div class="input-group autocomplete-container">
+      <label>Film 1 Search</label>
+      <input type="text" id="search1" placeholder="Search OMDb...">
+      <div class="autocomplete-results" id="search1Results"></div>
     </div>
+    <div class="input-group"><label>Film 1 Title</label><input type="text" id="posterTitle1"></div>
+    <div class="input-group"><label>Film 1 Tagline</label><input type="text" id="posterTagline1"></div>
+    <div class="input-group"><label>Film 1 Plot</label><textarea id="posterPlot1" rows="3"></textarea></div>
     
-    <div class="poster-preview-wrap">
-      <div class="poster-sheet theme-minimal" id="posterSheet">
-        <div class="film-grain" id="filmGrain"></div>
-        <div class="ps-content ps-film1">
-          <h1 class="ps-title" id="psTitle1" contenteditable="true">Film Title</h1>
-          <p class="ps-tagline" id="psTagline1"></p>
-          <p class="ps-plot" id="psPlot1"></p>
-          <div class="ps-rating" id="psRating1"></div>
-        </div>
-        <div class="ps-film-divider">VS</div>
-        <div class="ps-content ps-film2">
-          <h1 class="ps-title" id="psTitle2" contenteditable="true"></h1>
-          <p class="ps-tagline" id="psTagline2"></p>
-          <p class="ps-plot" id="psPlot2"></p>
-          <div class="ps-rating" id="psRating2"></div>
-        </div>
-        <div class="ps-content" style="flex: 0; padding-bottom: 20px; padding-top: 20px;">
-          <div class="ps-meta"><span id="psDate">—</span> <span>•</span> <span id="psTime">—</span></div>
-          <div class="ps-venue" id="psVenue">—</div>
-          <div class="ps-qr" id="psQR"></div>
-          <div class="ps-notes" id="psNotes" style="margin-top: 10px; font-size: 0.9rem; opacity: 0.7;"></div>
-        </div>
-        <div class="ps-footer-wrap" id="psFooterWrap">
-          <p class="ps-footer" id="psFooter"></p>
-        </div>
+    <div class="input-group autocomplete-container">
+      <label>Film 2 Search (Optional)</label>
+      <input type="text" id="search2" placeholder="Search OMDb...">
+      <div class="autocomplete-results" id="search2Results"></div>
+    </div>
+    <div class="input-group"><label>Film 2 Title</label><input type="text" id="posterTitle2"></div>
+    <div class="input-group"><label>Film 2 Tagline</label><input type="text" id="posterTagline2"></div>
+    <div class="input-group"><label>Film 2 Plot</label><textarea id="posterPlot2" rows="3"></textarea></div>
+
+    <div class="input-group"><label>Date</label><input type="text" id="posterDate" placeholder="e.g., 25th Dec"></div>
+    <div class="input-group"><label>Time</label><input type="text" id="posterTime" placeholder="e.g., 20:00"></div>
+    <div class="input-group"><label>Venue</label><input type="text" id="posterVenue" placeholder="e.g., The Living Room"></div>
+    
+    <div class="input-group"><label>Custom Backdrop Upload</label><input type="file" id="posterBackdrop" accept="image/*"></div>
+    <button class="btn btn-secondary" id="posterClearBackdrop" style="width: 100%; padding: 0.6rem; font-size: 0.8rem;">Clear Backdrop</button>
+
+    <div class="input-group">
+      <label>Poster Theme</label>
+      <div class="dropdown">
+        <button class="dropdown-toggle" id="posterThemeToggle"><span class="dropdown-label">Minimal</span> ▼</button>
+        <div class="dropdown-menu" id="posterThemeMenu"></div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Title Font</label>
+      <div class="dropdown">
+        <button class="dropdown-toggle" id="fontToggle"><span class="dropdown-label" id="fontLabel">Default</span> ▼</button>
+        <div class="dropdown-menu" id="fontMenu"></div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Format</label>
+      <div class="btn-row">
+        <button class="format-btn active" data-format="a4">A4 (Portrait)</button>
+        <button class="format-btn" data-format="916">9:16 (Story)</button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Extra Options</label>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="grainToggle">Film Grain</button>
+        <button class="btn btn-secondary" id="qrToggle">QR Code</button>
+      </div>
+    </div>
+    <div class="input-group"><label>QR Link</label><input type="text" id="posterQRLink" placeholder="https://..."></div>
+    <div class="input-group"><label>Notes</label><input type="text" id="posterNotes" placeholder="e.g., No latecomers"></div>
+    <div class="input-group"><label>Footer Text</label><input type="text" id="posterFooter" placeholder="e.g., Presented by..."></div>
+  </div>
+  
+  <div class="preview-panel">
+    <div class="poster-sheet theme-minimal" id="posterSheet">
+      <div class="film-grain" id="filmGrain"></div>
+      <div class="ps-content ps-film1">
+        <h1 class="ps-title" id="psTitle1" contenteditable="true">Film Title</h1>
+        <p class="ps-tagline" id="psTagline1"></p>
+        <p class="ps-plot" id="psPlot1"></p>
+        <div class="ps-rating" id="psRating1"></div>
+      </div>
+      <div class="ps-film-divider">VS</div>
+      <div class="ps-content ps-film2">
+        <h1 class="ps-title" id="psTitle2" contenteditable="true"></h1>
+        <p class="ps-tagline" id="psTagline2"></p>
+        <p class="ps-plot" id="psPlot2"></p>
+        <div class="ps-rating" id="psRating2"></div>
+      </div>
+      <div class="ps-content" style="flex: 0; padding-bottom: 20px; padding-top: 20px;">
+        <div class="ps-meta"><span id="psDate">—</span> <span>•</span> <span id="psTime">—</span></div>
+        <div class="ps-venue" id="psVenue">—</div>
+        <div class="ps-qr" id="psQR"></div>
+        <div class="ps-notes" id="psNotes" style="margin-top: 10px; font-size: 0.9rem; opacity: 0.7;"></div>
+      </div>
+      <div class="ps-footer-wrap" id="psFooterWrap">
+        <p class="ps-footer" id="psFooter"></p>
       </div>
     </div>
   </div>
@@ -199,29 +197,26 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 </div>
 
 <script>
-// Elements
 const posterSheet = document.getElementById('posterSheet');
 const backdropInput = document.getElementById('posterBackdrop');
-const clearBackdropBtn = document.getElementById('posterClearBackdrop');
 
-const posterFields = { 
+const fields = { 
   title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'),
   title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'),
   date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'),
-  blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'),
-  footer: document.getElementById('posterFooter')
+  qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter')
 };
 
-const posterPreview = {
+const preview = {
   title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'),
   title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'),
   date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'),
-  blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'),
+  rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'),
   qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'),
   footerWrap: document.getElementById('psFooterWrap'), film2Block: document.querySelector('.ps-film2'), filmDivider: document.querySelector('.ps-film-divider')
 };
 
-// Check for snapshot from Player
+// Check for snapshot
 const snapshot = sessionStorage.getItem('cineloom-snapshot');
 if (snapshot) {
   posterSheet.style.backgroundImage = `url('${snapshot}')`;
@@ -229,54 +224,43 @@ if (snapshot) {
 }
 
 function updatePosterPreview() {
-  posterPreview.title1.textContent = posterFields.title1.value || 'Film Title';
-  posterPreview.tagline1.textContent = posterFields.tagline1.value || '';
-  posterPreview.plot1.textContent = posterFields.plot1.value || '';
-  posterPreview.date.textContent = posterFields.date.value || '—';
-  posterPreview.time.textContent = posterFields.time.value || '—';
-  posterPreview.venue.textContent = posterFields.venue.value || '—';
-  posterPreview.notes.textContent = posterFields.notes.value || '';
+  preview.title1.textContent = fields.title1.value || 'Film Title';
+  preview.tagline1.textContent = fields.tagline1.value || '';
+  preview.plot1.textContent = fields.plot1.value || '';
+  preview.date.textContent = fields.date.value || '—';
+  preview.time.textContent = fields.time.value || '—';
+  preview.venue.textContent = fields.venue.value || '—';
+  preview.notes.textContent = fields.notes.value || '';
   
-  const footerText = posterFields.footer.value || '';
-  posterPreview.footer.textContent = footerText;
-  posterPreview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
+  const footerText = fields.footer.value || '';
+  preview.footer.textContent = footerText;
+  preview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
 
-  if (posterFields.title2.value.trim() !== '') {
+  if (fields.title2.value.trim() !== '') {
     posterSheet.classList.add('double-feature');
-    posterPreview.film2Block.style.display = 'flex';
-    posterPreview.filmDivider.style.display = 'flex';
-    posterPreview.title2.textContent = posterFields.title2.value;
-    posterPreview.tagline2.textContent = posterFields.tagline2.value || '';
-    posterPreview.plot2.textContent = posterFields.plot2.value || '';
+    preview.film2Block.style.display = 'flex';
+    preview.filmDivider.style.display = 'flex';
+    preview.title2.textContent = fields.title2.value;
+    preview.tagline2.textContent = fields.tagline2.value || '';
+    preview.plot2.textContent = fields.plot2.value || '';
   } else {
     posterSheet.classList.remove('double-feature');
-    posterPreview.film2Block.style.display = 'none';
-    posterPreview.filmDivider.style.display = 'none';
+    preview.film2Block.style.display = 'none';
+    preview.filmDivider.style.display = 'none';
   }
   applyZoom();
 }
 
-Object.keys(posterFields).forEach(key => {
-  const input = posterFields[key];
-  const preview = posterPreview[key];
-  input.addEventListener('input', () => {
-    if (preview && document.activeElement !== preview) {
-      preview.textContent = input.value;
-    }
-    updatePosterPreview();
-  });
+Object.keys(fields).forEach(key => {
+  const input = fields[key];
+  input.addEventListener('input', () => { updatePosterPreview(); });
 });
 
-// Make preview editable sync back
 ['title1', 'title2'].forEach(key => {
-  const preview = posterPreview[key];
-  const input = posterFields[key];
-  if (preview && preview.isContentEditable) {
-    preview.addEventListener('input', () => { input.value = preview.textContent; });
-  }
+  const prev = preview[key]; const inp = fields[key];
+  if (prev.isContentEditable) { prev.addEventListener('input', () => { inp.value = prev.textContent; }); }
 });
 
-// Backdrop Logic
 let currentBackdropURL = null;
 backdropInput.addEventListener('change', (e) => {
   const file = e.target.files[0]; if (!file) return;
@@ -284,28 +268,20 @@ backdropInput.addEventListener('change', (e) => {
   currentBackdropURL = URL.createObjectURL(file);
   posterSheet.style.backgroundImage = `url('${currentBackdropURL}')`;
 });
-clearBackdropBtn.addEventListener('click', () => {
+document.getElementById('posterClearBackdrop').addEventListener('click', () => {
   if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL);
   currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = '';
 });
 
-// Theme Logic
-const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
-const subtitleStyles = { 'theme-minimal': { color: '#fff', bg: 'rgba(0,0,0,0.85)', font: 'Inter' }, 'theme-neon': { color: '#00ffff', bg: 'rgba(11,14,23,0.9)', font: 'Inter' }, 'theme-noir': { color: '#fff', bg: 'rgba(0,0,0,0.9)', font: 'Courier New' }, 'theme-halloween': { color: '#41d636', bg: 'rgba(26,11,46,0.9)', font: 'Georgia' }, 'theme-christmas': { color: '#ffd700', bg: 'rgba(139,0,0,0.9)', font: 'Georgia' }, 'theme-valentine': { color: '#ff69b4', bg: 'rgba(255,240,245,0.9)', font: 'Georgia' }, 'theme-typewriter': { color: '#333', bg: 'rgba(240,240,240,0.9)', font: 'Courier New' }, 'theme-vhs': { color: '#ff00ff', bg: 'rgba(26,26,46,0.9)', font: 'Arial Black' }, 'theme-retro': { color: '#ffeb3b', bg: 'rgba(255,64,129,0.9)', font: 'Arial Black' } };
-
-const posterThemeMenu = document.getElementById('posterThemeMenu');
-const posterThemeToggle = document.getElementById('posterThemeToggle');
-const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
+// Themes
+const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's" };
+const posterThemeMenu = document.getElementById('posterThemeMenu'); const posterThemeToggle = document.getElementById('posterThemeToggle'); const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
 
 Object.keys(themeDisplayNames).forEach(themeClass => {
-  const btn = document.createElement('button');
-  btn.className = 'dropdown-item';
-  btn.dataset.posterTheme = themeClass;
-  btn.textContent = themeDisplayNames[themeClass];
+  const btn = document.createElement('button'); btn.className = 'dropdown-item'; btn.dataset.posterTheme = themeClass; btn.textContent = themeDisplayNames[themeClass];
   btn.addEventListener('click', () => { setPosterTheme(themeClass, themeDisplayNames[themeClass]); posterThemeMenu.classList.remove('open'); });
   posterThemeMenu.appendChild(btn);
 });
-
 posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeMenu.classList.toggle('open'); });
 document.addEventListener('click', (e) => { if (!posterThemeMenu.contains(e.target) && !posterThemeToggle.contains(e.target)) posterThemeMenu.classList.remove('open'); });
 
@@ -313,28 +289,17 @@ function setPosterTheme(themeClass, themeName) {
   const allThemes = Object.keys(themeDisplayNames);
   posterSheet.classList.remove(...allThemes);
   posterSheet.classList.add(themeClass);
-  document.getElementById('customColorPicker').style.display = themeClass === 'theme-custom' ? 'flex' : 'none';
   document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active'));
   const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`);
   if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; }
-  const style = subtitleStyles[themeClass] || subtitleStyles['theme-minimal'];
-  document.documentElement.style.setProperty('--cue-text', style.color);
-  document.documentElement.style.setProperty('--cue-bg', style.bg);
-  document.documentElement.style.setProperty('--cue-font', style.font);
   setTimeout(applyZoom, 10);
 }
 
-// Font Logic
-const fontMenu = document.getElementById('fontMenu');
-const fontToggle = document.getElementById('fontToggle');
-const fontLabel = document.getElementById('fontLabel');
+// Fonts
+const fontMenu = document.getElementById('fontMenu'); const fontToggle = document.getElementById('fontToggle'); const fontLabel = document.getElementById('fontLabel');
 const fonts = { 'default': 'Default', "'Inter', sans-serif": 'Inter', "'Georgia', serif": 'Georgia', "'Courier Prime', monospace": 'Courier', "'Impact', sans-serif": 'Impact', "'Arial Black', sans-serif": 'Arial Black' };
-
 Object.keys(fonts).forEach(font => {
-  const btn = document.createElement('button');
-  btn.className = 'dropdown-item';
-  btn.dataset.font = font;
-  btn.textContent = fonts[font];
+  const btn = document.createElement('button'); btn.className = 'dropdown-item'; btn.dataset.font = font; btn.textContent = fonts[font];
   btn.addEventListener('click', () => {
     document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active'); fontLabel.textContent = fonts[font]; fontMenu.classList.remove('open');
@@ -345,7 +310,7 @@ Object.keys(fonts).forEach(font => {
 fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontMenu.classList.toggle('open'); });
 document.addEventListener('click', (e) => { if (!fontMenu.contains(e.target) && !fontToggle.contains(e.target)) fontMenu.classList.remove('open'); });
 
-// Format Logic
+// Format
 document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -353,22 +318,20 @@ document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('cl
   applyZoom();
 }));
 
-// Options Logic
-const grainToggle = document.getElementById('grainToggle');
-const filmGrain = document.getElementById('filmGrain');
+// Options
+const grainToggle = document.getElementById('grainToggle'); const filmGrain = document.getElementById('filmGrain');
 grainToggle.addEventListener('click', () => { grainToggle.classList.toggle('active'); filmGrain.classList.toggle('show'); });
-
 const qrToggle = document.getElementById('qrToggle');
 qrToggle.addEventListener('click', () => {
   qrToggle.classList.toggle('active'); const show = qrToggle.classList.contains('active');
-  posterPreview.qr.classList.toggle('show', show);
-  if (show) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; }
+  preview.qr.classList.toggle('show', show);
+  if (show) { const link = fields.qrLink.value || 'https://www.google.com'; preview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; }
 });
-posterFields.qrLink.addEventListener('input', () => {
-  if (qrToggle.classList.contains('active')) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; }
+fields.qrLink.addEventListener('input', () => {
+  if (qrToggle.classList.contains('active')) { const link = fields.qrLink.value || 'https://www.google.com'; preview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; }
 });
 
-// OMDb Logic
+// OMDb Autofill
 function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
 async function fetchSuggestions(query, target) {
   const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
@@ -387,33 +350,40 @@ async function fetchSuggestions(query, target) {
   } catch (e) { hideResults(target); }
 }
 function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
+
+function mapGenreToTheme(genreString) {
+  if (!genreString) return null;
+  const genres = genreString.toLowerCase();
+  if (genres.includes('horror')) return 'theme-halloween';
+  if (genres.includes('romance')) return 'theme-valentine';
+  if (genres.includes('sci-fi')) return 'theme-neon';
+  if (genres.includes('fantasy')) return 'theme-artdeco';
+  if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir';
+  if (genres.includes('comedy')) return 'theme-orange';
+  if (genres.includes('western')) return 'theme-golden';
+  if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter';
+  if (genres.includes('family') || genres.includes('animation')) return 'theme-retro';
+  if (genres.includes('musical')) return 'theme-marquee';
+  if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue';
+  return null;
+}
+
 async function fetchMovieDetails(imdbID, target) {
-  const apiKey = localStorage.getItem('cl-omdb-key');
+  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
   try {
     const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`); const data = await res.json();
     if (data.Response === 'True') {
       if (target === '1') {
-        posterFields.title1.value = data.Title || ''; posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot1.value = data.Plot || '';
+        fields.title1.value = data.Title || ''; fields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot1.value = data.Plot || '';
         if (data.Poster && data.Poster !== 'N/A') { posterSheet.style.backgroundImage = `url('${data.Poster}')`; }
-        posterPreview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-        posterPreview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+        preview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
+        preview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
       } else {
-        posterFields.title2.value = data.Title || ''; posterFields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot2.value = data.Plot || '';
-        posterPreview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-        posterPreview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+        fields.title2.value = data.Title || ''; fields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot2.value = data.Plot || '';
+        preview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
+        preview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
       }
-      // Auto map theme based on genre
-      const genres = data.Genre ? data.Genre.toLowerCase() : '';
-      let mappedTheme = null;
-      if (genres.includes('horror')) mappedTheme = 'theme-halloween';
-      else if (genres.includes('romance')) mappedTheme = 'theme-valentine';
-      else if (genres.includes('sci-fi')) mappedTheme = 'theme-neon';
-      else if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery')) mappedTheme = 'theme-noir';
-      else if (genres.includes('comedy')) mappedTheme = 'theme-orange';
-      else if (genres.includes('action')) mappedTheme = 'theme-midblue';
-      
-      if (mappedTheme) setPosterTheme(mappedTheme, themeDisplayNames[mappedTheme]);
-      
+      const mappedTheme = mapGenreToTheme(data.Genre); if (mappedTheme) setPosterTheme(mappedTheme, themeDisplayNames[mappedTheme]);
       updatePosterPreview();
     }
   } catch (e) { console.error('Error fetching details:', e); }
@@ -423,7 +393,7 @@ document.getElementById('search1').addEventListener('input', debounce((e) => fet
 document.getElementById('search2').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '2'), 300));
 document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
 
-// Zoom Logic
+// Zoom
 let posterZoom = 0.75;
 function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
 document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
@@ -433,19 +403,15 @@ document.getElementById('zoomReset').addEventListener('click', () => { posterZoo
 // Print & Export
 document.getElementById('posterPrintBtn').addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
 document.getElementById('posterExportBtn').addEventListener('click', () => {
-  const exportBtn = document.getElementById('posterExportBtn');
-  exportBtn.textContent = 'Rendering...';
-  const currentTransform = posterSheet.style.transform;
-  posterSheet.style.transform = 'none'; posterSheet.style.marginBottom = '0';
+  const exportBtn = document.getElementById('posterExportBtn'); exportBtn.textContent = 'Rendering...';
+  const currentTransform = posterSheet.style.transform; posterSheet.style.transform = 'none'; posterSheet.style.marginBottom = '0';
   html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
     const link = document.createElement('a'); link.download = 'cineloom-poster.png'; link.href = canvas.toDataURL('image/png'); link.click();
     exportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; applyZoom();
   }).catch(err => { alert('Export failed. Try Print or Custom Backdrop.'); exportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; applyZoom(); });
 });
 
-// Init
 updatePosterPreview();
-window.addEventListener('resize', applyZoom);
 </script>
 </body>
 </html>
