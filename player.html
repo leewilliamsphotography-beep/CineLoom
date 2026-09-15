@@ -128,14 +128,14 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v1.4.0 loaded");
+console.log("CineLoom Player v1.4.1 loaded");
 
 const playerContainer = document.getElementById('playerContainer'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
 let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let currentFilm = 1;
 
-// Subtitle Parsing Functions
+// --- Subtitle Parsing & Sync Logic (Global) ---
 function parseSubtitles(filename, content) { const ext = filename.split('.').pop().toLowerCase(); if (ext === 'vtt') return content; if (ext === 'srt') return srtToVtt(content); if (ext === 'sbv') return sbvToVtt(content); if (ext === 'ass' || ext === 'ssa') return assToVtt(content); return srtToVtt(content); }
 function srtToVtt(srt) { let vtt = 'WEBVTT\n\n'; vtt += srt.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2'); vtt = vtt.replace(/(^|\n)(\d{2}:\d{2}),(\d{3})/g, '$1$2.$3'); return vtt; }
 function sbvToVtt(content) { let vtt = 'WEBVTT\n\n'; const blocks = content.trim().split(/\n\s*\n/); blocks.forEach(block => { const lines = block.split('\n'); if (lines.length < 2) return; const times = lines[0].split(','); if (times.length === 2) { const start = formatSbvTime(times[0].trim()); const end = formatSbvTime(times[1].trim()); vtt += `${start} --> ${end}\n${lines.slice(1).join('\n')}\n\n`; } }); return vtt; }
@@ -143,11 +143,93 @@ function formatSbvTime(t) { let parts = t.replace(',', '.').split(':'); while(pa
 function assToVtt(content) { let vtt = 'WEBVTT\n\n'; const lines = content.split('\n'); let inEvents = false; let textIdx = -1, startIdx = -1, endIdx = -1; for (let line of lines) { if (line.trim().startsWith('[')) inEvents = line.trim().toLowerCase() === '[events]'; if (inEvents && line.startsWith('Format:')) { const fmt = line.split(':')[1].split(',').map(s => s.trim()); textIdx = fmt.indexOf('Text'); startIdx = fmt.indexOf('Start'); endIdx = fmt.indexOf('End'); continue; } if (inEvents && line.startsWith('Dialogue:') && textIdx !== -1) { const parts = line.substring(9).split(','); if (parts.length > textIdx) { const start = formatAssTime(parts[startIdx]?.trim()); const end = formatAssTime(parts[endIdx]?.trim()); let text = parts.slice(textIdx).join(',').trim(); text = text.replace(/\{[^}]+\}/g, ''); text = text.replace(/\\N/gi, '\n'); if (start && end) vtt += `${start} --> ${end}\n${text}\n\n`; } } } return vtt; }
 function formatAssTime(t) { if (!t) return ''; let parts = t.split(':'); while(parts.length < 3) parts.unshift('00'); let secParts = parts[2].split('.'); let sec = secParts[0].padStart(2, '0'); let ms = (secParts[1] || '0').padEnd(3, '0'); return `${parts[0].padStart(2,'0')}:${parts[1].padStart(2,'0')}:${sec}.${ms}`; }
 
+let currentSubURL = null; 
+let subDelay = 0; 
+let originalCues = [];
+const subSyncControls = document.getElementById('subSyncControls');
+
+function applySubDelay() { 
+  const videoEl = document.getElementById('player');
+  const track = videoEl.textTracks[0]; 
+  if (!track || track.cues.length === 0 || originalCues.length === 0) return; 
+  for (let i = 0; i < track.cues.length; i++) { 
+    const cue = track.cues[i]; 
+    cue.startTime = Math.max(0, originalCues[i].start + subDelay); 
+    cue.endTime = Math.max(0, originalCues[i].end + subDelay); 
+  } 
+  document.getElementById('subSyncVal').textContent = (subDelay > 0 ? '+' : '') + subDelay.toFixed(1) + 's'; 
+}
+
+document.getElementById('subSyncBack').addEventListener('click', () => { subDelay -= 0.5; applySubDelay(); });
+document.getElementById('subSyncFwd').addEventListener('click', () => { subDelay += 0.5; applySubDelay(); });
+document.getElementById('subSyncReset').addEventListener('click', () => { subDelay = 0; applySubDelay(); });
+
+const fileSub = document.querySelector('.file-input-sub');
+fileSub.addEventListener('change', async (e) => { 
+  const file = e.target.files[0]; if (!file) return; 
+  let vttContent; 
+  try { 
+    const rawText = await file.text(); 
+    vttContent = parseSubtitles(file.name, rawText); 
+  } catch (err) { 
+    console.error('Failed to read subtitle file:', err); 
+    return; 
+  } 
+  const blob = new Blob([vttContent], { type: 'text/vtt' }); 
+  if (currentSubURL) URL.revokeObjectURL(currentSubURL); 
+  currentSubURL = URL.createObjectURL(blob); 
+  
+  const videoEl = document.getElementById('player');
+  videoEl.querySelectorAll('track').forEach(t => t.remove()); 
+  const track = document.createElement('track'); 
+  track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; 
+  videoEl.appendChild(track); 
+  
+  track.addEventListener('load', () => { 
+    const activeTrack = track.track; 
+    originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); 
+    subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; 
+    subSyncControls.style.display = 'flex'; 
+    for (let i = 0; i < videoEl.textTracks.length; i++) videoEl.textTracks[i].mode = 'showing'; 
+    if (window.player) window.player.toggleCaptions(true); 
+  }); 
+  
+  // If a video is already loaded, update Plyr source to include the track
+  const currentFilmObj = currentFilm === 1 ? film1 : film2;
+  if (currentFilmObj.url && window.player) {
+    const currentTime = window.player.currentTime; 
+    const isPlaying = !videoEl.paused; 
+    window.player.source = { 
+      type: 'video', 
+      title: currentFilmObj.name || 'CineLoom', 
+      sources: [{ src: currentFilmObj.url, type: currentFilmObj.mime }], 
+      tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] 
+    }; 
+    const onLoaded = () => { 
+      window.player.currentTime = currentTime; 
+      if (isPlaying) window.player.play().catch(()=>{}); 
+      window.player.toggleCaptions(true); 
+      const activeTrack = videoEl.textTracks[0]; 
+      if (activeTrack) { 
+        originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); 
+        subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; 
+        subSyncControls.style.display = 'flex'; 
+      } 
+      videoEl.removeEventListener('loadedmetadata', onLoaded); 
+    }; 
+    videoEl.addEventListener('loadedmetadata', onLoaded);
+  } else if (window.player) {
+    window.player.toggleCaptions(true);
+  }
+  
+  document.getElementById('loadSubsName').textContent = file.name; 
+});
+
+// --- Player Setup ---
 function setupPlayer() {
   const video = document.getElementById('player'); 
   const fileVideo1 = playerContainer.querySelector('.file-input-video-1');
   const fileVideo2 = playerContainer.querySelector('.file-input-video-2');
-  const fileSub = playerContainer.querySelector('.file-input-sub');
   
   const player = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], invertTime: true, toggleInvertTime: true });
   window.player = player;
@@ -191,88 +273,6 @@ function setupPlayer() {
     document.getElementById('loadFilm2Name').textContent = film2.name;
     switchFilm(1);
   };
-
-  // Subtitle Loading Logic
-  let currentSubURL = null; 
-  let subDelay = 0; 
-  let originalCues = [];
-  const subSyncControls = document.getElementById('subSyncControls');
-
-  function applySubDelay() { 
-    const track = video.textTracks[0]; 
-    if (!track || track.cues.length === 0 || originalCues.length === 0) return; 
-    for (let i = 0; i < track.cues.length; i++) { 
-      const cue = track.cues[i]; 
-      cue.startTime = Math.max(0, originalCues[i].start + subDelay); 
-      cue.endTime = Math.max(0, originalCues[i].end + subDelay); 
-    } 
-    document.getElementById('subSyncVal').textContent = (subDelay > 0 ? '+' : '') + subDelay.toFixed(1) + 's'; 
-  }
-
-  document.getElementById('subSyncBack').addEventListener('click', () => { subDelay -= 0.5; applySubDelay(); });
-  document.getElementById('subSyncFwd').addEventListener('click', () => { subDelay += 0.5; applySubDelay(); });
-  document.getElementById('subSyncReset').addEventListener('click', () => { subDelay = 0; applySubDelay(); });
-
-  fileSub.addEventListener('change', async (e) => { 
-    const file = e.target.files[0]; if (!file) return; 
-    let vttContent; 
-    try { 
-      const rawText = await file.text(); 
-      vttContent = parseSubtitles(file.name, rawText); 
-    } catch (err) { 
-      console.error('Failed to read subtitle file:', err); 
-      return; 
-    } 
-    const blob = new Blob([vttContent], { type: 'text/vtt' }); 
-    if (currentSubURL) URL.revokeObjectURL(currentSubURL); 
-    currentSubURL = URL.createObjectURL(blob); 
-    
-    const videoEl = document.getElementById('player');
-    videoEl.querySelectorAll('track').forEach(t => t.remove()); 
-    const track = document.createElement('track'); 
-    track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; 
-    videoEl.appendChild(track); 
-    
-    track.addEventListener('load', () => { 
-      const activeTrack = track.track; 
-      originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); 
-      subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; 
-      subSyncControls.style.display = 'flex'; 
-      for (let i = 0; i < videoEl.textTracks.length; i++) videoEl.textTracks[i].mode = 'showing'; 
-      window.player.toggleCaptions(true); 
-    }); 
-    
-    // If a local file is loaded, update the source to include the track
-    const currentFilmObj = currentFilm === 1 ? film1 : film2;
-    if (currentFilmObj.url) {
-      const currentTime = window.player.currentTime; 
-      const isPlaying = !videoEl.paused; 
-      window.player.source = { 
-        type: 'video', 
-        title: currentFilmObj.name || 'CineLoom', 
-        sources: [{ src: currentFilmObj.url, type: currentFilmObj.mime }], 
-        tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] 
-      }; 
-      const onLoaded = () => { 
-        window.player.currentTime = currentTime; 
-        if (isPlaying) window.player.play().catch(()=>{}); 
-        window.player.toggleCaptions(true); 
-        const activeTrack = videoEl.textTracks[0]; 
-        if (activeTrack) { 
-          originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); 
-          subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; 
-          subSyncControls.style.display = 'flex'; 
-        } 
-        videoEl.removeEventListener('loadedmetadata', onLoaded); 
-      }; 
-      videoEl.addEventListener('loadedmetadata', onLoaded);
-    } else {
-      // For torrent streams, just ensure captions are toggled on
-      window.player.toggleCaptions(true);
-    }
-    
-    document.getElementById('loadSubsName').textContent = file.name; 
-  });
 
   const videoStage = document.querySelector('.video-stage');
   videoStage.addEventListener('dragover', (e) => { e.preventDefault(); videoStage.classList.add('drag-over'); });
@@ -322,7 +322,7 @@ document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target
 
 const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
 
-// MQTT Remote Host Logic
+// --- MQTT Remote Host Logic ---
 const qrOverlay = document.getElementById('qrOverlay'); 
 const qrCloseBtn = document.getElementById('qrCloseBtn'); 
 const remoteCodeDisplay = document.getElementById('remoteCodeDisplay'); 
@@ -474,6 +474,7 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
 
 qrCloseBtn.addEventListener('click', () => { qrOverlay.classList.remove('active'); });
 
+// --- Torrents ---
 async function searchTorrents(query) {
   if (!query || query.trim().length < 3) return;
   const torrentResults = document.getElementById('torrentResults');
@@ -510,7 +511,13 @@ function startTorrentStream(magnet) {
       if (err) { alert('Error streaming torrent.'); bufferingOverlay.classList.remove('show'); return; }
       elem.id = 'player'; elem.setAttribute('playsinline', '');
       videoStage.insertBefore(elem, tempContainer); tempContainer.remove();
-      document.getElementById('loadFilm1Name').textContent = `Streaming: ${file.name}`;
+      
+      // CRITICAL: Set film1 properties so subtitle loading works!
+      film1.url = elem.src; 
+      film1.mime = 'video/mp4'; 
+      film1.name = `Streaming: ${file.name}`;
+      document.getElementById('loadFilm1Name').textContent = film1.name;
+      
       elem.addEventListener('waiting', () => { bufferingText.textContent = 'Buffering...'; bufferingOverlay.classList.add('show'); });
       elem.addEventListener('playing', () => bufferingOverlay.classList.remove('show'));
       elem.addEventListener('canplay', () => bufferingOverlay.classList.remove('show'));
