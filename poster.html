@@ -15,7 +15,6 @@
   --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4);
   --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15);
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
-  --cue-text: #ffffff; --cue-bg: rgba(0,0,0,0.85); --cue-font: 'Inter', sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 16px; background: var(--bg); display: flex; flex-direction: column; }
@@ -49,6 +48,11 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .poster-sheet.double-feature .ps-film-divider { display: flex; align-items: center; justify-content: center; margin: -15px 0; background: rgba(0,0,0,0.8); width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); font-weight: bold; z-index: 1; }
 
 .ps-content { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6) 40%, transparent 80%); }
+
+.ps-poster-img { display: none; width: 180px; height: 270px; object-fit: cover; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.1); align-self: flex-end; margin-bottom: 20px; }
+.ps-poster-img.show { display: block; }
+.poster-sheet.double-feature .ps-poster-img { width: 120px; height: 180px; }
+
 .ps-title { font-size: 3rem; margin-bottom: 1rem; font-weight: 800; line-height: 1.1; }
 .ps-tagline { font-size: 1.2rem; margin-bottom: 1rem; color: #ccc; }
 .ps-plot { font-size: 1rem; opacity: 0.8; max-width: 80%; margin-bottom: 2rem; }
@@ -165,6 +169,7 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
     <div class="poster-sheet theme-minimal" id="posterSheet">
       <div class="film-grain" id="filmGrain"></div>
       <div class="ps-content ps-film1">
+        <img id="psPoster1" class="ps-poster-img" src="" alt="">
         <h1 class="ps-title" id="psTitle1" contenteditable="true">Film Title</h1>
         <p class="ps-tagline" id="psTagline1"></p>
         <p class="ps-plot" id="psPlot1"></p>
@@ -172,6 +177,7 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
       </div>
       <div class="ps-film-divider">VS</div>
       <div class="ps-content ps-film2">
+        <img id="psPoster2" class="ps-poster-img" src="" alt="">
         <h1 class="ps-title" id="psTitle2" contenteditable="true"></h1>
         <p class="ps-tagline" id="psTagline2"></p>
         <p class="ps-plot" id="psPlot2"></p>
@@ -375,11 +381,21 @@ async function fetchMovieDetails(imdbID, target) {
     if (data.Response === 'True') {
       if (target === '1') {
         fields.title1.value = data.Title || ''; fields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot1.value = data.Plot || '';
-        if (data.Poster && data.Poster !== 'N/A') { posterSheet.style.backgroundImage = `url('${data.Poster}')`; }
+        // Set Backdrop and Cover Art
+        if (data.Poster && data.Poster !== 'N/A') { 
+          posterSheet.style.backgroundImage = `url('${data.Poster}')`;
+          const img = document.getElementById('psPoster1');
+          img.src = data.Poster; img.classList.add('show');
+        }
         preview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
         preview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
       } else {
         fields.title2.value = data.Title || ''; fields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot2.value = data.Plot || '';
+        // Set Cover Art for Film 2
+        if (data.Poster && data.Poster !== 'N/A') {
+          const img = document.getElementById('psPoster2');
+          img.src = data.Poster; img.classList.add('show');
+        }
         preview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
         preview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
       }
