@@ -25,10 +25,11 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; } .brand-logo svg { height: 36px; width: auto; display: block; } .brand-text { font-size: 1.25rem; font-weight: 700; }
 .header-actions { margin-left: auto; position: relative; display: flex; gap: 0.5rem; align-items: center; }
 .settings-btn, .remote-btn, .nav-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s var(--ease); flex-shrink: 0; text-decoration: none; position: relative; } .settings-btn:hover, .remote-btn:hover, .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .settings-btn svg, .remote-btn svg, .nav-btn svg { width: 18px; height: 18px; }
-.remote-active-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #41d636; border-radius: 50%; display: none; box-shadow: 0 0 5px #41d636; } .remote-active-dot.show { display: block; }
+.remote-active-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #41d636; border-radius: 50%; display: none; box-shadow: 0 0 5px #41d636; } .remote-active-dot.show { display: block; } .remote-active-dot.reconnecting { background: #f5a05f; box-shadow: 0 0 5px #f5a05f; }
 .hero { padding: 4rem 2rem 2rem; max-width: 800px; margin: 0 auto; text-align: center; position: relative; z-index: 5; } .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.1; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 0.75rem; text-shadow: 0 4px 20px rgba(0,0,0,0.6); } .hero p { color: var(--text-soft); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
 main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relative; z-index: 10; flex: 1; width: 100%; }
 .player { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(16px); box-shadow: var(--shadow-card); }
+.player.web-fullscreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; border-radius: 0; z-index: 9999; }
 .player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); gap: 0.75rem; flex-wrap: wrap; } .screen-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
 .header-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; } .poster-mini-btn, .countdown-btn, .snapshot-btn, .load-media-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; text-decoration: none; } .poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .load-media-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .load-media-btn svg { width: 14px; height: 14px; }
 .load-dropdown { position: relative; display: flex; } .load-menu { position: absolute; top: calc(100% + 8px); right: 0; width: 240px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 8px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; display: none; flex-direction: column; gap: 2px; } .load-menu.open { display: flex; } .load-item { background: transparent; border: 1px solid transparent; color: var(--text-soft); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; border-radius: 6px; text-align: left; display: flex; align-items: center; gap: 0.6rem; width: 100%; } .load-item:hover { background: var(--accent-soft); color: var(--accent); } .load-item-content { display: flex; flex-direction: column; gap: 2px; overflow: hidden; } .load-item-label { font-size: 0.85rem; font-weight: 600; color: var(--text); } .load-item-filename { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .load-menu-divider { height: 1px; background: var(--line); margin: 4px 0; }
@@ -67,7 +68,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 <main>
   <section class="hero"><h1>CineLoom</h1><p>Drag & drop or click load to begin. Stream torrents or control playback via your phone.</p></section>
   <section class="players">
-    <div class="player" data-screen="1">
+    <div class="player" data-screen="1" id="playerContainer">
       <div class="player-header">
         <span class="screen-label">Now Showing</span>
         <div class="header-actions-row">
@@ -120,10 +121,9 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v1.1.1 loaded");
+console.log("CineLoom Player v1.3.0 loaded");
 
-// Player Setup
-const playerContainer = document.querySelector('.player'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
+const playerContainer = document.getElementById('playerContainer'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
 let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let currentFilm = 1;
@@ -196,7 +196,6 @@ function setupPlayer() {
 }
 setupPlayer();
 
-// Load Dropdown
 const loadMediaToggle = document.getElementById('loadMediaToggle'); const loadMenu = document.getElementById('loadMenu');
 loadMediaToggle.addEventListener('click', (e) => { e.stopPropagation(); loadMenu.classList.toggle('open'); });
 document.addEventListener('click', (e) => { if (!loadMenu.contains(e.target) && !loadMediaToggle.contains(e.target)) loadMenu.classList.remove('open'); });
@@ -205,7 +204,6 @@ document.getElementById('loadFilm2Item').addEventListener('click', () => { docum
 document.getElementById('loadSubsItem').addEventListener('click', () => { document.querySelector('.file-input-sub').click(); loadMenu.classList.remove('open'); });
 document.getElementById('swapFilmsItem').addEventListener('click', () => { if (window.swapFilms) window.swapFilms(); loadMenu.classList.remove('open'); });
 
-// Snapshot
 document.getElementById('snapshotBtn').addEventListener('click', () => {
   const video = document.getElementById('player');
   if (!video.src || video.error) { alert('Please load a video first.'); return; }
@@ -221,12 +219,10 @@ document.getElementById('snapshotBtn').addEventListener('click', () => {
   }
 });
 
-// Settings
 const settingsToggle = document.getElementById('settingsToggle'); const settingsPanel = document.getElementById('settingsPanel');
 settingsToggle.addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('open'); settingsToggle.classList.toggle('active'); });
 document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) { settingsPanel.classList.remove('open'); settingsToggle.classList.remove('active'); } });
 
-// OMDb Key
 const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
 
 // MQTT Remote Host Logic
@@ -241,47 +237,46 @@ let timeUpdateInterval = null;
 let currentRoomCode = null;
 
 function connectToBroker(statusEl, onConnect) {
-    const brokers = [
-        'wss://broker.emqx.io:8084/mqtt',
-        'wss://broker.hivemq.com:8884/mqtt',
-        'wss://test.mosquitto.org:8081/mqtt'
-    ];
-    let brokerIndex = 0;
-    let connected = false;
+    const brokers = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
+    let brokerIndex = 0; let connected = false;
     
     function tryNext() {
         if (brokerIndex >= brokers.length || connected) {
-            if (!connected) {
-                statusEl.textContent = "Connection Failed. Check network.";
-                statusEl.style.color = "#ef4444";
-            }
+            if (!connected) { statusEl.textContent = "Connection Failed. Check network."; statusEl.style.color = "#ef4444"; }
             return;
         }
-        
         const url = brokers[brokerIndex];
         statusEl.textContent = `Connecting to network...`;
-        
         const clientId = 'cineloom-host-' + Math.random().toString(16).substr(2, 8);
-        const client = mqtt.connect(url, { 
-            clientId: clientId,
-            connectTimeout: 3000,
-            reconnectPeriod: 0
-        });
+        
+        // Using reconnectPeriod 5000 allows auto-reconnect if connection drops later
+        const client = mqtt.connect(url, { clientId: clientId, connectTimeout: 3000, reconnectPeriod: 5000 });
         
         client.on('connect', () => {
-            connected = true;
-            statusEl.textContent = "Host Active! You can close this window.";
-            statusEl.style.color = "#41d636";
-            remoteActiveDot.classList.add('show');
-            console.log('Host Session ID:', clientId);
-            onConnect(client);
+            if (!connected) {
+                connected = true;
+                statusEl.textContent = "Host Active! You can close this window.";
+                statusEl.style.color = "#41d636";
+                remoteActiveDot.classList.add('show');
+                remoteActiveDot.classList.remove('reconnecting');
+                console.log('Host Session ID:', clientId);
+                onConnect(client);
+            } else {
+                // Reconnected after a drop
+                statusEl.textContent = "Reconnected!";
+                statusEl.style.color = "#41d636";
+                remoteActiveDot.classList.remove('reconnecting');
+            }
         });
         
-        client.on('error', (err) => {
-            console.error('Broker error:', err);
-            client.end();
-        });
+        client.on('error', (err) => { console.error('Broker error:', err); });
         
+        client.on('offline', () => {
+            statusEl.textContent = "Network dropped. Reconnecting...";
+            statusEl.style.color = "#f5a05f";
+            remoteActiveDot.classList.add('reconnecting');
+        });
+
         client.on('close', () => {
             if (!connected) {
                 brokerIndex++;
@@ -289,7 +284,6 @@ function connectToBroker(statusEl, onConnect) {
             }
         });
     }
-    
     tryNext();
 }
 
@@ -300,10 +294,8 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
     hostStatus.style.color = "#41d636";
     return;
   }
-
   currentRoomCode = Math.floor(100000 + Math.random() * 900000); 
   remoteCodeDisplay.textContent = currentRoomCode;
-  
   const currentPath = window.location.href; const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
   document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${baseUrl}remote.html?room=${currentRoomCode}`)}`;
   qrOverlay.classList.add('active');
@@ -318,41 +310,43 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
       if (topic === cmdTopic) {
         const data = JSON.parse(message.toString());
         console.log('Received command:', data);
-        
         remoteActiveDot.style.background = '#ff0000';
-        setTimeout(() => remoteActiveDot.style.background = '#41d636', 200);
+        setTimeout(() => remoteActiveDot.style.background = '', 200);
         
         const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
         if (!videoEl) return;
         
         try {
-          if (data.action === 'play1') { 
-            // Only switch if film1 is explicitly loaded as a file. If streaming torrent, just play.
-            if (film1.url) window.switchFilm(1); 
-            videoEl.play().catch(e => console.error("Play failed:", e)); 
-          }
-          if (data.action === 'play2') { 
-            if (film2.url) window.switchFilm(2); 
-            videoEl.play().catch(e => console.error("Play failed:", e)); 
-          }
+          if (data.action === 'play1') { if (film1.url) window.switchFilm(1); videoEl.play().catch(e => console.error("Play failed:", e)); }
+          if (data.action === 'play2') { if (film2.url) window.switchFilm(2); videoEl.play().catch(e => console.error("Play failed:", e)); }
           if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
-          if (data.action === 'playPause') { 
-            if (videoEl.paused) videoEl.play().catch(e => console.error("Play failed:", e)); 
-            else videoEl.pause(); 
-          }
-          if (data.action === 'fullscreen') { 
-            // Try native video fullscreen first (best for programmatic requests), then Plyr
-            if (videoEl.webkitEnterFullscreen) videoEl.webkitEnterFullscreen();
-            else if (window.player && window.player.fullscreen) window.player.fullscreen.enter();
-            else if (videoEl.requestFullscreen) videoEl.requestFullscreen(); 
-          }
-          if (data.action === 'seekBack') { 
-            videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); 
-          }
-          if (data.action === 'seekFwd') { 
-            videoEl.currentTime = videoEl.currentTime + 10; 
-          }
+          if (data.action === 'playPause') { if (videoEl.paused) videoEl.play().catch(e => console.error("Play failed:", e)); else videoEl.pause(); }
+          
+          // Web Fullscreen bypasses browser security blocks
+          if (data.action === 'fullscreen') { playerContainer.classList.toggle('web-fullscreen'); }
+          
+          if (data.action === 'seekBack') { videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); }
+          if (data.action === 'seekFwd') { videoEl.currentTime = videoEl.currentTime + 10; }
           if (data.action === 'showtime') { document.getElementById('countdownBtn').click(); }
+          
+          if (data.action === 'volumeUp') { videoEl.volume = Math.min(1, videoEl.volume + 0.1); }
+          if (data.action === 'volumeDown') { videoEl.volume = Math.max(0, videoEl.volume - 0.1); }
+          if (data.action === 'mute') { videoEl.muted = !videoEl.muted; }
+          if (data.action === 'toggleSubs') { if (window.player) window.player.toggleCaptions(); }
+          if (data.action === 'subSyncBack') { const btn = document.getElementById('subSyncBack'); if (btn) btn.click(); }
+          if (data.action === 'subSyncFwd') { const btn = document.getElementById('subSyncFwd'); if (btn) btn.click(); }
+          if (data.action === 'lights') { document.body.classList.toggle('cinema-mode'); }
+          if (data.action === 'speed') {
+              const speeds = [1, 1.25, 1.5, 2];
+              let idx = speeds.indexOf(videoEl.playbackRate);
+              idx = (idx + 1) % speeds.length;
+              videoEl.playbackRate = speeds[idx];
+          }
+          if (data.action === 'skip90') { 
+              if (!isNaN(videoEl.duration) && isFinite(videoEl.duration)) {
+                  videoEl.currentTime = Math.min(videoEl.duration, videoEl.currentTime + 90);
+              }
+          }
         } catch (e) {
           console.error('Remote Command Failed:', e);
         }
@@ -363,19 +357,19 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
       if (err) console.error('Subscription error:', err);
     });
     
-    // Broadcast heartbeat in background
     timeUpdateInterval = setInterval(() => {
       if (mqttClient && mqttClient.connected) {
         const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
         let timeStr = "Paused";
+        let volume = videoEl ? videoEl.volume : 1;
+        let muted = videoEl ? videoEl.muted : false;
+        let speed = videoEl ? videoEl.playbackRate : 1;
         
-        // Check if duration is valid (not NaN or Infinity, which happens on live streams)
         if (videoEl && !isNaN(videoEl.duration) && isFinite(videoEl.duration)) {
           let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
           const hrs = Math.floor(remaining / 3600); 
           const mins = Math.floor((remaining % 3600) / 60); 
           const secs = Math.floor(remaining % 60);
-          
           if (!videoEl.paused) {
             timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; 
             if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
@@ -386,17 +380,14 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
           timeStr = "Live Stream";
         }
         
-        mqttClient.publish(timeTopic, JSON.stringify({timeStr: timeStr}));
+        mqttClient.publish(timeTopic, JSON.stringify({ timeStr, volume, muted, speed }));
       }
     }, 1000);
   });
 });
 
-qrCloseBtn.addEventListener('click', () => { 
-  qrOverlay.classList.remove('active'); 
-});
+qrCloseBtn.addEventListener('click', () => { qrOverlay.classList.remove('active'); });
 
-// Torrents
 async function searchTorrents(query) {
   if (!query || query.trim().length < 3) return;
   const torrentResults = document.getElementById('torrentResults');
@@ -442,11 +433,9 @@ function startTorrentStream(magnet) {
   });
 }
 
-// Countdown
 const countdownBtn = document.getElementById('countdownBtn'); const countdownOverlay = document.getElementById('countdownOverlay'); const countdownText = document.getElementById('countdownText');
 countdownBtn.addEventListener('click', () => { let count = 5; countdownOverlay.classList.add('active'); countdownText.textContent = count; const interval = setInterval(() => { count--; if (count > 0) { countdownText.textContent = count; } else { clearInterval(interval); countdownText.textContent = 'PLAY'; setTimeout(() => { countdownOverlay.classList.remove('active'); const vid = document.getElementById('player'); if (vid) vid.play(); }, 800); } }, 1000); });
 
-// Reload Protection
 window.addEventListener('beforeunload', (event) => {
   const video = document.getElementById('player');
   if ((video && video.src && video.src !== window.location.href) || (window.torrentClient && window.torrentClient.torrents && window.torrentClient.torrents.length > 0)) { event.preventDefault(); event.returnValue = ''; }
