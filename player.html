@@ -560,25 +560,68 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
 
 qrCloseBtn.addEventListener('click', () => { qrOverlay.classList.remove('active'); });
 
-// --- Torrents ---
 async function searchTorrents(query) {
   if (!query || query.trim().length < 3) return;
   const torrentResults = document.getElementById('torrentResults');
-  torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Searching YTS...</span></div>'; torrentResults.classList.add('show');
-  try {
-    const res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(`https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=10`)}`);
-    const data = await res.json(); torrentResults.innerHTML = '';
-    if (data.status === 'ok' && data.data.movies) {
+  torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Searching YTS...</span></div>'; 
+  torrentResults.classList.add('show');
+  
+  const apiUrl = `https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=10`;
+  
+  // Reordered proxies for maximum reliability
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`,
+    `https://corsproxy.io/?url=${encodeURIComponent(apiUrl)}`,
+    `https://thingproxy.freeboard.io/fetch/${apiUrl}`
+  ];
+  
+  let data = null;
+  let success = false;
+  let lastError = null;
+  
+  for (const proxyUrl of proxies) {
+    try {
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+      if (data && data.status === 'ok') {
+        success = true;
+        break;
+      } else if (data && data.status === 'error') {
+        // YTS returned a valid response, but no movies were found
+        success = true; 
+        break;
+      }
+    } catch (e) { 
+      console.warn("Fetch failed via proxy:", proxyUrl, e.message);
+      lastError = e;
+    }
+  }
+
+  torrentResults.innerHTML = '';
+  
+  if (success && data) {
+    if (data.data && data.data.movies && data.data.movies.length > 0) {
       data.data.movies.forEach(movie => {
-        const torrent = movie.torrents.find(t => t.quality === '1080p') || movie.torrents.find(t => t.quality === '720p');
+        const torrent = movie.torrents.find(t => t.quality === '1080p' && t.type === 'web') || movie.torrents.find(t => t.quality === '1080p') || movie.torrents.find(t => t.quality === '720p');
         if (!torrent) return;
-        const item = document.createElement('div'); item.className = 'torrent-item';
-        item.innerHTML = `<span>${movie.title_long} (${torrent.quality})</span>`;
-        item.addEventListener('click', () => { document.getElementById('torrentInput').value = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://tracker.opentrackr.org:1337/announce`; torrentResults.classList.remove('show'); startTorrentStream(document.getElementById('torrentInput').value); });
+        const item = document.createElement('div'); 
+        item.className = 'torrent-item';
+        item.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg><div class="torrent-info"><span class="torrent-title">${movie.title_long} (${torrent.quality})</span><span class="torrent-meta">${torrent.type} • ${torrent.size} ${torrent.size_unit} • S:${torrent.seeds} L:${torrent.peers}</span></div>`;
+        item.addEventListener('click', () => { 
+          document.getElementById('torrentInput').value = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.openbittorrent.com:80&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.openwebtorrent.com`; 
+          torrentResults.classList.remove('show'); 
+          startTorrentStream(document.getElementById('torrentInput').value); 
+        });
         torrentResults.appendChild(item);
       });
-    } else { torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>No torrents found.</span></div>'; }
-  } catch (e) { torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Search failed.</span></div>'; }
+    } else {
+      torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>No torrents found for this title.</span></div>';
+    }
+  } else {
+    torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Search failed. Network blocked or proxies down. Try pasting a Magnet Link directly.</span></div>';
+    console.error("All CORS proxies failed. Last error:", lastError);
+  }
 }
 document.getElementById('torrentSearchBtn').addEventListener('click', () => { const query = document.getElementById('torrentInput').value.trim(); if (query.startsWith('magnet:')) startTorrentStream(query); else searchTorrents(query); });
 
