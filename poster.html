@@ -18,51 +18,52 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 16px; background: var(--bg); display: flex; flex-direction: column; }
-header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg-elev); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(16px); height: 73px; box-sizing: border-box; }
+header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg-elev); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(16px); }
 .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; } .brand svg { width: 36px; height: 36px; } .brand-text { font-size: 1.25rem; font-weight: 700; }
 .header-actions { display: flex; gap: 0.5rem; align-items: center; }
 .btn { background: var(--accent); color: #fff; border: none; padding: 0.6rem 1.2rem; font-family: inherit; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; text-decoration: none; font-size: 0.9rem; } .btn:hover { background: var(--accent-2); } .btn-secondary { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); } .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
-.main-container { display: grid; grid-template-columns: 380px 1fr; width: 100%; flex: 1; overflow: hidden; height: calc(100vh - 73px); }
-.editor-panel { border-right: 1px solid var(--line); overflow-y: auto; padding: 1.5rem; background: var(--bg-elev); display: flex; flex-direction: column; gap: 1.5rem; }
-.preview-panel { overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; align-items: center; background: rgba(8,9,11,0.5); position: sticky; top: 0; height: 100%; }
+/* Poster Overlay Styles (Restored from Original) */
+.poster-overlay { position: relative; flex: 1; background: var(--bg); overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 1; pointer-events: auto; }
+.poster-modal { display: grid; grid-template-columns: 380px 1fr; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 16px; overflow: hidden; width: 100%; max-width: 1200px; height: calc(100vh - 140px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.poster-editor { padding: 1.5rem; overflow-y: auto; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 1rem; background: var(--bg-elev); }
+.poster-preview-wrap { padding: 1rem; overflow-y: auto; display: flex; justify-content: center; align-items: flex-start; background: rgba(8,9,11,0.5); }
 
-.input-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; } .input-group label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; } .input-group input, .input-group textarea, .input-group select { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; outline: none; transition: border 0.2s; width: 100%; } .input-group input:focus, .input-group textarea:focus, .input-group select:focus { border-color: var(--accent); }
-.autocomplete-container { position: relative; } .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 10; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; margin-top: 4px; } .autocomplete-results.show { display: flex; } .autocomplete-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 4px; cursor: pointer; } .autocomplete-item:hover { background: var(--accent-soft); } .autocomplete-item img { width: 30px; height: 45px; object-fit: cover; border-radius: 2px; } .auto-info { display: flex; flex-direction: column; } .auto-title { font-size: 0.85rem; color: var(--text); } .auto-year { font-size: 0.75rem; color: var(--text-dim); }
+.input-group { display: flex; flex-direction: column; gap: 0.4rem; } .input-group label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; } .input-group input, .input-group textarea, .input-group select { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; outline: none; width: 100%; }
+.autocomplete-container { position: relative; } .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 10; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; margin-top: 4px; } .autocomplete-results.show { display: flex; } .autocomplete-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 4px; cursor: pointer; } .autocomplete-item:hover { background: var(--accent-soft); } .autocomplete-item img { width: 30px; height: 45px; object-fit: cover; border-radius: 2px; }
 
-.dropdown { position: relative; display: inline-block; width: 100%; }
-.dropdown-toggle { background: var(--bg); border: 1px solid var(--line); color: var(--text-soft); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; cursor: pointer; width: 100%; display: flex; justify-content: space-between; align-items: center; } .dropdown-toggle:hover { border-color: var(--accent); }
+.dropdown { position: relative; width: 100%; }
+.dropdown-toggle { background: var(--bg); border: 1px solid var(--line); color: var(--text-soft); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; cursor: pointer; width: 100%; display: flex; justify-content: space-between; align-items: center; } 
 .dropdown-menu { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 10; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; margin-top: 4px; } .dropdown-menu.open { display: flex; }
-.dropdown-item { background: transparent; border: none; color: var(--text-soft); padding: 0.5rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; border-radius: 4px; text-align: left; } .dropdown-item:hover { background: var(--accent-soft); color: var(--accent); } .dropdown-item.active { background: var(--accent-soft); color: var(--accent); }
+.dropdown-item { background: transparent; border: none; color: var(--text-soft); padding: 0.5rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; border-radius: 4px; text-align: left; } .dropdown-item:hover { background: var(--accent-soft); color: var(--accent); } 
 
-.btn-row { display: flex; gap: 0.5rem; } .btn-row .btn { flex: 1; padding: 0.6rem; font-size: 0.8rem; }
 .format-btn { background: var(--bg); border: 1px solid var(--line); color: var(--text-soft); padding: 0.6rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; border-radius: 6px; flex: 1; } .format-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
-/* Poster Sheet Styles */
+/* Poster Sheet Styles (Restored) */
 .poster-sheet { width: 595px; min-height: 842px; background-color: #1a1a1a; background-size: cover; background-position: center; transform: scale(0.75); transform-origin: top center; margin-bottom: -210px; display: flex; flex-direction: column; color: #fff; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 .poster-sheet.format-916 { width: 400px; min-height: 711px; }
 .poster-sheet.double-feature .ps-film1 { border-bottom: 1px dashed rgba(255,255,255,0.3); padding-bottom: 30px; margin-bottom: 30px; }
 .ps-film2 { display: none; }
 .poster-sheet.double-feature .ps-film2 { display: flex; }
+.ps-film-divider { display: none; }
+.poster-sheet.double-feature .ps-film-divider { display: flex; align-items: center; justify-content: center; margin: -15px 0; background: rgba(0,0,0,0.8); width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); font-weight: bold; z-index: 1; }
 
 .ps-content { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6) 40%, transparent 80%); }
-
-.ps-poster-img { display: none; width: 180px; height: 270px; object-fit: cover; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.1); align-self: flex-end; margin-bottom: 20px; }
-.ps-poster-img.show { display: block; }
+.ps-poster-img { display: none; width: 180px; height: 270px; object-fit: cover; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.1); align-self: flex-end; margin-bottom: 20px; } .ps-poster-img.show { display: block; }
 .poster-sheet.double-feature .ps-poster-img { width: 120px; height: 180px; }
-
-.ps-title { font-size: 3rem; margin-bottom: 1rem; font-weight: 800; line-height: 1.1; outline: none; } .ps-title:focus { background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 0 2px var(--accent); }
+.ps-title { font-size: 3rem; margin-bottom: 1rem; font-weight: 800; line-height: 1.1; outline: none; } .ps-title:focus { background: rgba(59, 130, 246, 0.1); }
 .ps-tagline { font-size: 1.2rem; margin-bottom: 1rem; color: #ccc; }
 .ps-plot { font-size: 1rem; opacity: 0.8; max-width: 80%; margin-bottom: 2rem; }
 .ps-meta { display: flex; gap: 20px; font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
 .ps-venue { font-size: 1rem; opacity: 0.7; }
-.ps-rating { font-size: 1rem; color: #ffd700; margin-top: 10px; display: none; }
-.ps-rating.show { display: block; }
+.ps-rating { font-size: 1rem; color: #ffd700; margin-top: 10px; display: none; } .ps-rating.show { display: block; }
+.ps-blurb { font-size: 1.1rem; margin-bottom: 2rem; display: none; } .ps-blurb.show { display: block; }
 .ps-footer-wrap { padding: 20px 40px; border-top: 1px solid rgba(255,255,255,0.2); display: none; }
 .ps-footer { font-size: 0.8rem; text-align: center; opacity: 0.5; }
+.ps-qr { display: none; width: 100px; height: 100px; margin-top: 20px; border-radius: 8px; background: #fff; padding: 5px; } .ps-qr.show { display: block; }
 
 .zoom-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 0.5rem; background: var(--bg-elev-3); padding: 0.5rem; border-radius: 12px; border: 1px solid var(--line-strong); box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; }
-.zoom-btn { background: var(--bg-elev-2); border: none; color: var(--text); width: 36px; height: 36px; border-radius: 6px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; } .zoom-btn:hover { background: var(--accent-soft); color: var(--accent); }
+.zoom-btn { background: var(--bg-elev-2); border: none; color: var(--text); width: 36px; height: 36px; border-radius: 6px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; } 
 
 /* Theme Styles */
 .poster-sheet.theme-minimal { font-family: 'Inter', sans-serif; }
@@ -84,26 +85,9 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .film-grain { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 2; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.5"/></svg>'); }
 .film-grain.show { opacity: 0.15; }
 
-.ps-qr { display: none; width: 100px; height: 100px; margin-top: 20px; border-radius: 8px; background: #fff; padding: 5px; } .ps-qr.show { display: block; }
-
-/* Bulletproof Print Rules */
-@media print {
-    body * { visibility: hidden !important; }
-    .poster-sheet, .poster-sheet * { visibility: visible !important; }
-    .poster-sheet {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 210mm !important;
-        min-height: 297mm !important;
-        transform: none !important;
-        margin: 0 !important;
-        box-shadow: none !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    @page { size: A4; margin: 0; }
-}
+/* Exact Print Rules from Original */
+@media print { @page { size: A4; margin: 0; } body * { visibility: hidden !important; } .poster-sheet, .poster-sheet * { visibility: visible !important; } .poster-sheet { position: absolute; left: 0; top: 0; box-shadow: none; transform: none !important; margin: 0 !important; border: none !important; } .poster-overlay { position: static !important; background: none !important; backdrop-filter: none !important; padding: 0 !important; } .poster-modal, .poster-editor, .poster-preview-wrap { display: contents !important; background: none !important; border: none !important; padding: 0 !important; text-align: left !important; } }
+@media (max-width: 900px) { .poster-modal { grid-template-columns: 1fr; height: 95vh; } .poster-editor { border-right: none; border-bottom: 1px solid var(--line); max-height: 40vh; } }
 </style>
 </head>
 <body>
@@ -119,94 +103,89 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
   </div>
 </header>
 
-<div class="main-container">
-  <div class="editor-panel">
-    <div class="input-group autocomplete-container">
-      <label>Film 1 Search</label>
-      <input type="text" id="search1" placeholder="Search OMDb...">
-      <div class="autocomplete-results" id="search1Results"></div>
-    </div>
-    <div class="input-group"><label>Film 1 Title</label><input type="text" id="posterTitle1"></div>
-    <div class="input-group"><label>Film 1 Tagline</label><input type="text" id="posterTagline1"></div>
-    <div class="input-group"><label>Film 1 Plot</label><textarea id="posterPlot1" rows="3"></textarea></div>
-    
-    <div class="input-group autocomplete-container">
-      <label>Film 2 Search (Optional)</label>
-      <input type="text" id="search2" placeholder="Search OMDb...">
-      <div class="autocomplete-results" id="search2Results"></div>
-    </div>
-    <div class="input-group"><label>Film 2 Title</label><input type="text" id="posterTitle2"></div>
-    <div class="input-group"><label>Film 2 Tagline</label><input type="text" id="posterTagline2"></div>
-    <div class="input-group"><label>Film 2 Plot</label><textarea id="posterPlot2" rows="3"></textarea></div>
+<div class="poster-overlay" id="posterOverlay">
+  <div class="poster-modal">
+    <div class="poster-editor">
+      <div class="autocomplete-container">
+        <label>Film 1 Search</label>
+        <input type="text" id="search1" placeholder="Search OMDb...">
+        <div class="autocomplete-results" id="search1Results"></div>
+      </div>
+      <div class="input-group"><label>Film 1 Title</label><input type="text" id="posterTitle1"></div>
+      <div class="input-group"><label>Film 1 Tagline</label><input type="text" id="posterTagline1"></div>
+      <div class="input-group"><label>Film 1 Plot</label><textarea id="posterPlot1" rows="3"></textarea></div>
+      
+      <div class="autocomplete-container">
+        <label>Film 2 Search (Optional)</label>
+        <input type="text" id="search2" placeholder="Search OMDb...">
+        <div class="autocomplete-results" id="search2Results"></div>
+      </div>
+      <div class="input-group"><label>Film 2 Title</label><input type="text" id="posterTitle2"></div>
+      <div class="input-group"><label>Film 2 Tagline</label><input type="text" id="posterTagline2"></div>
+      <div class="input-group"><label>Film 2 Plot</label><textarea id="posterPlot2" rows="3"></textarea></div>
 
-    <div class="input-group"><label>Date</label><input type="text" id="posterDate" placeholder="e.g., 25th Dec"></div>
-    <div class="input-group"><label>Time</label><input type="text" id="posterTime" placeholder="e.g., 20:00"></div>
-    <div class="input-group"><label>Venue</label><input type="text" id="posterVenue" placeholder="e.g., The Living Room"></div>
-    
-    <div class="input-group"><label>Custom Backdrop Upload</label><input type="file" id="posterBackdrop" accept="image/*"></div>
-    <button class="btn btn-secondary" id="posterClearBackdrop" style="width: 100%; padding: 0.6rem; font-size: 0.8rem;">Clear Backdrop</button>
+      <div class="input-group"><label>Date</label><input type="text" id="posterDate" placeholder="e.g., 25th Dec"></div>
+      <div class="input-group"><label>Time</label><input type="text" id="posterTime" placeholder="e.g., 20:00"></div>
+      <div class="input-group"><label>Venue</label><input type="text" id="posterVenue" placeholder="e.g., The Living Room"></div>
+      <div class="input-group"><label>Blurb</label><textarea id="posterBlurb" rows="2"></textarea></div>
+      
+      <div class="input-group"><label>Custom Backdrop Upload</label><input type="file" id="posterBackdrop" accept="image/*"></div>
+      <button class="btn btn-secondary" id="posterClearBackdrop" style="width: 100%; padding: 0.6rem; font-size: 0.8rem;">Clear Backdrop</button>
 
-    <div class="input-group">
-      <label>Poster Theme</label>
-      <div class="dropdown">
+      <div class="dropdown" id="posterThemeDropdown">
+        <label>Poster Theme</label>
         <button class="dropdown-toggle" id="posterThemeToggle"><span class="dropdown-label">Minimal</span> ▼</button>
         <div class="dropdown-menu" id="posterThemeMenu"></div>
       </div>
-    </div>
 
-    <div class="input-group">
-      <label>Title Font</label>
-      <div class="dropdown">
+      <div class="dropdown" id="fontDropdown">
+        <label>Title Font</label>
         <button class="dropdown-toggle" id="fontToggle"><span class="dropdown-label" id="fontLabel">Default</span> ▼</button>
         <div class="dropdown-menu" id="fontMenu"></div>
       </div>
-    </div>
 
-    <div class="input-group">
-      <label>Format</label>
-      <div class="btn-row">
+      <div style="display: flex; gap: 0.5rem;">
         <button class="format-btn active" data-format="a4">A4 (Portrait)</button>
         <button class="format-btn" data-format="916">9:16 (Story)</button>
       </div>
-    </div>
 
-    <div class="input-group">
-      <label>Extra Options</label>
-      <div class="btn-row">
-        <button class="btn btn-secondary" id="grainToggle">Film Grain</button>
-        <button class="btn btn-secondary" id="qrToggle">QR Code</button>
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn btn-secondary" id="grainToggle" style="flex: 1;">Film Grain</button>
+        <button class="btn btn-secondary" id="qrToggle" style="flex: 1;">QR Code</button>
       </div>
+      <div class="input-group"><label>QR Link</label><input type="text" id="posterQRLink" placeholder="https://..."></div>
+      <div class="input-group"><label>Notes</label><input type="text" id="posterNotes" placeholder="e.g., No latecomers"></div>
+      <div class="input-group"><label>Footer Text</label><input type="text" id="posterFooter" placeholder="e.g., Presented by..."></div>
     </div>
-    <div class="input-group"><label>QR Link</label><input type="text" id="posterQRLink" placeholder="https://..."></div>
-    <div class="input-group"><label>Notes</label><input type="text" id="posterNotes" placeholder="e.g., No latecomers"></div>
-    <div class="input-group"><label>Footer Text</label><input type="text" id="posterFooter" placeholder="e.g., Presented by..."></div>
-  </div>
-  
-  <div class="preview-panel">
-    <div class="poster-sheet theme-minimal" id="posterSheet">
-      <div class="film-grain" id="filmGrain"></div>
-      <div class="ps-content ps-film1">
-        <img id="psPoster1" class="ps-poster-img" src="" alt="">
-        <h1 class="ps-title" id="psTitle1" contenteditable="true">Film Title</h1>
-        <p class="ps-tagline" id="psTagline1"></p>
-        <p class="ps-plot" id="psPlot1"></p>
-        <div class="ps-rating" id="psRating1"></div>
-      </div>
-      <div class="ps-content ps-film2">
-        <img id="psPoster2" class="ps-poster-img" src="" alt="">
-        <h1 class="ps-title" id="psTitle2" contenteditable="true"></h1>
-        <p class="ps-tagline" id="psTagline2"></p>
-        <p class="ps-plot" id="psPlot2"></p>
-        <div class="ps-rating" id="psRating2"></div>
-      </div>
-      <div class="ps-content" style="flex: 0; padding-bottom: 20px; padding-top: 20px;">
-        <div class="ps-meta"><span id="psDate">—</span> <span>•</span> <span id="psTime">—</span></div>
-        <div class="ps-venue" id="psVenue">—</div>
-        <div class="ps-qr" id="psQR"></div>
-        <div class="ps-notes" id="psNotes" style="margin-top: 10px; font-size: 0.9rem; opacity: 0.7;"></div>
-      </div>
-      <div class="ps-footer-wrap" id="psFooterWrap">
-        <p class="ps-footer" id="psFooter"></p>
+    
+    <div class="poster-preview-wrap">
+      <div class="poster-sheet theme-minimal" id="posterSheet">
+        <div class="film-grain" id="filmGrain"></div>
+        <div class="ps-content ps-film1">
+          <img id="psPoster1" class="ps-poster-img" src="" alt="">
+          <h1 class="ps-title" id="psTitle1" contenteditable="true">Film Title</h1>
+          <p class="ps-tagline" id="psTagline1"></p>
+          <p class="ps-plot" id="psPlot1"></p>
+          <div class="ps-rating" id="psRating1"></div>
+        </div>
+        <div class="ps-film-divider" id="psFilmDivider"></div>
+        <div class="ps-content ps-film2">
+          <img id="psPoster2" class="ps-poster-img" src="" alt="">
+          <h1 class="ps-title" id="psTitle2" contenteditable="true"></h1>
+          <p class="ps-tagline" id="psTagline2"></p>
+          <p class="ps-plot" id="psPlot2"></p>
+          <div class="ps-rating" id="psRating2"></div>
+        </div>
+        <div class="ps-content ps-event">
+          <div class="ps-blurb" id="psBlurb"></div>
+          <div class="ps-meta"><span id="psDate">—</span> <span>•</span> <span id="psTime">—</span></div>
+          <div class="ps-venue" id="psVenue">—</div>
+          <div class="ps-qr" id="psQR"></div>
+          <div class="ps-notes" id="psNotes" style="margin-top: 10px; font-size: 0.9rem; opacity: 0.7;"></div>
+        </div>
+        <div class="ps-footer-wrap" id="psFooterWrap">
+          <p class="ps-footer" id="psFooter"></p>
+        </div>
       </div>
     </div>
   </div>
@@ -219,25 +198,6 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 </div>
 
 <script>
-const posterSheet = document.getElementById('posterSheet');
-const backdropInput = document.getElementById('posterBackdrop');
-
-const fields = { 
-  title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'),
-  title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'),
-  date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'),
-  qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter')
-};
-
-const preview = {
-  title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'),
-  title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'),
-  date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'),
-  rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'),
-  qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'),
-  footerWrap: document.getElementById('psFooterWrap'), film2Block: document.querySelector('.ps-film2')
-};
-
 // Check for snapshot
 const snapshot = sessionStorage.getItem('cineloom-snapshot');
 if (snapshot) {
@@ -245,207 +205,141 @@ if (snapshot) {
   sessionStorage.removeItem('cineloom-snapshot');
 }
 
-function updatePosterPreview() {
-  preview.title1.textContent = fields.title1.value || 'Film Title';
-  preview.tagline1.textContent = fields.tagline1.value || '';
-  preview.plot1.textContent = fields.plot1.value || '';
-  preview.date.textContent = fields.date.value || '—';
-  preview.time.textContent = fields.time.value || '—';
-  preview.venue.textContent = fields.venue.value || '—';
-  preview.notes.textContent = fields.notes.value || '';
-  
-  const footerText = fields.footer.value || '';
-  preview.footer.textContent = footerText;
-  preview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
+const posterOverlay = document.getElementById('posterOverlay'); const posterCloseBtn = document.getElementById('posterCloseBtn'); const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
+const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
+const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), film2Block: document.getElementById('psFilm2'), filmDivider: document.getElementById('psFilmDivider'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), event: document.getElementById('psEvent') };
 
-  if (fields.title2.value.trim() !== '') {
+function updateBroadcastMarquee() { const marqueeContent = document.getElementById('marqueeContent'); if (!marqueeContent) return; let feedText = "Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. "; if (posterFields.title1.value) { feedText += `TONIGHT: ${posterFields.title1.value}. `; if (posterFields.tagline1.value) feedText += `Genre/Rating: ${posterFields.tagline1.value}. `; if (posterFields.plot1.value) feedText += `Plot: ${posterFields.plot1.value} `; } if (posterFields.title2.value) { feedText += `ALSO SHOWING: ${posterFields.title2.value}. `; if (posterFields.plot2.value) feedText += `Plot: ${posterFields.plot2.value} `; } marqueeContent.innerHTML = `<span>${feedText}</span><span>${feedText}</span>`; }
+
+function updatePosterPreview() {
+  posterPreview.title1.textContent = posterFields.title1.value || 'Film Title';
+  posterPreview.tagline1.textContent = posterFields.tagline1.value || '';
+  posterPreview.plot1.textContent = posterFields.plot1.value || '';
+  posterPreview.date.textContent = posterFields.date.value || '—';
+  posterPreview.time.textContent = posterFields.time.value || '—';
+  posterPreview.venue.textContent = posterFields.venue.value || '—';
+  posterPreview.notes.textContent = posterFields.notes.value || '';
+  posterPreview.blurb.textContent = posterFields.blurb.value || '';
+  posterPreview.blurb.classList.toggle('show', posterFields.blurb.value.trim() !== '');
+  
+  const footerText = posterFields.footer.value || '';
+  posterPreview.footer.textContent = footerText;
+  posterPreview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
+
+  if (posterFields.title2.value.trim() !== '') {
     posterSheet.classList.add('double-feature');
-    preview.film2Block.style.display = 'flex';
-    preview.title2.textContent = fields.title2.value;
-    preview.tagline2.textContent = fields.tagline2.value || '';
-    preview.plot2.textContent = fields.plot2.value || '';
+    posterPreview.film2Block.style.display = 'flex';
+    posterPreview.filmDivider.style.display = 'flex';
+    posterPreview.title2.textContent = posterFields.title2.value;
+    posterPreview.tagline2.textContent = posterFields.tagline2.value || '';
+    posterPreview.plot2.textContent = posterFields.plot2.value || '';
   } else {
     posterSheet.classList.remove('double-feature');
-    preview.film2Block.style.display = 'none';
+    posterPreview.film2Block.style.display = 'none';
+    posterPreview.filmDivider.style.display = 'none';
   }
+  updateBroadcastMarquee();
   applyZoom();
 }
 
-// Bidirectional Editing Sync
-Object.keys(fields).forEach(key => {
-  const input = fields[key];
-  const prev = preview[key];
-  if (!prev) return;
+Object.keys(posterFields).forEach(key => {
+  const input = posterFields[key];
+  const preview = posterPreview[key];
+  if (!preview) return;
   
   input.addEventListener('input', () => {
-    if (document.activeElement !== prev) {
-      prev.textContent = input.value;
+    if (document.activeElement !== preview) {
+      preview.textContent = input.value;
+      if (key === 'blurb') preview.classList.toggle('show', input.value.trim() !== '');
+      if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
     }
     updatePosterPreview();
   });
   
-  if (prev.isContentEditable) {
-    prev.addEventListener('input', () => {
-      input.value = prev.textContent;
+  if (preview.isContentEditable) {
+    preview.addEventListener('input', () => {
+      input.value = preview.textContent;
+      if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
     });
   }
 });
+posterPreview.event.addEventListener('input', () => updateBroadcastMarquee());
 
-let currentBackdropURL = null;
-backdropInput.addEventListener('change', (e) => {
-  const file = e.target.files[0]; if (!file) return;
-  if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL);
-  currentBackdropURL = URL.createObjectURL(file);
-  posterSheet.style.backgroundImage = `url('${currentBackdropURL}')`;
-});
-document.getElementById('posterClearBackdrop').addEventListener('click', () => {
-  if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL);
-  currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = '';
-});
+const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
+const subtitleStyles = { 'theme-minimal': { color: '#fff', bg: 'rgba(0,0,0,0.85)', font: 'Inter' }, 'theme-neon': { color: '#00ffff', bg: 'rgba(11,14,23,0.9)', font: 'Inter' }, 'theme-noir': { color: '#fff', bg: 'rgba(0,0,0,0.9)', font: 'Courier New' }, 'theme-halloween': { color: '#41d636', bg: 'rgba(26,11,46,0.9)', font: 'Georgia' }, 'theme-christmas': { color: '#ffd700', bg: 'rgba(139,0,0,0.9)', font: 'Georgia' }, 'theme-valentine': { color: '#ff69b4', bg: 'rgba(255,240,245,0.9)', font: 'Georgia' }, 'theme-typewriter': { color: '#333', bg: 'rgba(240,240,240,0.9)', font: 'Courier New' }, 'theme-vhs': { color: '#ff00ff', bg: 'rgba(26,26,46,0.9)', font: 'Arial Black' }, 'theme-retro': { color: '#ffeb3b', bg: 'rgba(255,64,129,0.9)', font: 'Arial Black' } };
+function updateSubtitleStyle(themeClass) { const style = subtitleStyles[themeClass] || subtitleStyles['theme-minimal']; document.documentElement.style.setProperty('--cue-text', style.color); document.documentElement.style.setProperty('--cue-bg', style.bg); document.documentElement.style.setProperty('--cue-font', style.font); }
 
-// Themes
-const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's" };
-const posterThemeMenu = document.getElementById('posterThemeMenu'); const posterThemeToggle = document.getElementById('posterThemeToggle'); const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
+function mapGenreToTheme(genreString) { if (!genreString) return null; const genres = genreString.toLowerCase(); if (genres.includes('horror')) return 'theme-halloween'; if (genres.includes('romance')) return 'theme-valentine'; if (genres.includes('sci-fi')) return 'theme-neon'; if (genres.includes('fantasy')) return 'theme-artdeco'; if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir'; if (genres.includes('comedy')) return 'theme-orange'; if (genres.includes('western')) return 'theme-golden'; if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter'; if (genres.includes('family') || genres.includes('animation')) return 'theme-retro'; if (genres.includes('musical')) return 'theme-marquee'; if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue'; return null; }
+let applyCustomTheme = () => {}; // Dummy function to prevent errors
+function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } updateSubtitleStyle(themeClass); setTimeout(applyZoom, 10); }
 
-Object.keys(themeDisplayNames).forEach(themeClass => {
-  const btn = document.createElement('button'); btn.className = 'dropdown-item'; btn.dataset.posterTheme = themeClass; btn.textContent = themeDisplayNames[themeClass];
-  btn.addEventListener('click', () => { setPosterTheme(themeClass, themeDisplayNames[themeClass]); posterThemeMenu.classList.remove('open'); });
-  posterThemeMenu.appendChild(btn);
-});
-posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeMenu.classList.toggle('open'); });
-document.addEventListener('click', (e) => { if (!posterThemeMenu.contains(e.target) && !posterThemeToggle.contains(e.target)) posterThemeMenu.classList.remove('open'); });
+const fontDropdown = document.getElementById('fontDropdown'); const fontToggle = document.getElementById('fontToggle'); const fontMenu = document.getElementById('fontMenu'); const fontLabel = document.getElementById('fontLabel');
+fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontDropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!fontDropdown.contains(e.target)) fontDropdown.classList.remove('open'); });
+document.querySelectorAll('.dropdown-item[data-font]').forEach(btn => btn.addEventListener('click', () => { const font = btn.dataset.font; const name = btn.textContent; document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); fontLabel.textContent = name; fontDropdown.classList.remove('open'); document.querySelectorAll('.ps-title').forEach(el => { if (font === 'default') el.style.fontFamily = ''; else el.style.fontFamily = font; }); }));
 
-function setPosterTheme(themeClass, themeName) {
-  const allThemes = Object.keys(themeDisplayNames);
-  posterSheet.classList.remove(...allThemes);
-  posterSheet.classList.add(themeClass);
-  document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active'));
-  const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`);
-  if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; }
-  setTimeout(applyZoom, 10);
-}
-
-// Fonts
-const fontMenu = document.getElementById('fontMenu'); const fontToggle = document.getElementById('fontToggle'); const fontLabel = document.getElementById('fontLabel');
-const fonts = { 'default': 'Default', "'Inter', sans-serif": 'Inter', "'Georgia', serif": 'Georgia', "'Courier Prime', monospace": 'Courier', "'Impact', sans-serif": 'Impact', "'Arial Black', sans-serif": 'Arial Black' };
-Object.keys(fonts).forEach(font => {
-  const btn = document.createElement('button'); btn.className = 'dropdown-item'; btn.dataset.font = font; btn.textContent = fonts[font];
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active'); fontLabel.textContent = fonts[font]; fontMenu.classList.remove('open');
-    document.querySelectorAll('.ps-title').forEach(el => { el.style.fontFamily = font === 'default' ? '' : font; });
-  });
-  fontMenu.appendChild(btn);
-});
-fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontMenu.classList.toggle('open'); });
-document.addEventListener('click', (e) => { if (!fontMenu.contains(e.target) && !fontToggle.contains(e.target)) fontMenu.classList.remove('open'); });
-
-// Format
-document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => {
-  document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (btn.dataset.format === '916') posterSheet.classList.add('format-916'); else posterSheet.classList.remove('format-916');
-  applyZoom();
-}));
-
-// Options
 const grainToggle = document.getElementById('grainToggle'); const filmGrain = document.getElementById('filmGrain');
 grainToggle.addEventListener('click', () => { grainToggle.classList.toggle('active'); filmGrain.classList.toggle('show'); });
+
 const qrToggle = document.getElementById('qrToggle');
-qrToggle.addEventListener('click', () => {
-  qrToggle.classList.toggle('active'); const show = qrToggle.classList.contains('active');
-  preview.qr.classList.toggle('show', show);
-  if (show) { const link = fields.qrLink.value || 'https://www.google.com'; preview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; }
-});
-fields.qrLink.addEventListener('input', () => {
-  if (qrToggle.classList.contains('active')) { const link = fields.qrLink.value || 'https://www.google.com'; preview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; }
-});
+qrToggle.addEventListener('click', () => { qrToggle.classList.toggle('active'); const show = qrToggle.classList.contains('active'); posterPreview.qr.classList.toggle('show', show); if (show) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
+posterFields.qrLink.addEventListener('input', () => { if (qrToggle.classList.contains('active')) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
 
-// OMDb Autofill
+document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if (btn.dataset.format === '916') posterSheet.classList.add('format-916'); else posterSheet.classList.remove('format-916'); applyZoom(); }));
+
 function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
-async function fetchSuggestions(query, target) {
-  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
-  if (!apiKey || query.trim().length < 3) { hideResults(target); return; }
-  try {
-    const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`);
-    const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = '';
-    if (data.Response === 'True' && data.Search) {
-      data.Search.slice(0, 5).forEach(movie => {
-        const item = document.createElement('div'); item.className = 'autocomplete-item';
-        item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`;
-        item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target));
-        resultsContainer.appendChild(item);
-      }); resultsContainer.classList.add('show');
-    } else { hideResults(target); }
-  } catch (e) { hideResults(target); }
-}
+async function fetchSuggestions(query, target) { const apiKey = localStorage.getItem('cl-omdb-key'); if (!apiKey || query.trim().length < 3) { hideResults(target); return; } try { const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; if (data.Response === 'True' && data.Search) { data.Search.slice(0, 5).forEach(movie => { const item = document.createElement('div'); item.className = 'autocomplete-item'; item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); resultsContainer.appendChild(item); }); resultsContainer.classList.add('show'); } else { hideResults(target); } } catch (e) { hideResults(target); } }
 function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
-
-function mapGenreToTheme(genreString) {
-  if (!genreString) return null;
-  const genres = genreString.toLowerCase();
-  if (genres.includes('horror')) return 'theme-halloween';
-  if (genres.includes('romance')) return 'theme-valentine';
-  if (genres.includes('sci-fi')) return 'theme-neon';
-  if (genres.includes('fantasy')) return 'theme-artdeco';
-  if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir';
-  if (genres.includes('comedy')) return 'theme-orange';
-  if (genres.includes('western')) return 'theme-golden';
-  if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter';
-  if (genres.includes('family') || genres.includes('animation')) return 'theme-retro';
-  if (genres.includes('musical')) return 'theme-marquee';
-  if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue';
-  return null;
-}
-
 async function fetchMovieDetails(imdbID, target) {
-  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
+  const apiKey = localStorage.getItem('cl-omdb-key');
   try {
-    const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`); const data = await res.json();
+    const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`);
+    const data = await res.json();
     if (data.Response === 'True') {
       if (target === '1') {
-        fields.title1.value = data.Title || ''; fields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot1.value = data.Plot || '';
-        if (data.Poster && data.Poster !== 'N/A') { 
-          const img = document.getElementById('psPoster1');
-          img.src = data.Poster; img.classList.add('show');
-        }
-        preview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-        preview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+        posterFields.title1.value = data.Title || ''; posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot1.value = data.Plot || '';
+        if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster1'); img.src = data.Poster; img.classList.add('show'); }
+        posterPreview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
+        posterPreview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
       } else {
-        fields.title2.value = data.Title || ''; fields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot2.value = data.Plot || '';
-        if (data.Poster && data.Poster !== 'N/A') {
-          const img = document.getElementById('psPoster2');
-          img.src = data.Poster; img.classList.add('show');
-        }
-        preview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-        preview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+        posterFields.title2.value = data.Title || ''; posterFields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot2.value = data.Plot || '';
+        if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster2'); img.src = data.Poster; img.classList.add('show'); }
+        posterPreview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
+        posterPreview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
       }
       const mappedTheme = mapGenreToTheme(data.Genre); if (mappedTheme) setPosterTheme(mappedTheme, themeDisplayNames[mappedTheme]);
       updatePosterPreview();
     }
   } catch (e) { console.error('Error fetching details:', e); }
-  hideResults(target); document.getElementById(`search${target}`).value = '';
+  hideResults(target); const input = document.getElementById(`search${target}`); if (input) input.value = '';
 }
 document.getElementById('search1').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '1'), 300));
 document.getElementById('search2').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '2'), 300));
 document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
+let currentBackdropURL = null;
+backdropInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = URL.createObjectURL(file); posterSheet.style.backgroundImage = `url(${currentBackdropURL})`; });
+clearBackdropBtn.addEventListener('click', () => { if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = ''; });
 
-// Zoom
+const posterThemeDropdown = document.getElementById('posterThemeDropdown'); const posterThemeToggle = document.getElementById('posterThemeToggle'); const posterThemeMenu = document.getElementById('posterThemeMenu'); const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
+posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeDropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!posterThemeDropdown.contains(e.target)) posterThemeDropdown.classList.remove('open'); });
+document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(btn => btn.addEventListener('click', () => { setPosterTheme(btn.dataset.posterTheme, btn.textContent); posterThemeDropdown.classList.remove('open'); }));
+
 let posterZoom = 0.75;
 function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
 document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
 document.getElementById('zoomOut').addEventListener('click', () => { posterZoom = Math.max(0.25, posterZoom - 0.1); applyZoom(); });
 document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
 
-// Print & Export
-document.getElementById('posterPrintBtn').addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
-document.getElementById('posterExportBtn').addEventListener('click', () => {
-  const exportBtn = document.getElementById('posterExportBtn'); exportBtn.textContent = 'Rendering...';
-  const currentTransform = posterSheet.style.transform; posterSheet.style.transform = 'none'; posterSheet.style.marginBottom = '0';
+posterPrintBtn.addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
+posterExportBtn.addEventListener('click', () => {
+  posterExportBtn.textContent = 'Rendering...';
+  const currentTransform = posterSheet.style.transform;
+  posterSheet.style.transform = 'none';
   html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
     const link = document.createElement('a'); link.download = 'cineloom-poster.png'; link.href = canvas.toDataURL('image/png'); link.click();
-    exportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; applyZoom();
-  }).catch(err => { alert('Export failed. Try Print or Custom Backdrop.'); exportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; applyZoom(); });
+    posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform;
+  }).catch(err => { console.error('Export failed', err); alert('Export failed due to CORS restrictions on the poster image. Try the Print option or use a custom backdrop upload.'); posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; });
 });
 
 updatePosterPreview();
