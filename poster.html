@@ -51,7 +51,7 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .ps-poster-img.show { display: block; }
 .poster-sheet.double-feature .ps-poster-img { width: 120px; height: 180px; }
 
-.ps-title { font-size: 3rem; margin-bottom: 1rem; font-weight: 800; line-height: 1.1; }
+.ps-title { font-size: 3rem; margin-bottom: 1rem; font-weight: 800; line-height: 1.1; outline: none; } .ps-title:focus { background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 0 2px var(--accent); }
 .ps-tagline { font-size: 1.2rem; margin-bottom: 1rem; color: #ccc; }
 .ps-plot { font-size: 1rem; opacity: 0.8; max-width: 80%; margin-bottom: 2rem; }
 .ps-meta { display: flex; gap: 20px; font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
@@ -88,23 +88,21 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 
 /* Bulletproof Print Rules */
 @media print {
-    @page { size: A4; margin: 0; }
-    body { background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    header, .editor-panel, .zoom-controls { display: none !important; }
-    .main-container { display: block !important; height: auto !important; overflow: visible !important; }
-    .poster-preview-wrap { position: static !important; overflow: visible !important; padding: 0 !important; height: auto !important; background: none !important; display: block !important; }
-    .poster-sheet { 
-        transform: none !important; 
-        margin: 0 auto !important; 
-        box-shadow: none !important; 
-        page-break-after: avoid;
+    body * { visibility: hidden !important; }
+    .poster-sheet, .poster-sheet * { visibility: visible !important; }
+    .poster-sheet {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
         width: 210mm !important;
         min-height: 297mm !important;
+        transform: none !important;
+        margin: 0 !important;
+        box-shadow: none !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
-    .ps-content { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .ps-poster-img, .film-grain, .ps-qr { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    @page { size: A4; margin: 0; }
 }
 </style>
 </head>
@@ -273,14 +271,24 @@ function updatePosterPreview() {
   applyZoom();
 }
 
+// Bidirectional Editing Sync
 Object.keys(fields).forEach(key => {
   const input = fields[key];
-  input.addEventListener('input', () => { updatePosterPreview(); });
-});
-
-['title1', 'title2'].forEach(key => {
-  const prev = preview[key]; const inp = fields[key];
-  if (prev.isContentEditable) { prev.addEventListener('input', () => { inp.value = prev.textContent; }); }
+  const prev = preview[key];
+  if (!prev) return;
+  
+  input.addEventListener('input', () => {
+    if (document.activeElement !== prev) {
+      prev.textContent = input.value;
+    }
+    updatePosterPreview();
+  });
+  
+  if (prev.isContentEditable) {
+    prev.addEventListener('input', () => {
+      input.value = prev.textContent;
+    });
+  }
 });
 
 let currentBackdropURL = null;
