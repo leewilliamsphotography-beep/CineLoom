@@ -128,25 +128,23 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v1.4.1 loaded");
+console.log("CineLoom Player v1.4.2 loaded");
 
 const playerContainer = document.getElementById('playerContainer'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
 let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let currentFilm = 1;
+let currentSubURL = null; 
+let subDelay = 0; 
+let originalCues = [];
 
-// --- Subtitle Parsing & Sync Logic (Global) ---
+// --- Subtitle Parsing & Sync Logic ---
 function parseSubtitles(filename, content) { const ext = filename.split('.').pop().toLowerCase(); if (ext === 'vtt') return content; if (ext === 'srt') return srtToVtt(content); if (ext === 'sbv') return sbvToVtt(content); if (ext === 'ass' || ext === 'ssa') return assToVtt(content); return srtToVtt(content); }
 function srtToVtt(srt) { let vtt = 'WEBVTT\n\n'; vtt += srt.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2'); vtt = vtt.replace(/(^|\n)(\d{2}:\d{2}),(\d{3})/g, '$1$2.$3'); return vtt; }
 function sbvToVtt(content) { let vtt = 'WEBVTT\n\n'; const blocks = content.trim().split(/\n\s*\n/); blocks.forEach(block => { const lines = block.split('\n'); if (lines.length < 2) return; const times = lines[0].split(','); if (times.length === 2) { const start = formatSbvTime(times[0].trim()); const end = formatSbvTime(times[1].trim()); vtt += `${start} --> ${end}\n${lines.slice(1).join('\n')}\n\n`; } }); return vtt; }
 function formatSbvTime(t) { let parts = t.replace(',', '.').split(':'); while(parts.length < 3) parts.unshift('00'); return parts.map(p => p.padStart(2, '0')).join(':'); }
 function assToVtt(content) { let vtt = 'WEBVTT\n\n'; const lines = content.split('\n'); let inEvents = false; let textIdx = -1, startIdx = -1, endIdx = -1; for (let line of lines) { if (line.trim().startsWith('[')) inEvents = line.trim().toLowerCase() === '[events]'; if (inEvents && line.startsWith('Format:')) { const fmt = line.split(':')[1].split(',').map(s => s.trim()); textIdx = fmt.indexOf('Text'); startIdx = fmt.indexOf('Start'); endIdx = fmt.indexOf('End'); continue; } if (inEvents && line.startsWith('Dialogue:') && textIdx !== -1) { const parts = line.substring(9).split(','); if (parts.length > textIdx) { const start = formatAssTime(parts[startIdx]?.trim()); const end = formatAssTime(parts[endIdx]?.trim()); let text = parts.slice(textIdx).join(',').trim(); text = text.replace(/\{[^}]+\}/g, ''); text = text.replace(/\\N/gi, '\n'); if (start && end) vtt += `${start} --> ${end}\n${text}\n\n`; } } } return vtt; }
 function formatAssTime(t) { if (!t) return ''; let parts = t.split(':'); while(parts.length < 3) parts.unshift('00'); let secParts = parts[2].split('.'); let sec = secParts[0].padStart(2, '0'); let ms = (secParts[1] || '0').padEnd(3, '0'); return `${parts[0].padStart(2,'0')}:${parts[1].padStart(2,'0')}:${sec}.${ms}`; }
-
-let currentSubURL = null; 
-let subDelay = 0; 
-let originalCues = [];
-const subSyncControls = document.getElementById('subSyncControls');
 
 function applySubDelay() { 
   const videoEl = document.getElementById('player');
@@ -189,38 +187,10 @@ fileSub.addEventListener('change', async (e) => {
     const activeTrack = track.track; 
     originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); 
     subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; 
-    subSyncControls.style.display = 'flex'; 
+    document.getElementById('subSyncControls').style.display = 'flex'; 
     for (let i = 0; i < videoEl.textTracks.length; i++) videoEl.textTracks[i].mode = 'showing'; 
     if (window.player) window.player.toggleCaptions(true); 
   }); 
-  
-  // If a video is already loaded, update Plyr source to include the track
-  const currentFilmObj = currentFilm === 1 ? film1 : film2;
-  if (currentFilmObj.url && window.player) {
-    const currentTime = window.player.currentTime; 
-    const isPlaying = !videoEl.paused; 
-    window.player.source = { 
-      type: 'video', 
-      title: currentFilmObj.name || 'CineLoom', 
-      sources: [{ src: currentFilmObj.url, type: currentFilmObj.mime }], 
-      tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] 
-    }; 
-    const onLoaded = () => { 
-      window.player.currentTime = currentTime; 
-      if (isPlaying) window.player.play().catch(()=>{}); 
-      window.player.toggleCaptions(true); 
-      const activeTrack = videoEl.textTracks[0]; 
-      if (activeTrack) { 
-        originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); 
-        subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; 
-        subSyncControls.style.display = 'flex'; 
-      } 
-      videoEl.removeEventListener('loadedmetadata', onLoaded); 
-    }; 
-    videoEl.addEventListener('loadedmetadata', onLoaded);
-  } else if (window.player) {
-    window.player.toggleCaptions(true);
-  }
   
   document.getElementById('loadSubsName').textContent = file.name; 
 });
@@ -247,7 +217,25 @@ function setupPlayer() {
     currentFilm = filmNum;
     const f = filmNum === 1 ? film1 : film2;
     if (!f.url) return;
-    player.source = { type: 'video', title: f.name, sources: [{ src: f.url, type: f.mime }] };
+    
+    // If subtitles are loaded, include them in the source!
+    const tracks = [];
+    if (currentSubURL) {
+        tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true });
+    }
+    player.source = { type: 'video', title: f.name, sources: [{ src: f.url, type: f.mime }], tracks: tracks };
+    
+    // Re-apply sub sync after switching
+    const onLoaded = () => {
+        const activeTrack = video.textTracks[0];
+        if (activeTrack && originalCues.length > 0) {
+            // Reset originalCues if switching films
+            originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime }));
+            applySubDelay();
+        }
+        video.removeEventListener('loadedmetadata', onLoaded);
+    };
+    video.addEventListener('loadedmetadata', onLoaded);
   }
   window.switchFilm = switchFilm;
 
@@ -512,7 +500,7 @@ function startTorrentStream(magnet) {
       elem.id = 'player'; elem.setAttribute('playsinline', '');
       videoStage.insertBefore(elem, tempContainer); tempContainer.remove();
       
-      // CRITICAL: Set film1 properties so subtitle loading works!
+      // Set film1 properties so remote control and subtitle loading work
       film1.url = elem.src; 
       film1.mime = 'video/mp4'; 
       film1.name = `Streaming: ${file.name}`;
