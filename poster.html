@@ -87,6 +87,22 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .film-grain.show { opacity: 0.15; }
 
 .ps-qr { display: none; width: 100px; height: 100px; margin-top: 20px; border-radius: 8px; background: #fff; padding: 5px; } .ps-qr.show { display: block; }
+
+/* Print Rules - Hides everything except the poster */
+@media print {
+    body { background: white !important; }
+    header, .editor-panel, .zoom-controls { display: none !important; }
+    .main-container { display: block !important; height: auto !important; overflow: visible !important; }
+    .poster-preview-wrap { position: static !important; overflow: visible !important; padding: 0 !important; height: auto !important; background: none !important; }
+    .poster-sheet { 
+        transform: none !important; 
+        margin: 0 !important; 
+        box-shadow: none !important; 
+        page-break-after: avoid;
+        width: 100% !important;
+        min-height: 297mm !important; /* A4 height */
+    }
+}
 </style>
 </head>
 <body>
@@ -381,9 +397,8 @@ async function fetchMovieDetails(imdbID, target) {
     if (data.Response === 'True') {
       if (target === '1') {
         fields.title1.value = data.Title || ''; fields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot1.value = data.Plot || '';
-        // Set Backdrop and Cover Art
+        // Set ONLY the small cover art image, NOT the background
         if (data.Poster && data.Poster !== 'N/A') { 
-          posterSheet.style.backgroundImage = `url('${data.Poster}')`;
           const img = document.getElementById('psPoster1');
           img.src = data.Poster; img.classList.add('show');
         }
@@ -391,7 +406,7 @@ async function fetchMovieDetails(imdbID, target) {
         preview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
       } else {
         fields.title2.value = data.Title || ''; fields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot2.value = data.Plot || '';
-        // Set Cover Art for Film 2
+        // Set ONLY the small cover art image, NOT the background
         if (data.Poster && data.Poster !== 'N/A') {
           const img = document.getElementById('psPoster2');
           img.src = data.Poster; img.classList.add('show');
