@@ -12,6 +12,7 @@
     --text: #ffffff;
     --text-soft: rgba(255, 255, 255, 0.7);
     --accent: #3b82f6;
+    --accent-2: #8b5cf6;
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
   }
   
@@ -32,10 +33,16 @@
     background: var(--bg);
   }
   
+  /* Animated Background Canvas */
+  #bgCanvas {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(circle at center, #0a0a12 0%, #000 100%);
+  }
+  
   /* Start Overlay */
   .start-overlay { 
     position: absolute; inset: 0; z-index: 100; 
-    background: rgba(0,0,0,0.9); 
+    background: rgba(0,0,0,0.8); 
     display: flex; flex-direction: column; 
     align-items: center; justify-content: center; 
     gap: 2rem; text-align: center; 
@@ -43,33 +50,13 @@
     transition: opacity 0.5s var(--ease); 
   }
   .start-overlay.hidden { opacity: 0; pointer-events: none; }
-  .start-logo svg { width: 80px; height: 80px; }
+  .start-logo svg { width: 80px; height: 80px; filter: drop-shadow(0 0 10px var(--accent)); }
   .start-text { font-size: 1.5rem; font-weight: 600; color: var(--text-soft); letter-spacing: 0.05em; }
-  
-  /* Slideshow */
-  .poster-stage { 
-    position: absolute; inset: 0; 
-    overflow: hidden; 
-    background: #111; 
-  }
-  .poster-img { 
-    position: absolute; inset: 0; 
-    width: 100%; height: 100%; 
-    object-fit: cover; object-position: center;
-    opacity: 0; 
-    transition: opacity 2s ease-in-out; 
-  }
-  .poster-img.active { opacity: 1; animation: kenburns 20s ease-out forwards; }
-  
-  @keyframes kenburns {
-    0% { transform: scale(1) translate(0, 0); }
-    100% { transform: scale(1.15) translate(-2%, -2%); }
-  }
   
   /* Overlays */
   .vignette { 
     position: absolute; inset: 0; z-index: 2; 
-    background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.8) 100%); 
+    background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.9) 100%); 
     pointer-events: none; 
   }
   
@@ -81,33 +68,36 @@
   .kiosk-header svg { width: 32px; height: 32px; }
   .kiosk-brand { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.02em; }
   
-  .movie-info { 
-    position: absolute; bottom: 4rem; left: 0; right: 0; z-index: 3; 
-    text-align: center; 
-    opacity: 0; transition: opacity 1s ease; 
-  }
-  .movie-info.show { opacity: 1; }
-  .movie-title { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
-  .movie-meta { font-size: 1.1rem; color: var(--text-soft); margin-top: 0.5rem; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-  
-  .exit-hint { 
-    position: absolute; bottom: 1rem; right: 1rem; z-index: 3; 
-    font-size: 0.75rem; color: rgba(255,255,255,0.3); 
-  }
-  
   /* Audio Indicator */
   .audio-indicator { 
     position: absolute; top: 2rem; right: 2rem; z-index: 3; 
     display: flex; align-items: center; gap: 0.5rem; 
     color: var(--text-soft); font-size: 0.8rem; 
-    opacity: 0.6; 
+    opacity: 0; transition: opacity 0.5s ease; 
   }
-  .audio-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 5px var(--accent); }
+  .audio-indicator.show { opacity: 0.6; }
+  .audio-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 5px var(--accent); animation: pulse 2s infinite; }
+  
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+  
+  .exit-hint { 
+    position: absolute; bottom: 1.5rem; right: 1.5rem; z-index: 3; 
+    font-size: 0.8rem; color: rgba(255,255,255,0.4); 
+    background: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer; 
+    transition: all 0.2s ease;
+    opacity: 0; 
+  }
+  .exit-hint.show { opacity: 1; }
+  .exit-hint:hover { background: rgba(255,255,255,0.1); color: #fff; }
 </style>
 </head>
 <body>
 
 <div id="kiosk-container">
+  <canvas id="bgCanvas"></canvas>
+  
   <!-- Start Overlay -->
   <div class="start-overlay" id="startOverlay">
     <div class="start-logo">
@@ -125,9 +115,6 @@
     <div class="start-text">Click to Enter Ambient Mode</div>
   </div>
 
-  <!-- Slideshow Stage -->
-  <div class="poster-stage" id="posterStage"></div>
-  
   <!-- Vignette -->
   <div class="vignette"></div>
   
@@ -143,194 +130,148 @@
     <div class="kiosk-brand">CineLoom Suite</div>
   </div>
   
-  <div class="audio-indicator" id="audioIndicator" style="display: none;">
+  <div class="audio-indicator" id="audioIndicator">
     <div class="audio-dot"></div>
     <span>Ambient Audio</span>
   </div>
   
-  <div class="movie-info" id="movieInfo">
-    <div class="movie-title" id="movieTitle"></div>
-    <div class="movie-meta" id="movieMeta"></div>
-  </div>
-  
-  <div class="exit-hint">Press ESC to exit</div>
+  <button class="exit-hint" id="exitHint">Press ESC or Click to Exit</button>
 </div>
 
 <script>
-console.log("CineLoom Kiosk v1.0.0 loaded");
+console.log("CineLoom Kiosk v1.2.0 loaded");
 
 const startOverlay = document.getElementById('startOverlay');
-const posterStage = document.getElementById('posterStage');
-const movieInfo = document.getElementById('movieInfo');
-const movieTitle = document.getElementById('movieTitle');
-const movieMeta = document.getElementById('movieMeta');
 const audioIndicator = document.getElementById('audioIndicator');
+const exitHint = document.getElementById('exitHint');
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
 
-// A curated list of visually stunning movies to fetch from OMDb
-const movieList = [
-  "Inception", "Interstellar", "The Matrix", "Blade Runner 2049", 
-  "Dune", "The Godfather", "Pulp Fiction", "Parasite", 
-  "Mad Max: Fury Road", "Avatar", "The Dark Knight", "2001: A Space Odyssey",
-  "Drive", "Spirited Away", "The Grand Budapest Hotel", "Tron: Legacy"
-];
+// --- Animated Background Logic ---
+let particles = [];
 
-let currentIndex = 0;
-let posters = [];
-let audioContext, droneNodes = {};
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initParticles();
+}
+
+function initParticles() {
+    particles = [];
+    const numParticles = Math.floor((canvas.width * canvas.height) / 12000); // Slightly denser
+    for (let i = 0; i < numParticles; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            size: Math.random() * 1.5 + 0.5
+        });
+    }
+}
+
+function drawParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw connections
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 140) { // Slightly wider connection lines
+                ctx.strokeStyle = `rgba(59, 130, 246, ${(1 - dist / 140) * 0.8})`;
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.stroke();
+            }
+        }
+    }
+    
+    // Draw particles
+    for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        ctx.fillStyle = 'rgba(139, 92, 246, 0.9)';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+    }
+    
+    requestAnimationFrame(drawParticles);
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+drawParticles();
 
 // --- Ambient Audio Logic ---
+let audioContext, droneNodes = {};
+
 function startAmbientAudio() {
   if (audioContext) return;
   try {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Master Gain
     const masterGain = audioContext.createGain();
-    masterGain.gain.value = 0.08; // Very low volume
+    masterGain.gain.value = 0.05; 
     masterGain.connect(audioContext.destination);
     
-    // Low Frequencies for a deep drone (A2, E3, A3)
-    const freqs = [110, 164.81, 220];
+    const freqs = [110, 164.81, 220]; // A minor chord drone
     droneNodes = {};
     
     freqs.forEach((freq, i) => {
       const osc = audioContext.createOscillator();
       osc.type = 'sine';
       osc.frequency.value = freq;
-      
       const gain = audioContext.createGain();
       gain.gain.value = 0.5;
-      
-      // Slow LFO for a breathing effect
       const lfo = audioContext.createOscillator();
-      lfo.frequency.value = 0.05 + (i * 0.02); // Slightly different speeds
+      lfo.frequency.value = 0.05 + (i * 0.02);
       const lfoGain = audioContext.createGain();
       lfoGain.gain.value = 0.2;
       lfo.connect(lfoGain);
       lfoGain.connect(gain.gain);
-      
       osc.connect(gain);
       gain.connect(masterGain);
-      
       osc.start();
       lfo.start();
-      
       droneNodes[`osc${i}`] = osc;
       droneNodes[`lfo${i}`] = lfo;
     });
-    
-    audioIndicator.style.display = 'flex';
+    audioIndicator.classList.add('show');
   } catch (e) {
     console.warn('AudioContext not supported or blocked.', e);
   }
-}
-
-// --- OMDb Fetch Logic ---
-async function fetchPosters() {
-  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
-  // Shuffle array for randomness on load
-  const shuffled = movieList.sort(() => 0.5 - Math.random());
-  
-  for (const title of shuffled) {
-    try {
-      const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${apiKey}`);
-      const data = await res.json();
-      if (data.Response === 'True' && data.Poster && data.Poster !== 'N/A') {
-        // Preload image
-        const img = new Image();
-        img.src = data.Poster;
-        await new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
-        
-        posters.push({
-          url: data.Poster,
-          title: data.Title,
-          year: data.Year,
-          genre: data.Genre,
-          rating: data.imdbRating
-        });
-      }
-    } catch (e) {
-      console.error(`Failed to fetch ${title}`, e);
-    }
-  }
-}
-
-// --- Slideshow Logic ---
-async function startSlideshow() {
-  movieInfo.classList.remove('show');
-  document.getElementById('movieTitle').textContent = 'Loading Posters...';
-  document.getElementById('movieMeta').textContent = 'Fetching cinematic visuals...';
-  movieInfo.classList.add('show');
-  
-  await fetchPosters();
-  
-  if (posters.length === 0) {
-    document.getElementById('movieTitle').textContent = 'Could not load posters';
-    document.getElementById('movieMeta').textContent = 'Check your OMDb API key in settings.';
-    return;
-  }
-  
-  movieInfo.classList.remove('show');
-  
-  // Initial delay
-  setTimeout(() => {
-    showNextPoster();
-    setInterval(showNextPoster, 12000); // 12 seconds per poster
-  }, 2000);
-}
-
-function showNextPoster() {
-  if (posters.length === 0) return;
-  
-  const data = posters[currentIndex];
-  currentIndex = (currentIndex + 1) % posters.length;
-  
-  // Create new image element
-  const img = document.createElement('img');
-  img.src = data.url;
-  img.className = 'poster-img';
-  img.alt = data.title;
-  img.crossOrigin = 'anonymous'; 
-  
-  posterStage.appendChild(img);
-  
-  // Fade out old info
-  movieInfo.classList.remove('show');
-  
-  // Trigger fade in after a slight delay
-  setTimeout(() => {
-    img.classList.add('active');
-  }, 100);
-  
-  // Update Info
-  setTimeout(() => {
-    movieTitle.textContent = data.title;
-    movieMeta.textContent = `${data.year} • ${data.genre} • ★ ${data.rating}`;
-    movieInfo.classList.add('show');
-  }, 2000);
-  
-  // Clean up old images
-  setTimeout(() => {
-    const imgs = posterStage.querySelectorAll('.poster-img:not(.active)');
-    imgs.forEach(i => i.remove());
-  }, 3000);
 }
 
 // --- Start / Exit Logic ---
 startOverlay.addEventListener('click', () => {
   startOverlay.classList.add('hidden');
   startAmbientAudio();
-  startSlideshow();
+  exitHint.classList.add('show');
 });
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
+// Bulletproof Escape Key listener
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' || e.code === 'Escape' || e.keyCode === 27) {
+    e.preventDefault();
     window.location.href = 'index.html';
   }
 });
 
+exitHint.addEventListener('click', () => {
+  window.location.href = 'index.html';
+});
+
+// Show cursor on mouse move
 document.addEventListener('mousemove', () => {
-  // Show cursor if moved
   document.body.style.cursor = 'auto';
   clearTimeout(window.cursorTimeout);
   window.cursorTimeout = setTimeout(() => {
