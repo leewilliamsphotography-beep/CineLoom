@@ -3,734 +3,384 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CineLoom</title>
-
+<title>CineLoom Poster Maker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Georgia&family=Courier+Prime&family=Impact&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* Base Styles */
 :root {
   --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95);
   --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6;
   --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4);
   --line: rgba(255,255,255,0.08); --line-soft: rgba(255,255,255,0.04); --line-strong: rgba(255,255,255,0.15);
-  --error: #ef4444; --ease: cubic-bezier(0.4, 0, 0.2, 1); 
-  --cue-size: 1.8em; --cue-bg: rgba(0,0,0,0.85); --cue-text: #ffffff; --cue-font: 'Inter', sans-serif; --cue-shadow: #000000;
-  --blob-opacity: 0.15; --shadow-card: 0 10px 40px rgba(0,0,0,0.4);
-  --plyr-color-main: var(--accent); --plyr-video-background: rgba(0,0,0,0.9); --plyr-menu-background: var(--bg-elev-3);
-  --plyr-menu-color: var(--text); --plyr-menu-border-color: var(--line); --plyr-control-icon-size: 18px;
-  --plyr-control-spacing: 12px; --plyr-control-radius: 6px; --plyr-font-family: 'Inter', sans-serif; --plyr-font-size-small: 13px; --plyr-font-size-base: 14px;
+  --error: #ef4444; --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
-html[data-theme="light"] { --bg: #f8f9fa; --bg-elev: rgba(255,255,255,0.7); --bg-elev-2: rgba(255,255,255,0.85); --bg-elev-3: rgba(255,255,255,0.98); --text: #0f172a; --text-soft: #475569; --text-dim: #94a3b8; --accent: #2563eb; --accent-2: #db2777; --accent-soft: rgba(37,99,235,0.08); --accent-glow: rgba(37,99,235,0.2); --line: rgba(0,0,0,0.08); --line-soft: rgba(0,0,0,0.04); --line-strong: rgba(0,0,0,0.15); --blob-opacity: 0.1; --shadow-card: 0 10px 40px rgba(0,0,0,0.05); }
-html[data-theme="theater"] { --bg: #0a0606; --bg-elev: rgba(22,16,13,0.6); --bg-elev-2: rgba(31,23,19,0.7); --bg-elev-3: rgba(42,32,26,0.9); --text: #fff; --text-soft: #e4dcd8; --text-dim: #8a7a70; --accent: #f5a05f; --accent-2: #f55f7a; --blob-opacity: 0.2; }
-html[data-theme="midnight"] { --bg: #060410; --bg-elev: rgba(15,13,22,0.6); --bg-elev-2: rgba(22,19,31,0.7); --bg-elev-3: rgba(29,26,42,0.9); --text: #fff; --text-soft: #e4d8e4; --text-dim: #7a6e7a; --accent: #c98aff; --accent-2: #5f7aff; --blob-opacity: 0.15; }
-html[data-theme="mono"] { --bg: #000; --bg-elev: rgba(20,20,20,0.6); --bg-elev-2: rgba(30,30,30,0.7); --bg-elev-3: rgba(45,45,45,0.9); --text: #fff; --text-soft: #e0e0e0; --text-dim: #808080; --accent: #fff; --accent-2: #888; --line: rgba(255,255,255,0.15); --line-soft: rgba(255,255,255,0.05); --line-strong: rgba(255,255,255,0.3); --blob-opacity: 0.1; }
-html[data-theme="spring"] { --bg: #0c1410; --bg-elev: rgba(20,30,22,0.6); --bg-elev-2: rgba(26,38,28,0.7); --bg-elev-3: rgba(32,48,34,0.95); --text: #f5fff0; --text-soft: #d8e8d4; --text-dim: #8aa080; --accent: #7dd87d; --accent-2: #ff8fb1; --blob-opacity: 0.15; }
-html[data-theme="summer"] { --bg: #0d0a05; --bg-elev: rgba(30,22,13,0.6); --bg-elev-2: rgba(38,28,16,0.7); --bg-elev-3: rgba(48,36,20,0.95); --text: #fffdf5; --text-soft: #f0e8d4; --text-dim: #b0a080; --accent: #ffb84d; --accent-2: #ff5e5e; --blob-opacity: 0.2; }
-html[data-theme="autumn"] { --bg: #0e0805; --bg-elev: rgba(30,18,13,0.6); --bg-elev-2: rgba(40,24,18,0.7); --bg-elev-3: rgba(52,32,24,0.95); --text: #fff5ed; --text-soft: #e8d4c4; --text-dim: #b08a70; --accent: #e87a3e; --accent-2: #b8351f; --blob-opacity: 0.2; }
-html[data-theme="winter"] { --bg: #050a14; --bg-elev: rgba(13,20,32,0.6); --bg-elev-2: rgba(18,28,42,0.7); --bg-elev-3: rgba(24,36,52,0.95); --text: #f0f8ff; --text-soft: #d4e0e8; --text-dim: #8090a0; --accent: #5fb3d8; --accent-2: #c4e8ff; --blob-opacity: 0.15; }
-
-html, body { color: var(--text); font-family: 'Inter', sans-serif; font-weight: 400; min-height: 100vh; line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; transition: background 0.4s var(--ease), color 0.4s var(--ease); background: var(--bg); overflow-x: hidden; display: flex; flex-direction: column; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { color: var(--text); font-family: 'Inter', sans-serif; font-weight: 400; min-height: 100vh; line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: var(--bg); overflow-x: hidden; display: flex; flex-direction: column; }
 .bg-blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg); transition: opacity 0.5s ease; }
-.blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: var(--blob-opacity); animation: float 30s ease-in-out infinite; }
+.blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15; animation: float 30s ease-in-out infinite; }
 .blob-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -100px; }
 .blob-2 { width: 400px; height: 400px; background: var(--accent-2); bottom: -100px; right: -100px; animation-delay: -5s; animation-duration: 35s; }
-.blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: 50%; animation-delay: -10s; animation-duration: 40s; opacity: calc(var(--blob-opacity) * 0.5); }
+.blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: 50%; animation-delay: -10s; animation-duration: 40s; opacity: 0.075; }
 @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -20px) scale(1.1); } 66% { transform: translate(-20px, 30px) scale(0.9); } }
 *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-video::cue { font-family: var(--cue-font); color: var(--cue-text); background: var(--cue-bg); font-size: var(--cue-size); text-shadow: 0 0 3px var(--cue-shadow), 0 0 5px var(--cue-shadow); line-height: 1.4; padding: 0.1em 0.3em; border-radius: 4px; }
 
-header { display: flex; justify-content: flex-start; align-items: center; padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 1000; background: transparent; border-bottom: 1px solid transparent; transition: background 0.3s var(--ease), border-color 0.3s var(--ease), backdrop-filter 0.3s var(--ease), opacity 0.5s ease; }
-header.scrolled { background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: var(--line); }
-.brand { display: flex; align-items: center; gap: 0.75rem; }
+/* Header */
+header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 1000; background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); height: 73px; box-sizing: border-box; }
+.brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; }
 .brand-logo svg { height: 36px; width: auto; display: block; }
 .brand-text { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
-.header-actions { margin-left: auto; position: relative; display: flex; gap: 0.5rem; align-items: center; }
-.settings-btn, .shortcut-btn, .voice-btn, .remote-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s var(--ease); flex-shrink: 0; }
-.settings-btn:hover, .shortcut-btn:hover, .voice-btn:hover, .remote-btn:hover, .settings-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.settings-btn svg, .shortcut-btn svg, .voice-btn svg, .remote-btn svg { width: 18px; height: 18px; }
-.voice-btn.listening { background: var(--accent); color: #fff; border-color: var(--accent); animation: pulse-mic 1.5s infinite; }
-@keyframes pulse-mic { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
-.settings-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 300px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 12px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); backdrop-filter: blur(24px); opacity: 0; transform: translateY(-10px) scale(0.95); pointer-events: none; transition: all 0.2s var(--ease); z-index: 1000; max-height: 85vh; overflow-y: auto; }
-.settings-dropdown.open { opacity: 1; transform: none; pointer-events: auto; }
-.panel-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; padding: 8px 8px 8px; letter-spacing: 0.05em; margin-top: 12px; }
-.panel-label:first-child { margin-top: 0; }
-.theme-btn { display: flex; align-items: center; gap: 10px; padding: 8px; background: transparent; border: 1px solid transparent; color: var(--text-soft); border-radius: 6px; cursor: pointer; transition: all 0.15s var(--ease); font-family: inherit; font-size: 0.85rem; text-align: left; font-weight: 500; width: 100%; }
-.theme-btn:hover { background: var(--bg-elev-2); color: var(--text); }
-.theme-btn.active { border-color: var(--line-strong); color: var(--text); background: var(--accent-soft); }
-.theme-swatch { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
-.sub-style-row { display: flex; gap: 6px; padding: 4px; }
-.style-btn { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-soft); padding: 6px 0; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
-.style-btn:hover { border-color: var(--line-strong); color: var(--text); background: var(--bg-elev-2); }
-.style-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.api-key-input, .color-input, .select-input { width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.5rem 0.75rem; font-family: inherit; font-size: 0.8rem; border-radius: 6px; margin-bottom: 0.5rem; }
-.api-key-input:focus, .color-input:focus, .select-input:focus { outline: none; border-color: var(--accent); }
-.color-input { height: 36px; padding: 2px; cursor: pointer; }
-.mixer-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.mixer-row label { font-size: 0.8rem; color: var(--text-soft); width: 80px; }
-.mixer-row input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 6px; background: var(--line-strong); border-radius: 3px; outline: none; }
-.mixer-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
-.hero { padding: 4rem 2rem 2rem; max-width: 800px; margin: 0 auto; text-align: center; position: relative; z-index: 5; transition: opacity 0.5s ease; }
-.hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.1; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 0.75rem; text-shadow: 0 4px 20px rgba(0,0,0,0.6); }
-.hero p { color: var(--text-soft); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
-main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relative; z-index: 10; flex: 1; width: 100%; }
-.player { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(16px); box-shadow: var(--shadow-card); position: relative; transition: border-color 0.2s var(--ease); }
-.player:hover { border-color: var(--line-strong); }
-.player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); }
-.screen-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
-.header-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-.poster-mini-btn, .countdown-btn, .snapshot-btn, .commentary-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; }
-.poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .commentary-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .commentary-btn svg { width: 14px; height: 14px; }
-.actions-row { display: flex; gap: 1rem; padding: 1.25rem; border-bottom: 1px solid var(--line); }
-.load-btn { flex: 1; background: rgba(255,255,255,0.02); border: 1px dashed var(--line-strong); color: var(--text); padding: 1.25rem 1rem; font-family: inherit; font-size: 0.9rem; font-weight: 500; cursor: pointer; border-radius: 10px; transition: all 0.2s var(--ease); text-align: center; display: flex; flex-direction: column; gap: 0.25rem; min-height: 80px; justify-content: center; }
-.load-btn:hover { border-color: var(--accent); border-style: solid; background: var(--accent-soft); transform: translateY(-1px); }
-.load-btn .label { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-.load-btn .filename { font-size: 0.85rem; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
+.header-actions { display: flex; gap: 0.5rem; align-items: center; }
+.api-key-input { width: 200px; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.5rem 0.75rem; font-family: inherit; font-size: 0.8rem; border-radius: 6px; margin-left: 1rem; }
+.api-key-input:focus { outline: none; border-color: var(--accent); }
+.poster-print-btn, .poster-export-btn { background: var(--accent); border: none; color: #fff; padding: 0.6rem 1.2rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
+.poster-export-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); }
+.poster-print-btn:hover { background: var(--accent-2); }
+.poster-export-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
-.torrent-row { position: relative; display: flex; gap: 0.5rem; padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--line); }
-.torrent-input { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; }
-.torrent-input:focus { outline: none; border-color: var(--accent); }
-.torrent-btn, .torrent-search-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; justify-content: center; }
-.torrent-btn { background: var(--accent); border-color: var(--accent); color: #fff; }
-.torrent-btn:hover { background: var(--accent-2); }
-.torrent-search-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.torrent-search-btn svg { width: 16px; height: 16px; }
-.torrent-warning { font-size: 0.7rem; color: var(--text-dim); padding: 0.5rem 1.25rem 1rem; border-bottom: 1px solid var(--line); text-align: center; }
-.torrent-results { position: absolute; top: 55px; left: 1.25rem; right: 1.25rem; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; max-height: 300px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; }
-.torrent-results.show { display: flex; }
-.torrent-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem; border-radius: 4px; cursor: pointer; transition: background 0.15s var(--ease); }
-.torrent-item:hover { background: var(--bg-elev-2); }
-.torrent-item svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
-.torrent-info { display: flex; flex-direction: column; }
-.torrent-title { font-size: 0.85rem; color: var(--text); font-weight: 500; }
-.torrent-meta { font-size: 0.75rem; color: var(--text-dim); }
+/* Poster Modal (Adapted for standalone page) */
+.poster-overlay { position: relative; inset: auto; background: transparent; backdrop-filter: none; padding: 1rem; opacity: 1; pointer-events: auto; flex: 1; display: flex; align-items: stretch; justify-content: center; overflow: hidden; }
+.poster-modal { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 16px; width: 100%; max-width: 1200px; height: calc(100vh - 100px); display: grid; grid-template-columns: 340px 1fr; overflow: hidden; transform: scale(1); transition: transform 0.2s var(--ease); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.poster-editor { padding: 1.5rem; overflow-y: auto; border-right: 1px solid var(--line); background: var(--bg-elev-2); min-height: 0; }
+.poster-editor h2 { font-size: 1.25rem; margin-bottom: 0.25rem; color: var(--text); font-weight: 600; }
+.poster-subtitle { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1.5rem; }
+.poster-fields { display: flex; flex-direction: column; gap: 0.75rem; }
+.section-divider { margin: 1.5rem 0 0.5rem; border-top: 1px solid var(--line); padding-top: 1rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+.section-divider:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+.section-divider svg { width: 14px; height: 14px; }
+.autocomplete-container { position: relative; flex: 1; }
+.autocomplete-input { width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; }
+.autocomplete-input:focus { outline: none; border-color: var(--accent); }
+.autocomplete-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; max-height: 240px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; }
+.autocomplete-results.show { display: flex; }
+.autocomplete-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 4px; cursor: pointer; transition: background 0.15s var(--ease); }
+.autocomplete-item:hover { background: var(--bg-elev-2); }
+.autocomplete-item img { width: 30px; height: 45px; object-fit: cover; border-radius: 2px; background: var(--bg); }
+.auto-info { display: flex; flex-direction: column; }
+.auto-title { font-size: 0.85rem; color: var(--text); font-weight: 500; }
+.auto-year { font-size: 0.75rem; color: var(--text-dim); }
+.search-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+.clear-poster-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.6rem; font-family: inherit; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.15s var(--ease); }
+.clear-poster-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.clear-poster-btn svg { width: 14px; height: 14px; stroke: currentColor; }
+.poster-dropdown { position: relative; width: 100%; margin-bottom: 0.5rem; }
+.dropdown-toggle { width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; font-weight: 500; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.15s var(--ease); }
+.dropdown-toggle:hover { border-color: var(--line-strong); }
+.dropdown-toggle svg { width: 14px; height: 14px; transition: transform 0.2s var(--ease); }
+.poster-dropdown.open .dropdown-toggle { border-color: var(--accent); }
+.poster-dropdown.open .dropdown-toggle svg { transform: rotate(180deg); }
+.dropdown-menu { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; max-height: 240px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; }
+.poster-dropdown.open .dropdown-menu { display: flex; }
+.dropdown-item { background: transparent; border: none; color: var(--text-soft); padding: 0.5rem 0.75rem; font-family: inherit; font-size: 0.85rem; font-weight: 500; text-align: left; cursor: pointer; border-radius: 4px; transition: background 0.15s var(--ease); }
+.dropdown-item:hover { background: var(--bg-elev-2); color: var(--text); }
+.dropdown-item.active { background: var(--accent-soft); color: var(--accent); }
+.custom-color-picker { display: none; flex-direction: column; gap: 0.5rem; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; }
+.custom-color-picker.show { display: flex; }
+.custom-color-picker label { display: flex; flex-direction: row; align-items: center; justify-content: space-between; font-size: 0.8rem; text-transform: uppercase; color: var(--text-dim); font-weight: 600; }
+.custom-color-picker input[type="color"] { width: 40px; height: 30px; border: none; background: transparent; cursor: pointer; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 0.6rem 0.75rem; margin-bottom: 0.5rem; }
+.toggle-row span { font-size: 0.85rem; color: var(--text-soft); font-weight: 600; text-transform: uppercase; }
+.toggle-switch { position: relative; width: 40px; height: 20px; background: var(--line-strong); border-radius: 999px; cursor: pointer; transition: background 0.2s var(--ease); }
+.toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: var(--text-soft); border-radius: 50%; transition: transform 0.2s var(--ease); }
+.toggle-switch.active { background: var(--accent); }
+.toggle-switch.active::after { transform: translateX(20px); background: #fff; }
+.format-toggle-row { display: flex; gap: 6px; margin-bottom: 0.5rem; }
+.format-btn { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-soft); padding: 6px 0; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
+.format-btn:hover { border-color: var(--line-strong); color: var(--text); background: var(--bg-elev-2); }
+.format-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.poster-fields label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); font-weight: 600; }
+.poster-fields input, .poster-fields textarea { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; resize: vertical; }
+.poster-fields input:focus, .poster-fields textarea:focus { outline: none; border-color: var(--accent); }
+.poster-fields textarea { min-height: 50px; }
+.backdrop-upload-wrap { display: flex; gap: 0.5rem; align-items: center; }
+.backdrop-upload-wrap label { flex: 1; margin: 0; }
+.backdrop-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.6rem; font-family: inherit; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.15s var(--ease); }
+.backdrop-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.backdrop-btn svg { width: 14px; height: 14px; stroke: currentColor; }
+.poster-preview-wrap { padding: 2rem; background-color: var(--bg); background-image: radial-gradient(var(--line-strong) 1px, transparent 1px); background-size: 24px 24px; overflow: auto; min-height: 0; text-align: center; position: relative; display: flex; justify-content: center; align-items: flex-start; }
+.zoom-controls { position: sticky; bottom: 20px; margin: 0 auto; z-index: 10; display: flex; gap: 4px; align-items: center; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: max-content; }
+.zoom-controls .style-btn { padding: 6px 12px; font-size: 0.75rem; border: none; background: transparent; color: var(--text-soft); cursor: pointer; border-radius: 999px; }
+.zoom-controls .style-btn:hover { background: var(--bg-elev-2); color: var(--text); }
 
-.video-stage { position: relative; aspect-ratio: 16/9; background: #000; overflow: hidden; }
-.video-stage .plyr { height: 100%; width: 100%; }
-.video-stage video { width: 100%; height: 100%; display: block; background: #000; cursor: pointer; }
-.plyr--video .plyr__controls { background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); padding: 20px 10px 10px; backdrop-filter: blur(8px); }
-.plyr--video .plyr__control--overlaid { background: var(--accent); color: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent-glow); }
-.idle-broadcast-state { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; overflow: hidden; }
-.idle-broadcast-state.hidden { display: none; }
-.idle-broadcast-state::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2) 1px, transparent 1px, transparent 3px); pointer-events: none; z-index: 2; animation: flicker 0.1s infinite; }
-@keyframes flicker { 0% { opacity: 0.9; } 50% { opacity: 1; } 100% { opacity: 0.95; } }
-.broadcast-logo { color: #e0e0e0; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.5; animation: pulse-broadcast 2s infinite ease-in-out; display: flex; align-items: center; gap: 1rem; z-index: 3; }
-.broadcast-logo svg { width: 28px; height: 28px; }
-@keyframes pulse-broadcast { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.02); } }
-.broadcast-marquee { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: #111; border-top: 1px solid #333; border-bottom: 1px solid #333; overflow: hidden; display: flex; align-items: center; white-space: nowrap; z-index: 3; }
-.marquee-content { display: flex; white-space: nowrap; animation: scroll-left 40s linear infinite; color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 0.85rem; }
-.marquee-content span { padding-right: 50px; }
-@keyframes scroll-left { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
-.error-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; background: radial-gradient(circle at center, var(--bg-elev-2) 0%, #000 80%); text-align: center; padding: 2rem; z-index: 10; }
-.error-state.hidden { display: none; }
-.error-state .prompt { color: var(--error); font-size: 1.25rem; font-weight: 600; }
-.error-state .hint { color: var(--text-soft); font-size: 1rem; max-width: 400px; line-height: 1.5; }
-.sub-sync-controls { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 15; display: flex; gap: 4px; align-items: center; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 4px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(8px); }
-.sub-sync-controls span { font-size: 0.75rem; color: #fff; min-width: 35px; text-align: center; font-weight: 600; }
-.sub-sync-controls .style-btn { padding: 4px 8px; font-size: 0.7rem; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 999px; cursor: pointer; }
-.sub-sync-controls .style-btn:hover { background: rgba(255,255,255,0.1); }
-#audioVisualizer { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 14; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; }
-#audioVisualizer.active { opacity: 0.8; }
-.credits-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 60%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 80px; opacity: 0; pointer-events: none; transition: opacity 1s ease; z-index: 15; }
-.credits-overlay.show { opacity: 1; }
-.credits-text { color: #fff; font-size: 1.5rem; font-weight: 600; letter-spacing: 0.05em; text-shadow: 0 2px 10px rgba(0,0,0,0.8); text-align: center; }
+/* Poster Sheet Styles */
+.poster-sheet { background-color: #fff; background-size: cover; background-position: center; color: #111; width: 210mm; min-height: 297mm; padding: 22mm 20mm; display: inline-flex; flex-direction: column; text-align: left; font-family: 'Inter', sans-serif; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; transform-origin: top center; margin: 0 auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.poster-sheet.format-916 { width: 1080px; min-height: 1920px; padding: 80px 60px; }
+.ps-overlay { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.poster-sheet .ps-top { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid currentColor; padding-bottom: 0.6rem; margin-bottom: 1.5rem; }
+.poster-sheet .ps-brand { font-size: 0.85rem; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase; }
+.poster-sheet .ps-event { font-size: 0.85rem; letter-spacing: 0.1em; opacity: 0.6; text-transform: uppercase; font-weight: 600; }
+.ps-content { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; }
+.ps-film-block { display: flex; flex-direction: column; }
+.ps-label { font-size: 0.9rem; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.5; font-weight: 700; margin-bottom: 0.5rem; }
+.ps-title-row { display: flex; align-items: center; gap: 1.5rem; }
+.ps-title-poster { width: 25mm; height: 35mm; object-fit: cover; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); display: none; flex-shrink: 0; }
+.ps-title-poster.show { display: block; }
+.ps-title { font-family: 'Georgia', serif; font-size: 4.5rem; line-height: 1.05; font-weight: 700; word-break: break-word; margin-bottom: 0.5rem; flex: 1; outline: none; }
+.format-916 .ps-title { font-size: 4rem; }
+.ps-tagline { font-family: 'Georgia', serif; font-size: 1.3rem; font-style: italic; opacity: 0.7; max-width: 90%; line-height: 1.4; margin-top: 0.5rem; outline: none; }
+.ps-plot { font-size: 0.9rem; line-height: 1.4; opacity: 0.6; margin-top: 0.5rem; max-width: 90%; outline: none; }
+.ps-rating { font-size: 1.5rem; font-weight: 700; color: #ffd700; margin-top: 1rem; display: none; }
+.ps-rating.show { display: block; }
+.ps-blurb { font-family: 'Georgia', serif; font-style: italic; font-size: 1.2rem; text-align: center; margin: 2rem 0; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; padding: 1rem 0; opacity: 0.8; display: none; outline: none; }
+.ps-blurb.show { display: block; }
+.poster-sheet.double-feature .ps-title { font-size: 3.2rem; }
+.poster-sheet.double-feature .ps-tagline { font-size: 1.1rem; }
+.poster-sheet.double-feature .ps-title-poster { width: 20mm; height: 30mm; }
+.poster-sheet.double-feature .ps-plot { font-size: 0.8rem; }
+.poster-sheet .ps-divider { display: flex; align-items: center; gap: 1rem; margin: 0.5rem 0; opacity: 0.4; }
+.poster-sheet .ps-divider::before, .poster-sheet .ps-divider::after { content: ''; flex: 1; height: 1px; background: currentColor; }
+.poster-sheet .ps-divider span { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700; }
+.ps-meta { position: relative; z-index: 2; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(0,0,0,0.2); display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.ps-meta-item .k { display: block; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.7rem; opacity: 0.5; font-weight: 700; margin-bottom: 0.2rem; }
+.ps-meta-item .v { font-size: 1rem; font-weight: 600; outline: none; }
+.ps-notes { position: relative; z-index: 2; font-size: 0.9rem; line-height: 1.5; opacity: 0.6; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(0,0,0,0.2); outline: none; }
+.ps-footer { position: relative; z-index: 2; margin-top: auto; padding-top: 1.5rem; border-top: 2px solid currentColor; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.6; }
+.ps-footer .ps-mark { font-weight: 900; opacity: 1; outline: none; }
+.ps-qr { width: 25mm; height: 25mm; display: none; background: #fff; padding: 2mm; z-index: 3; }
+.ps-qr.show { display: block; }
+.film-grain-overlay { position: absolute; inset: 0; z-index: 4; pointer-events: none; display: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='noise'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23noise)' opacity='0.15'/></svg>"); opacity: 0.2; mix-blend-mode: multiply; }
+.film-grain-overlay.show { display: block; }
+[contenteditable]:focus { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
-.buffering-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 20; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #fff; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.1rem; }
-.buffering-overlay.show { display: flex; }
-.spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+/* Theme Styles */
+.poster-sheet.theme-minimal { background-color: #fff; color: #111; } .poster-sheet.theme-minimal .ps-overlay { background: rgba(255,255,255,0.85); }
+.poster-sheet.theme-neon { background-color: #0b0e17; color: #fff; border: 1px solid rgba(255,255,255,0.1); } .poster-sheet.theme-neon .ps-overlay { background: rgba(11,14,23,0.85); } .poster-sheet.theme-neon .ps-title { font-family: 'Inter', sans-serif; font-weight: 900; background: linear-gradient(135deg, #4A00E0, #E94057, #F27121); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -1px; } .poster-sheet.theme-neon .ps-tagline { font-family: 'Inter', sans-serif; font-weight: 300; color: #c4e8ff; opacity: 0.9; } .poster-sheet.theme-neon .ps-top, .poster-sheet.theme-neon .ps-footer { border-color: rgba(255,255,255,0.2); } .poster-sheet.theme-neon .ps-meta, .poster-sheet.theme-neon .ps-notes { border-color: rgba(255,255,255,0.1); } .poster-sheet.theme-neon .ps-label, .poster-sheet.theme-neon .ps-event, .poster-sheet.theme-neon .ps-divider span, .poster-sheet.theme-neon .ps-meta-item .k { color: #5fb3f5; opacity: 1; } .poster-sheet.theme-neon .ps-divider::before, .poster-sheet.theme-neon .ps-divider::after { background: rgba(95, 179, 245, 0.3); }
+.poster-sheet.theme-noir { background-color: #111; color: #f5f5f5; border: 4px double #f5f5f5; } .poster-sheet.theme-noir .ps-overlay { background: rgba(17,17,17,0.85); } .poster-sheet.theme-noir .ps-title { color: #f5f5f5; font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; } .poster-sheet.theme-noir .ps-tagline { font-family: 'Inter', sans-serif; font-style: normal; font-weight: 300; color: #ccc; opacity: 0.8; }
+.poster-sheet.theme-golden { background-color: #fdfbf7; color: #3e2723; border: 2px solid #bf360c; } .poster-sheet.theme-golden .ps-overlay { background: rgba(253,251,247,0.85); } .poster-sheet.theme-golden .ps-title { font-family: 'Georgia', serif; color: #bf360c; font-weight: 700; } .poster-sheet.theme-golden .ps-top, .poster-sheet.theme-golden .ps-footer { border-color: #d7ccc8; } .poster-sheet.theme-golden .ps-meta, .poster-sheet.theme-golden .ps-notes { border-color: #efebe9; } .poster-sheet.theme-golden .ps-label, .poster-sheet.theme-golden .ps-meta-item .k, .poster-sheet.theme-golden .ps-event, .poster-sheet.theme-golden .ps-divider span { color: #8d6e63; opacity: 1; } .poster-sheet.theme-golden .ps-divider::before, .poster-sheet.theme-golden .ps-divider::after { background: #d7ccc8; }
+.poster-sheet.theme-marquee { background-color: #050505; color: #ffd700; border: 4px solid #ffd700; } .poster-sheet.theme-marquee .ps-overlay { background: rgba(5,5,5,0.85); } .poster-sheet.theme-marquee .ps-title { font-family: 'Impact', sans-serif; color: #fff; text-transform: uppercase; letter-spacing: 2px; -webkit-text-stroke: 1px #ffd700; } .poster-sheet.theme-marquee .ps-top, .poster-sheet.theme-marquee .ps-footer { border-color: #ffd700; } .poster-sheet.theme-marquee .ps-meta, .poster-sheet.theme-marquee .ps-notes { border-color: #333; } .poster-sheet.theme-marquee .ps-label, .poster-sheet.theme-marquee .ps-event, .poster-sheet.theme-marquee .ps-meta-item .k, .poster-sheet.theme-marquee .ps-divider span { color: #ffd700; opacity: 0.8; } .poster-sheet.theme-marquee .ps-divider::before, .poster-sheet.theme-marquee .ps-divider::after { background: #333; }
+.poster-sheet.theme-retro { background-color: #ff4081; color: #fff; } .poster-sheet.theme-retro .ps-overlay { background: rgba(255,64,129,0.85); } .poster-sheet.theme-retro .ps-title { font-family: 'Arial Black', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; color: #ffeb3b; text-shadow: 3px 3px 0px #000; } .poster-sheet.theme-retro .ps-top, .poster-sheet.theme-retro .ps-footer { border-color: #fff; } .poster-sheet.theme-retro .ps-meta, .poster-sheet.theme-retro .ps-notes { border-color: rgba(255,255,255,0.3); } .poster-sheet.theme-retro .ps-label, .poster-sheet.theme-retro .ps-event, .poster-sheet.theme-retro .ps-meta-item .k, .poster-sheet.theme-retro .ps-divider span { color: #ffeb3b; opacity: 1; } .poster-sheet.theme-retro .ps-divider::before, .poster-sheet.theme-retro .ps-divider::after { background: #fff; }
+.poster-sheet.theme-blueprint { background-color: #0d2438; color: #5fa8d3; background-image: linear-gradient(rgba(95, 168, 211, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(95, 168, 211, 0.2) 1px, transparent 1px); background-size: 20px 20px; } .poster-sheet.theme-blueprint .ps-overlay { background: rgba(13, 36, 56, 0.85); } .poster-sheet.theme-blueprint .ps-title { font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 2px; color: #a0d8ef; } .poster-sheet.theme-blueprint .ps-tagline { font-family: 'Courier New', monospace; font-style: normal; } .poster-sheet.theme-blueprint .ps-top, .poster-sheet.theme-blueprint .ps-footer, .poster-sheet.theme-blueprint .ps-meta, .poster-sheet.theme-blueprint .ps-notes { border-color: rgba(95, 168, 211, 0.3); }
+.poster-sheet.theme-artdeco { background-color: #0d2818; color: #d4af37; border: 8px double #d4af37; } .poster-sheet.theme-artdeco .ps-overlay { background: rgba(13, 40, 24, 0.85); } .poster-sheet.theme-artdeco .ps-title { font-family: 'Georgia', serif; text-transform: uppercase; letter-spacing: 4px; border-bottom: 1px solid #d4af37; padding-bottom: 10px; } .poster-sheet.theme-artdeco .ps-top, .poster-sheet.theme-artdeco .ps-footer { border-color: #d4af37; }
+.poster-sheet.theme-vhs { background-color: #1a1a2e; color: #ff00ff; border: 2px solid #00ffff; } .poster-sheet.theme-vhs .ps-overlay { background: rgba(26, 26, 46, 0.85); } .poster-sheet.theme-vhs .ps-title { font-family: 'Arial Black', sans-serif; color: #00ffff; text-shadow: 2px 2px #ff00ff; letter-spacing: -1px; } .poster-sheet.theme-vhs .ps-top, .poster-sheet.theme-vhs .ps-footer { border-color: #ff00ff; }
+.poster-sheet.theme-orange { background-color: #fff5e6; color: #ff4500; } .poster-sheet.theme-orange .ps-overlay { background: rgba(255, 245, 230, 0.85); } .poster-sheet.theme-orange .ps-title { font-family: 'Arial Black', sans-serif; text-transform: lowercase; font-size: 5rem; } .poster-sheet.theme-orange .ps-top, .poster-sheet.theme-orange .ps-footer { border-color: #ff4500; }
+.poster-sheet.theme-midblue { background-color: #0a0f25; color: #fff; } .poster-sheet.theme-midblue .ps-overlay { background: rgba(10, 15, 37, 0.85); } .poster-sheet.theme-midblue .ps-title { font-family: 'Inter', sans-serif; font-weight: 800; background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; } .poster-sheet.theme-midblue .ps-top, .poster-sheet.theme-midblue .ps-footer { border-color: rgba(255,255,255,0.2); }
+.poster-sheet.theme-typewriter { background-color: #f0f0f0; color: #333; } .poster-sheet.theme-typewriter .ps-overlay { background: rgba(240, 240, 240, 0.85); } .poster-sheet.theme-typewriter .ps-title { font-family: 'Courier New', monospace; font-weight: 700; } .poster-sheet.theme-typewriter .ps-top, .poster-sheet.theme-typewriter .ps-footer { border-color: #333; border-style: dashed; } .poster-sheet.theme-typewriter .ps-meta, .poster-sheet.theme-typewriter .ps-notes { border-color: #666; border-style: dashed; }
+.poster-sheet.theme-halloween { background-color: #1a0b2e; color: #ff7518; border: 4px solid #ff7518; } .poster-sheet.theme-halloween .ps-overlay { background: rgba(26, 11, 46, 0.85); } .poster-sheet.theme-halloween .ps-title { font-family: 'Georgia', serif; color: #ff7518; text-transform: uppercase; letter-spacing: 2px; } .poster-sheet.theme-halloween .ps-tagline { color: #41d636; } .poster-sheet.theme-halloween .ps-top, .poster-sheet.theme-halloween .ps-footer { border-color: #ff7518; } .poster-sheet.theme-halloween .ps-label, .poster-sheet.theme-halloween .ps-meta-item .k, .poster-sheet.theme-halloween .ps-divider span, .poster-sheet.theme-halloween .ps-event { color: #41d636; opacity: 0.9; }
+.poster-sheet.theme-christmas { background-color: #8b0000; color: #fff; border: 6px double #ffd700; } .poster-sheet.theme-christmas .ps-overlay { background: rgba(139, 0, 0, 0.85); } .poster-sheet.theme-christmas .ps-title { font-family: 'Georgia', serif; color: #fff; text-transform: uppercase; } .poster-sheet.theme-christmas .ps-tagline { color: #ffd700; } .poster-sheet.theme-christmas .ps-top, .poster-sheet.theme-christmas .ps-footer { border-color: #ffd700; } .poster-sheet.theme-christmas .ps-label, .poster-sheet.theme-christmas .ps-meta-item .k, .poster-sheet.theme-christmas .ps-divider span, .poster-sheet.theme-christmas .ps-event { color: #ffd700; opacity: 0.9; }
+.poster-sheet.theme-valentine { background-color: #fff0f5; color: #c71585; border: 2px solid #c71585; } .poster-sheet.theme-valentine .ps-overlay { background: rgba(255, 240, 245, 0.85); } .poster-sheet.theme-valentine .ps-title { font-family: 'Georgia', serif; color: #c71585; } .poster-sheet.theme-valentine .ps-tagline { color: #8b0000; } .poster-sheet.theme-valentine .ps-top, .poster-sheet.theme-valentine .ps-footer { border-color: #c71585; } .poster-sheet.theme-valentine .ps-label, .poster-sheet.theme-valentine .ps-meta-item .k, .poster-sheet.theme-valentine .ps-divider span, .poster-sheet.theme-valentine .ps-event { color: #8b0000; opacity: 0.7; }
+.poster-sheet.theme-newyear { background-color: #000; color: #fff; border: 1px solid #c0c0c0; } .poster-sheet.theme-newyear .ps-overlay { background: rgba(0, 0, 0, 0.85); } .poster-sheet.theme-newyear .ps-title { font-family: 'Inter', sans-serif; font-weight: 800; background: linear-gradient(to right, #c0c0c0 0%, #fff 50%, #ffd700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; } .poster-sheet.theme-newyear .ps-tagline { color: #c0c0c0; } .poster-sheet.theme-newyear .ps-top, .poster-sheet.theme-newyear .ps-footer { border-color: #c0c0c0; } .poster-sheet.theme-newyear .ps-label, .poster-sheet.theme-newyear .ps-meta-item .k, .poster-sheet.theme-newyear .ps-divider span, .poster-sheet.theme-newyear .ps-event { color: #ffd700; opacity: 0.9; }
 
-.file-input { position: absolute; width: 0; height: 0; opacity: 0; }
-.site-footer { text-align: center; padding: 2rem 1rem; color: var(--text-dim); font-size: 0.75rem; opacity: 0.7; position: relative; z-index: 5; margin-top: auto; border-top: 1px solid var(--line-soft); transition: opacity 0.5s ease; }
-.site-footer span { color: var(--text-soft); font-weight: 600; }
-body.cinema-mode .bg-blobs, body.cinema-mode header, body.cinema-mode .hero, body.cinema-mode .site-footer { opacity: 0.1; }
-body.cinema-mode header { pointer-events: none; }
-#ambientGlow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80vw; height: 80vh; z-index: -2; background: transparent; filter: blur(150px); transition: background 1s ease; pointer-events: none; }
-.countdown-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 25; display: none; align-items: center; justify-content: center; }
-.countdown-overlay.active { display: flex; }
-.countdown-text { font-size: 12rem; font-weight: 900; color: #fff; text-shadow: 0 0 40px var(--accent); animation: count-pulse 1s ease; }
-@keyframes count-pulse { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
-
-/* Remote Control QR Modal */
-.qr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10003; display: none; align-items: center; justify-content: center; padding: 2rem; opacity: 0; transition: opacity 0.3s var(--ease); }
-.qr-overlay.active { display: flex; opacity: 1; }
-.qr-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-.qr-box h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--text); }
-.qr-box p { color: var(--text-soft); margin-bottom: 1.5rem; }
-.qr-code-img { width: 250px; height: 250px; border-radius: 12px; margin: 0 auto 1.5rem; display: block; background: #fff; padding: 10px; }
-.qr-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.2s var(--ease); }
-.qr-close-btn:hover { border-color: var(--text-soft); color: var(--text); }
-
-/* Mobile Remote UI */
-.remote-app { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; background: var(--bg); color: var(--text); text-align: center; }
-.remote-app .remote-title { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; }
-.remote-app .remote-status { font-size: 1.2rem; color: var(--accent); margin-bottom: 3rem; font-weight: 600; }
-.remote-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; width: 100%; max-width: 500px; }
-.remote-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text); padding: 2rem 1rem; font-family: inherit; font-size: 1.5rem; font-weight: 700; cursor: pointer; border-radius: 16px; transition: all 0.2s var(--ease); display: flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 100px; }
-.remote-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.remote-btn:active { transform: scale(0.95); }
-.remote-btn svg { width: 32px; height: 32px; }
-.remote-btn.wide { grid-column: span 2; }
-
+/* Print Rules */
 @media print { @page { size: A4; margin: 0; } body * { visibility: hidden !important; } .poster-sheet, .poster-sheet * { visibility: visible !important; } .poster-sheet { position: absolute; left: 0; top: 0; box-shadow: none; transform: none !important; margin: 0 !important; border: none !important; } .poster-overlay { position: static !important; background: none !important; backdrop-filter: none !important; padding: 0 !important; } .poster-modal, .poster-editor, .poster-preview-wrap { display: contents !important; background: none !important; border: none !important; padding: 0 !important; text-align: left !important; } }
-@media (max-width: 900px) { .poster-modal { grid-template-columns: 1fr; height: 95vh; } .poster-editor { border-right: none; border-bottom: 1px solid var(--line); max-height: 40vh; } header { padding: 1rem 1.5rem; } .brand-text { font-size: 1.1rem; } .brand-logo svg { height: 32px; } main { padding: 0 1rem 2rem; } }
+@media (max-width: 900px) { .poster-modal { grid-template-columns: 1fr; height: 95vh; } .poster-editor { border-right: none; border-bottom: 1px solid var(--line); max-height: 40vh; } header { padding: 1rem 1.5rem; } .brand-text { font-size: 1.1rem; } .brand-logo svg { height: 32px; } }
 </style>
 </head>
 <body>
-
 <div class="bg-blobs" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
-<div id="ambientGlow"></div>
 
-<!-- Mobile Remote UI -->
-<div class="remote-app" id="mobileRemoteApp">
-  <div class="remote-title">CineLoom Remote</div>
-  <div class="remote-status" id="remoteStatus">Connecting...</div>
-  <div class="remote-btn-grid">
-    <button class="remote-btn" id="rPlayPause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play</button>
-    <button class="remote-btn" id="rFullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg> Fullscreen</button>
-    <button class="remote-btn" id="rSeekBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20L9 12l10-8v16z"/><line x1="5" y1="19" x2="5" y2="5"/></svg> -10s</button>
-    <button class="remote-btn" id="rSeekFwd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="5" x2="19" y2="19"/></svg> +10s</button>
-    <button class="remote-btn wide" id="rShowtime"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Start Showtime</button>
-  </div>
-</div>
-
-<!-- Main App UI -->
-<div id="mainApp" style="display:flex; flex-direction:column; min-height:100vh; width:100%;">
-  <header id="mainHeader">
-    <div class="brand"><div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="CineLoom Logo"><defs><linearGradient id="filmbgGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="var(--bg-elev-3)"/><stop offset="1" stop-color="var(--bg-elev-2)"/></linearGradient><radialGradient id="filmpinGrad" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="var(--accent-glow)"/><stop offset="1" stop-color="var(--accent)"/></radialGradient><filter id="filmshadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/></filter></defs><rect width="120" height="120" rx="28" fill="url(#filmbgGrad)"/><rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="var(--line-strong)" stroke-opacity="0.5"/><path d="M38 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><path d="M82 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="42" r="2.5" fill="var(--accent)"/><circle cx="82" cy="42" r="2.5" fill="var(--accent)"/><rect x="32" y="38" width="56" height="64" rx="10" fill="var(--text)" filter="url(#filmshadow)"/><circle cx="60" cy="62" r="16" fill="var(--accent-soft)"/><g fill="none" stroke="var(--text-dim)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="54" y="51" width="12" height="22" rx="2"/><rect x="56" y="53" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="56" y="58" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="56" y="63" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="56" y="68" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="62" y="53" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="62" y="58" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="62" y="63" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="62" y="68" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="58.5" y="55" width="3" height="14" fill="var(--accent)" stroke="none"/></g><rect x="42" y="86" width="36" height="5" rx="2.5" fill="var(--bg-elev-3)"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="var(--accent)"/><circle cx="60" cy="20" r="7" fill="url(#filmpinGrad)" filter="url(#filmshadow)"/><circle cx="57.5" cy="17.5" r="1.8" fill="var(--text)" opacity="0.7"/></svg></div><span class="brand-text">CineLoom</span></div>
+<header id="mainHeader">
+  <a href="index.html" class="brand">
+    <div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="CineLoom Logo"><defs><linearGradient id="filmbgGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="var(--bg-elev-3)"/><stop offset="1" stop-color="var(--bg-elev-2)"/></linearGradient><radialGradient id="filmpinGrad" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="var(--accent-glow)"/><stop offset="1" stop-color="var(--accent)"/></radialGradient><filter id="filmshadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/></filter></defs><rect width="120" height="120" rx="28" fill="url(#filmbgGrad)"/><rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="var(--line-strong)" stroke-opacity="0.5"/><path d="M38 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><path d="M82 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="42" r="2.5" fill="var(--accent)"/><circle cx="82" cy="42" r="2.5" fill="var(--accent)"/><rect x="32" y="38" width="56" height="64" rx="10" fill="var(--text)" filter="url(#filmshadow)"/><circle cx="60" cy="62" r="16" fill="var(--accent-soft)"/><g fill="none" stroke="var(--text-dim)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="54" y="51" width="12" height="22" rx="2"/><rect x="58.5" y="55" width="3" height="14" fill="var(--accent)" stroke="none"/></g><rect x="42" y="86" width="36" height="5" rx="2.5" fill="var(--bg-elev-3)"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="var(--accent)"/><circle cx="60" cy="20" r="7" fill="url(#filmpinGrad)" filter="url(#filmshadow)"/></svg></div>
+    <span class="brand-text">Poster Maker</span>
+  </a>
   <div class="header-actions">
-    <button class="remote-btn" id="remoteToggle" aria-label="Open Remote Control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
-    <button class="voice-btn" id="voiceToggle" aria-label="Enable Voice Commands"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
-    <button class="settings-btn" id="settingsToggle" aria-label="Open Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
-    <div class="settings-dropdown" id="settingsPanel" role="region" aria-label="Site Settings">
-      <div class="panel-label">Base Theme</div>
-      <button class="theme-btn active" data-theme="cyber"><span class="theme-swatch" style="background: #3b82f6;"></span><span>Cyber Blue</span></button>
-      <button class="theme-btn" data-theme="light"><span class="theme-swatch" style="background: #2563eb;"></span><span>Light Mode</span></button>
-      <button class="theme-btn" data-theme="theater"><span class="theme-swatch" style="background: #f5a05f;"></span><span>Warm Theater</span></button>
-      <button class="theme-btn" data-theme="midnight"><span class="theme-swatch" style="background: #c98aff;"></span><span>Purple Night</span></button>
-      <button class="theme-btn" data-theme="mono"><span class="theme-swatch" style="background: #ffffff;"></span><span>Black and White</span></button>
-      <div class="panel-label">Seasonal Themes</div>
-      <button class="theme-btn" data-theme="spring"><span class="theme-swatch" style="background: #7dd87d;"></span><span>Spring</span></button>
-      <button class="theme-btn" data-theme="summer"><span class="theme-swatch" style="background: #ffb84d;"></span><span>Summer</span></button>
-      <button class="theme-btn" data-theme="autumn"><span class="theme-swatch" style="background: #e87a3e;"></span><span>Autumn</span></button>
-      <button class="theme-btn" data-theme="winter"><span class="theme-swatch" style="background: #5fb3d8;"></span><span>Winter</span></button>
-      <div class="panel-label">Custom UI Builder</div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px;">
-        <label style="font-size:0.7rem; color:var(--text-dim);">Accent: <input type="color" id="customUiAccent" class="color-input" value="#3b82f6"></label>
-        <label style="font-size:0.7rem; color:var(--text-dim);">Background: <input type="color" id="customUiBg" class="color-input" value="#08090b"></label>
-      </div>
-      <div class="panel-label">Advanced Subtitle Studio</div>
-      <select id="cueFontSelect" class="select-input">
-        <option value="Inter, sans-serif">Inter (Modern)</option>
-        <option value="Georgia, serif">Georgia (Serif)</option>
-        <option value="Courier Prime, monospace">Courier (Monospace)</option>
-        <option value="Impact, sans-serif">Impact (Bold)</option>
-      </select>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px;">
-        <label style="font-size:0.7rem; color:var(--text-dim);">Text Color: <input type="color" id="cueTextColor" class="color-input" value="#ffffff"></label>
-        <label style="font-size:0.7rem; color:var(--text-dim);">Outline: <input type="color" id="cueShadowColor" class="color-input" value="#000000"></label>
-      </div>
-      <div class="panel-label">Audio Mixer</div>
-      <div class="mixer-row"><label>Movie</label><input type="range" id="videoVolumeSlider" min="0" max="1" step="0.05" value="1"></div>
-      <div class="mixer-row"><label>Commentary</label><input type="range" id="comVolumeSlider" min="0" max="1" step="0.05" value="1"></div>
-      <div class="panel-label">OMDb API Key</div><input type="text" id="omdbKeyInput" class="api-key-input" placeholder="Enter OMDb API Key"><p style="font-size: 0.7rem; color: var(--text-dim); margin-bottom: 0.5rem; padding: 0 0.5rem;">Get a free key at omdbapi.com/apikey.aspx</p>
-    </div>
+    <input type="text" id="omdbKeyInput" class="api-key-input" placeholder="Enter OMDb API Key">
+    <button class="poster-export-btn" id="posterExportBtn">Export PNG</button>
+    <button class="poster-print-btn" id="posterPrintBtn">Print Poster</button>
   </div>
 </header>
-<main>
-  <section class="hero" aria-labelledby="hero-title"><h1 id="hero-title">CineLoom</h1><p>Load a film below to begin. You can also generate a printable A4 poster for a single feature or a double bill.</p></section>
-  <section class="players" aria-label="Video Player">
-    <div class="player" data-screen="1" aria-label="Screen 1">
-      <div class="player-header"><span class="screen-label">Now Showing</span><div class="header-actions-row"><button class="commentary-btn" id="commentaryBtn" aria-label="Load Commentary Track"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> Commentary</button><button class="snapshot-btn" id="snapshotBtn" aria-label="Capture Frame for Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Snapshot</button><button class="countdown-btn" id="countdownBtn" aria-label="Start Showtime Countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Start Showtime</button><button class="poster-mini-btn" data-screen-poster="1" aria-label="Create Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Create Poster</button></div></div>
-      <div class="actions-row"><button class="load-btn load-video-btn" type="button" aria-label="Load Film"><span class="label">Load Film</span><span class="filename">No file chosen</span></button><button class="load-btn load-sub-btn" type="button" aria-label="Add Subtitles"><span class="label">Add Subtitles</span><span class="filename">No file chosen</span></button></div>
-      <div class="torrent-row">
-        <input type="text" id="torrentInput" class="torrent-input" placeholder="Search Movies (YTS) or paste Magnet Link...">
-        <button type="button" class="torrent-search-btn" id="torrentSearchBtn" aria-label="Search Torrents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
-        <button type="button" class="torrent-btn" id="torrentBtn">Stream</button>
-        <div class="torrent-results" id="torrentResults"></div>
-      </div>
-      <div class="torrent-warning">Note: Browser WebTorrent only connects to WebRTC peers. Standard torrents may hang if not seeded by WebRTC clients (like WebTorrent Desktop or Brave).</div>
-      <div class="video-stage">
-        <video id="player" playsinline></video>
-        <div class="idle-broadcast-state" id="idleState"><div class="broadcast-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>CineLoom Broadcast</div><div class="broadcast-marquee"><div class="marquee-content" id="marqueeContent"><span>Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. </span><span>Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. </span></div></div></div>
-        <div class="error-state hidden" role="alert"><div class="prompt">Cannot play this video</div><div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div></div>
-        <div class="buffering-overlay" id="bufferingOverlay"><div class="spinner"></div><span id="bufferingText">Buffering...</span></div>
-        <div class="sub-sync-controls" id="subSyncControls" style="display: none;"><button class="style-btn" id="subSyncBack" type="button">-0.5s</button><span id="subSyncVal">0.0s</span><button class="style-btn" id="subSyncFwd" type="button">+0.5s</button><button class="style-btn" id="subSyncReset" type="button" style="margin-left: 4px;">Reset</button></div>
-        <canvas id="audioVisualizer"></canvas>
-        <div class="credits-overlay" id="creditsOverlay"><div class="credits-text">Thank you for watching with CineLoom</div></div>
-        <div class="countdown-overlay" id="countdownOverlay"><div class="countdown-text" id="countdownText"></div></div>
-      </div>
-      <input type="file" class="file-input file-input-video" accept="*/*" aria-hidden="true" tabindex="-1"><input type="file" class="file-input file-input-sub" accept=".vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream" aria-hidden="true" tabindex="-1"><input type="file" class="file-input file-input-com" accept="audio/*" aria-hidden="true" tabindex="-1">
-    </div>
-  </section>
-</main>
-<footer class="site-footer">CineLoom by <span>Lee Williams</span></footer>
 
-<!-- QR Code Modal -->
-<div class="qr-overlay" id="qrOverlay" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
-  <div class="qr-box">
-    <h3 id="qrTitle">Remote Control</h3>
-    <p>Scan this code with your phone to control CineLoom remotely.</p>
-    <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code for Remote Control">
-    <button class="qr-close-btn" id="qrCloseBtn">Close</button>
+<div class="poster-overlay" id="posterOverlay" role="dialog" aria-modal="true" aria-labelledby="posterEditorTitle">
+  <div class="poster-modal">
+    <div class="poster-editor">
+      <h2 id="posterEditorTitle">Poster Maker</h2><p class="poster-subtitle">Leave Film 2 blank for a single feature poster. Click text on the poster to edit directly.</p>
+      <div class="poster-fields">
+        <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Auto-Fill from OMDb</div>
+        <div class="search-row"><div class="autocomplete-container"><input type="text" id="search1" class="autocomplete-input" placeholder="Search for Film 1..."><div class="autocomplete-results" id="search1Results"></div></div><button type="button" class="clear-poster-btn" data-clear-poster="1" aria-label="Clear Film 1 Poster Image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
+        <div class="search-row"><div class="autocomplete-container"><input type="text" id="search2" class="autocomplete-input" placeholder="Search for Film 2 (Optional)"><div class="autocomplete-results" id="search2Results"></div></div><button type="button" class="clear-poster-btn" data-clear-poster="2" aria-label="Clear Film 2 Poster Image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
+        
+        <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>Design & Effects</div>
+        <div class="format-toggle-row"><button type="button" class="format-btn active" data-format="a4">A4 Print</button><button type="button" class="format-btn" data-format="916">9:16 Invite</button></div>
+        <div class="poster-dropdown" id="posterThemeDropdown"><button type="button" class="dropdown-toggle" id="posterThemeToggle"><span class="dropdown-label">Minimal</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="dropdown-menu" id="posterThemeMenu"><button type="button" class="dropdown-item active" data-poster-theme="theme-minimal">Minimal</button><button type="button" class="dropdown-item" data-poster-theme="theme-neon">Neon Stream</button><button type="button" class="dropdown-item" data-poster-theme="theme-noir">Cinema Noir</button><button type="button" class="dropdown-item" data-poster-theme="theme-golden">Golden Hour</button><button type="button" class="dropdown-item" data-poster-theme="theme-marquee">Marquee</button><button type="button" class="dropdown-item" data-poster-theme="theme-retro">Retro Pop</button><button type="button" class="dropdown-item" data-poster-theme="theme-blueprint">Blueprint</button><button type="button" class="dropdown-item" data-poster-theme="theme-artdeco">Art Deco</button><button type="button" class="dropdown-item" data-poster-theme="theme-vhs">VHS Retro</button><button type="button" class="dropdown-item" data-poster-theme="theme-orange">Orange Crush</button><button type="button" class="dropdown-item" data-poster-theme="theme-midblue">Midnight Blue</button><button type="button" class="dropdown-item" data-poster-theme="theme-typewriter">Typewriter</button><button type="button" class="dropdown-item" data-poster-theme="theme-halloween">Halloween</button><button type="button" class="dropdown-item" data-poster-theme="theme-christmas">Christmas</button><button type="button" class="dropdown-item" data-poster-theme="theme-valentine">Valentine's</button><button type="button" class="dropdown-item" data-poster-theme="theme-newyear">New Year's</button><button type="button" class="dropdown-item" data-poster-theme="theme-custom">Custom Colors</button></div></div>
+        <div class="custom-color-picker" id="customColorPicker"><label>Background <input type="color" id="customBg" value="#0b0e17"></label><label>Text Color <input type="color" id="customText" value="#ffffff"></label><label>Accent Color <input type="color" id="customAccent" value="#5fb3f5"></label></div>
+        <div class="poster-dropdown" id="fontDropdown"><button type="button" class="dropdown-toggle" id="fontToggle"><span class="dropdown-label" id="fontLabel">Theme Default</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="dropdown-menu" id="fontMenu"><button type="button" class="dropdown-item active" data-font="default">Theme Default</button><button type="button" class="dropdown-item" data-font="'Georgia', serif">Elegant Serif</button><button type="button" class="dropdown-item" data-font="'Inter', sans-serif">Modern Sans</button><button type="button" class="dropdown-item" data-font="'Impact', sans-serif">Classic Impact</button><button type="button" class="dropdown-item" data-font="'Courier New', monospace">Typewriter</button><button type="button" class="dropdown-item" data-font="'Brush Script MT', cursive">Script</button></div></div>
+        <div class="toggle-row"><span>Film Grain Overlay</span><div class="toggle-switch" id="grainToggle"></div></div>
+        <div class="toggle-row"><span>QR Code (Trailer Link)</span><div class="toggle-switch" id="qrToggle"></div></div>
+        
+        <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Backdrop Image</div>
+        <div class="backdrop-upload-wrap"><label>Upload Backdrop <input type="file" id="posterBackdrop" accept="image/*"></label><button type="button" class="backdrop-btn" id="posterClearBackdrop" aria-label="Clear Backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
+        
+        <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Film One</div>
+        <label>Film 1 Title <input type="text" id="posterTitle1" placeholder="The Grand Feature"></label><label>Film 1 Tagline <input type="text" id="posterTagline1" placeholder="Genre / Age Rating"></label><label>Film 1 Plot <textarea id="posterPlot1" placeholder="Plot summary..."></textarea></label>
+        
+        <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>Film Two (Optional)</div>
+        <label>Film 2 Title <input type="text" id="posterTitle2" placeholder="The Second Act"></label><label>Film 2 Tagline <input type="text" id="posterTagline2" placeholder="Genre / Age Rating"></label><label>Film 2 Plot <textarea id="posterPlot2" placeholder="Plot summary..."></textarea></label>
+        
+        <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Event Details</div>
+        <label>Date <input type="text" id="posterDate" placeholder="Thursday, 14 March"></label><label>Time <input type="text" id="posterTime" placeholder="7:30 PM"></label><label>Venue <input type="text" id="posterVenue" placeholder="The Living Room"></label><label>Critic Blurb <input type="text" id="posterBlurb" placeholder="A breathtaking masterpiece."></label><label>QR Code Link <input type="text" id="posterQRLink" placeholder="https://youtube.com/..."></label><label>Event Notes <textarea id="posterNotes" placeholder="Bring snacks. BYOB. Doors open 30 minutes before showtime."></textarea></label><label>Footer Label (Optional) <input type="text" id="posterFooter" placeholder="Add custom footer text..."></label>
+      </div>
+    </div>
+    
+    <div class="poster-preview-wrap">
+      <div class="poster-sheet theme-minimal" id="posterSheet">
+        <div class="ps-overlay"></div><div class="film-grain-overlay" id="filmGrain"></div>
+        <div class="ps-top"><div class="ps-brand">CineLoom Presents</div><div class="ps-event" id="psEvent" contenteditable="true">Film Night</div></div>
+        <div class="ps-content">
+          <div class="ps-blurb" id="psBlurb" contenteditable="true"></div>
+          <div class="ps-film-block" id="psFilm1"><div class="ps-label">Film One</div><div class="ps-title-row"><img class="ps-title-poster" id="psPoster1" src="" crossorigin="anonymous"><div class="ps-title" id="psTitle1" contenteditable="true">Film Title</div></div><div class="ps-rating" id="psRating1"></div><div class="ps-tagline" id="psTagline1" contenteditable="true"></div><div class="ps-plot" id="psPlot1" contenteditable="true"></div></div>
+          <div class="ps-divider" id="psFilmDivider"><span>Also Showing</span></div>
+          <div class="ps-film-block" id="psFilm2"><div class="ps-label">Film Two</div><div class="ps-title-row"><img class="ps-title-poster" id="psPoster2" src="" crossorigin="anonymous"><div class="ps-title" id="psTitle2" contenteditable="true"></div></div><div class="ps-rating" id="psRating2"></div><div class="ps-tagline" id="psTagline2" contenteditable="true"></div><div class="ps-plot" id="psPlot2" contenteditable="true"></div></div>
+        </div>
+        <div class="ps-meta">
+          <div class="ps-meta-item"><span class="k">Date</span><span class="v" id="psDate" contenteditable="true">—</span></div>
+          <div class="ps-meta-item"><span class="k">Time</span><span class="v" id="psTime" contenteditable="true">—</span></div>
+          <div class="ps-meta-item"><span class="k">Venue</span><span class="v" id="psVenue" contenteditable="true">—</span></div>
+        </div>
+        <div class="ps-notes" id="psNotes" contenteditable="true"></div>
+        <div class="ps-footer" id="psFooterWrap" style="display: none;"><span class="ps-mark" id="psFooter" contenteditable="true"></span><img class="ps-qr" id="psQR" src="" crossorigin="anonymous"></div>
+      </div>
+      <div class="zoom-controls"><button class="style-btn" id="zoomOut">-</button><button class="style-btn" id="zoomReset">Auto</button><button class="style-btn" id="zoomIn">+</button></div>
+    </div>
   </div>
 </div>
-</div> <!-- End Main App -->
 
-<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-// ===== Remote Control URL Check =====
-const urlParams = new URLSearchParams(window.location.search);
-const remoteId = urlParams.get('remote');
+// OMDb API Key Logic
+const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
 
-if (remoteId) {
-    // Mobile Remote Mode
-    document.getElementById('mainApp').style.display = 'none';
-    document.getElementById('mobileRemoteApp').style.display = 'flex';
-    document.title = "CineLoom Remote";
-    
-    const remoteStatus = document.getElementById('remoteStatus');
-    const remotePeer = new Peer();
-    
-    remotePeer.on('open', () => {
-        remoteStatus.textContent = "Connecting to Host...";
-        const conn = remotePeer.connect(remoteId);
-        
-        conn.on('open', () => {
-            remoteStatus.textContent = "Connected!";
-            remoteStatus.style.color = "#41d636";
-            
-            document.getElementById('rPlayPause').addEventListener('click', () => conn.send({action: 'playPause'}));
-            document.getElementById('rFullscreen').addEventListener('click', () => conn.send({action: 'fullscreen'}));
-            document.getElementById('rSeekBack').addEventListener('click', () => conn.send({action: 'seekBack'}));
-            document.getElementById('rSeekFwd').addEventListener('click', () => conn.send({action: 'seekFwd'}));
-            document.getElementById('rShowtime').addEventListener('click', () => conn.send({action: 'showtime'}));
-        });
-        
-        conn.on('error', () => { remoteStatus.textContent = "Connection lost."; remoteStatus.style.color = "#ef4444"; });
-    });
-} else {
-    // Normal Desktop Mode
-    const header = document.getElementById('mainHeader');
-    window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 10));
-    
-    const settingsToggle = document.getElementById('settingsToggle'); const settingsPanel = document.getElementById('settingsPanel');
-    settingsToggle.addEventListener('click', (e) => { e.stopPropagation(); const isOpen = settingsPanel.classList.toggle('open'); settingsToggle.classList.toggle('active', isOpen); });
-    document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) { settingsPanel.classList.remove('open'); settingsToggle.classList.remove('active'); } });
+const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
+const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
+const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), film2Block: document.getElementById('psFilm2'), filmDivider: document.getElementById('psFilmDivider'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), event: document.getElementById('psEvent') };
 
-    // QR Remote Logic
-    const qrOverlay = document.getElementById('qrOverlay');
-    const qrCloseBtn = document.getElementById('qrCloseBtn');
-    document.getElementById('remoteToggle').addEventListener('click', () => {
-        const peer = new Peer();
-        peer.on('open', (id) => {
-            const remoteUrl = `${window.location.origin}${window.location.pathname}?remote=${id}`;
-            document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
-            qrOverlay.classList.add('active');
-            
-            peer.on('connection', (conn) => {
-                conn.on('data', (data) => {
-                    if (!player) return;
-                    if (data.action === 'playPause') player.togglePlay();
-                    if (data.action === 'fullscreen') player.fullscreen.enter();
-                    if (data.action === 'seekBack') player.currentTime -= 10;
-                    if (data.action === 'seekFwd') player.currentTime += 10;
-                    if (data.action === 'showtime') document.getElementById('countdownBtn').click();
-                });
-            });
-        });
-    });
-    qrCloseBtn.addEventListener('click', () => qrOverlay.classList.remove('active'));
+function updatePosterPreview() {
+  posterPreview.title1.textContent = posterFields.title1.value || 'Film Title';
+  posterPreview.tagline1.textContent = posterFields.tagline1.value || '';
+  posterPreview.plot1.textContent = posterFields.plot1.value || '';
+  posterPreview.date.textContent = posterFields.date.value || '—';
+  posterPreview.time.textContent = posterFields.time.value || '—';
+  posterPreview.venue.textContent = posterFields.venue.value || '—';
+  posterPreview.notes.textContent = posterFields.notes.value || '';
+  posterPreview.blurb.textContent = posterFields.blurb.value || '';
+  posterPreview.blurb.classList.toggle('show', posterFields.blurb.value.trim() !== '');
+  
+  const footerText = posterFields.footer.value || '';
+  posterPreview.footer.textContent = footerText;
+  posterPreview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
 
-    // OMDb API Key Logic
-    const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
-
-    // Theme Logic
-    document.querySelectorAll('.theme-btn').forEach(btn => btn.addEventListener('click', () => { const theme = btn.dataset.theme; document.documentElement.setAttribute('data-theme', theme); document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); localStorage.setItem('cl-theme', theme); localStorage.removeItem('cl-custom-ui'); }));
-    const savedTheme = localStorage.getItem('cl-theme') || 'cyber'; document.documentElement.setAttribute('data-theme', savedTheme); document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === savedTheme));
-
-    // Custom UI Builder Logic
-    const customAccent = document.getElementById('customUiAccent');
-    const customBg = document.getElementById('customUiBg');
-    function applyCustomUI() {
-        document.documentElement.style.setProperty('--accent', customAccent.value);
-        document.documentElement.style.setProperty('--bg', customBg.value);
-        localStorage.setItem('cl-custom-ui', JSON.stringify({accent: customAccent.value, bg: customBg.value}));
-    }
-    customAccent.addEventListener('input', applyCustomUI);
-    customBg.addEventListener('input', applyCustomUI);
-    const savedCustomUI = JSON.parse(localStorage.getItem('cl-custom-ui') || 'null');
-    if (savedCustomUI) { customAccent.value = savedCustomUI.accent; customBg.value = savedCustomUI.bg; applyCustomUI(); }
-
-    // Subtitle Studio Logic
-    const cueFont = document.getElementById('cueFontSelect');
-    const cueText = document.getElementById('cueTextColor');
-    const cueShadow = document.getElementById('cueShadowColor');
-    function applyCueStyles() {
-        document.documentElement.style.setProperty('--cue-font', cueFont.value);
-        document.documentElement.style.setProperty('--cue-text', cueText.value);
-        document.documentElement.style.setProperty('--cue-shadow', cueShadow.value);
-        localStorage.setItem('cl-cue-styles', JSON.stringify({font: cueFont.value, text: cueText.value, shadow: cueShadow.value}));
-    }
-    cueFont.addEventListener('change', applyCueStyles);
-    cueText.addEventListener('input', applyCueStyles);
-    cueShadow.addEventListener('input', applyCueStyles);
-    const savedCueStyles = JSON.parse(localStorage.getItem('cl-cue-styles') || 'null');
-    if (savedCueStyles) { cueFont.value = savedCueStyles.font; cueText.value = savedCueStyles.text; cueShadow.value = savedCueStyles.shadow; applyCueStyles(); }
-
-    const posterOverlay = document.getElementById('posterOverlay'); const posterCloseBtn = document.getElementById('posterCloseBtn'); const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
-    const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
-    const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), film2Block: document.getElementById('psFilm2'), filmDivider: document.getElementById('psFilmDivider'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), event: document.getElementById('psEvent') };
-
-    function updateBroadcastMarquee() { const marqueeContent = document.getElementById('marqueeContent'); if (!marqueeContent) return; let feedText = "Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. "; if (posterFields.title1.value) { feedText += `TONIGHT: ${posterFields.title1.value}. `; if (posterFields.tagline1.value) feedText += `Genre/Rating: ${posterFields.tagline1.value}. `; if (posterFields.plot1.value) feedText += `Plot: ${posterFields.plot1.value} `; } if (posterFields.title2.value) { feedText += `ALSO SHOWING: ${posterFields.title2.value}. `; if (posterFields.plot2.value) feedText += `Plot: ${posterFields.plot2.value} `; } marqueeContent.innerHTML = `<span>${feedText}</span><span>${feedText}</span>`; }
-
-    function updatePosterPreview() {
-      posterPreview.title1.textContent = posterFields.title1.value || 'Film Title';
-      posterPreview.tagline1.textContent = posterFields.tagline1.value || '';
-      posterPreview.plot1.textContent = posterFields.plot1.value || '';
-      posterPreview.date.textContent = posterFields.date.value || '—';
-      posterPreview.time.textContent = posterFields.time.value || '—';
-      posterPreview.venue.textContent = posterFields.venue.value || '—';
-      posterPreview.notes.textContent = posterFields.notes.value || '';
-      posterPreview.blurb.textContent = posterFields.blurb.value || '';
-      posterPreview.blurb.classList.toggle('show', posterFields.blurb.value.trim() !== '');
-      
-      const footerText = posterFields.footer.value || '';
-      posterPreview.footer.textContent = footerText;
-      posterPreview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
-
-      if (posterFields.title2.value.trim() !== '') {
-        posterSheet.classList.add('double-feature');
-        posterPreview.film2Block.style.display = 'flex';
-        posterPreview.filmDivider.style.display = 'flex';
-        posterPreview.title2.textContent = posterFields.title2.value;
-        posterPreview.tagline2.textContent = posterFields.tagline2.value || '';
-        posterPreview.plot2.textContent = posterFields.plot2.value || '';
-      } else {
-        posterSheet.classList.remove('double-feature');
-        posterPreview.film2Block.style.display = 'none';
-        posterPreview.filmDivider.style.display = 'none';
-      }
-      updateBroadcastMarquee();
-      applyZoom();
-    }
-
-    Object.keys(posterFields).forEach(key => {
-      const input = posterFields[key];
-      const preview = posterPreview[key];
-      if (!preview) return;
-      
-      input.addEventListener('input', () => {
-        if (document.activeElement !== preview) {
-          preview.textContent = input.value;
-          if (key === 'blurb') preview.classList.toggle('show', input.value.trim() !== '');
-          if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
-        }
-        updatePosterPreview();
-      });
-      
-      if (preview.isContentEditable) {
-        preview.addEventListener('input', () => {
-          input.value = preview.textContent;
-          if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
-        });
-      }
-    });
-    posterPreview.event.addEventListener('input', () => updateBroadcastMarquee());
-
-    const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
-    const subtitleStyles = { 'theme-minimal': { color: '#fff', bg: 'rgba(0,0,0,0.85)', font: 'Inter' }, 'theme-neon': { color: '#00ffff', bg: 'rgba(11,14,23,0.9)', font: 'Inter' }, 'theme-noir': { color: '#fff', bg: 'rgba(0,0,0,0.9)', font: 'Courier New' }, 'theme-halloween': { color: '#41d636', bg: 'rgba(26,11,46,0.9)', font: 'Georgia' }, 'theme-christmas': { color: '#ffd700', bg: 'rgba(139,0,0,0.9)', font: 'Georgia' }, 'theme-valentine': { color: '#ff69b4', bg: 'rgba(255,240,245,0.9)', font: 'Georgia' }, 'theme-typewriter': { color: '#333', bg: 'rgba(240,240,240,0.9)', font: 'Courier New' }, 'theme-vhs': { color: '#ff00ff', bg: 'rgba(26,26,46,0.9)', font: 'Arial Black' }, 'theme-retro': { color: '#ffeb3b', bg: 'rgba(255,64,129,0.9)', font: 'Arial Black' } };
-    function updateSubtitleStyle(themeClass) { const style = subtitleStyles[themeClass] || subtitleStyles['theme-minimal']; document.documentElement.style.setProperty('--cue-text', style.color); document.documentElement.style.setProperty('--cue-bg', style.bg); document.documentElement.style.setProperty('--cue-font', style.font); }
-
-    function mapGenreToTheme(genreString) { if (!genreString) return null; const genres = genreString.toLowerCase(); if (genres.includes('horror')) return 'theme-halloween'; if (genres.includes('romance')) return 'theme-valentine'; if (genres.includes('sci-fi')) return 'theme-neon'; if (genres.includes('fantasy')) return 'theme-artdeco'; if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir'; if (genres.includes('comedy')) return 'theme-orange'; if (genres.includes('western')) return 'theme-golden'; if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter'; if (genres.includes('family') || genres.includes('animation')) return 'theme-retro'; if (genres.includes('musical')) return 'theme-marquee'; if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue'; return null; }
-    function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } updateSubtitleStyle(themeClass); setTimeout(applyZoom, 10); }
-
-    const fontDropdown = document.getElementById('fontDropdown'); const fontToggle = document.getElementById('fontToggle'); const fontMenu = document.getElementById('fontMenu'); const fontLabel = document.getElementById('fontLabel');
-    fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontDropdown.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (!fontDropdown.contains(e.target)) fontDropdown.classList.remove('open'); });
-    document.querySelectorAll('.dropdown-item[data-font]').forEach(btn => btn.addEventListener('click', () => { const font = btn.dataset.font; const name = btn.textContent; document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); fontLabel.textContent = name; fontDropdown.classList.remove('open'); document.querySelectorAll('.ps-title').forEach(el => { if (font === 'default') el.style.fontFamily = ''; else el.style.fontFamily = font; }); }));
-
-    const grainToggle = document.getElementById('grainToggle'); const filmGrain = document.getElementById('filmGrain');
-    grainToggle.addEventListener('click', () => { grainToggle.classList.toggle('active'); filmGrain.classList.toggle('show'); });
-
-    const qrToggle = document.getElementById('qrToggle');
-    qrToggle.addEventListener('click', () => { qrToggle.classList.toggle('active'); const show = qrToggle.classList.contains('active'); posterPreview.qr.classList.toggle('show', show); if (show) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
-    posterFields.qrLink.addEventListener('input', () => { if (qrToggle.classList.contains('active')) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
-
-    document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if (btn.dataset.format === '916') posterSheet.classList.add('format-916'); else posterSheet.classList.remove('format-916'); applyZoom(); }));
-
-    function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
-    async function fetchSuggestions(query, target) { const apiKey = localStorage.getItem('cl-omdb-key'); if (!apiKey || query.trim().length < 3) { hideResults(target); return; } try { const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; if (data.Response === 'True' && data.Search) { data.Search.slice(0, 5).forEach(movie => { const item = document.createElement('div'); item.className = 'autocomplete-item'; item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); resultsContainer.appendChild(item); }); resultsContainer.classList.add('show'); } else { hideResults(target); } } catch (e) { hideResults(target); } }
-    function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
-    async function fetchMovieDetails(imdbID, target) {
-      const apiKey = localStorage.getItem('cl-omdb-key');
-      try {
-        const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`);
-        const data = await res.json();
-        if (data.Response === 'True') {
-          if (target === '1') {
-            posterFields.title1.value = data.Title || ''; posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot1.value = data.Plot || '';
-            if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster1'); img.src = data.Poster; img.classList.add('show'); }
-            posterPreview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-            posterPreview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
-          } else {
-            posterFields.title2.value = data.Title || ''; posterFields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot2.value = data.Plot || '';
-            if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster2'); img.src = data.Poster; img.classList.add('show'); }
-            posterPreview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-            posterPreview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
-          }
-          const mappedTheme = mapGenreToTheme(data.Genre); if (mappedTheme) setPosterTheme(mappedTheme, themeDisplayNames[mappedTheme]);
-          updatePosterPreview();
-        }
-      } catch (e) { console.error('Error fetching details:', e); }
-      hideResults(target); const input = document.getElementById(`search${target}`); if (input) input.value = '';
-    }
-    document.getElementById('search1').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '1'), 300));
-    document.getElementById('search2').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '2'), 300));
-    document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
-    document.querySelectorAll('.clear-poster-btn').forEach(btn => btn.addEventListener('click', () => { const img = document.getElementById(`psPoster${btn.dataset.clearPoster}`); img.src = ''; img.classList.remove('show'); }));
-    let currentBackdropURL = null;
-    backdropInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = URL.createObjectURL(file); posterSheet.style.backgroundImage = `url(${currentBackdropURL})`; });
-    clearBackdropBtn.addEventListener('click', () => { if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = ''; });
-    const posterThemeDropdown = document.getElementById('posterThemeDropdown'); const posterThemeToggle = document.getElementById('posterThemeToggle'); const posterThemeMenu = document.getElementById('posterThemeMenu'); const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
-    posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeDropdown.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (!posterThemeDropdown.contains(e.target)) posterThemeDropdown.classList.remove('open'); });
-    document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(btn => btn.addEventListener('click', () => { setPosterTheme(btn.dataset.posterTheme, btn.textContent); posterThemeDropdown.classList.remove('open'); }));
-    let posterZoom = 0.75;
-    function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
-    document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
-    document.getElementById('zoomOut').addEventListener('click', () => { posterZoom = Math.max(0.25, posterZoom - 0.1); applyZoom(); });
-    document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
-    function openPosterMaker() { const filenameEl = document.querySelector('.load-video-btn .filename'); const filename = filenameEl.textContent.trim(); const cleanName = (filename && filename !== 'No file chosen' && !filename.startsWith('Streaming')) ? filename.replace(/\.[^/.]+$/, "").replace(/[._]/g, " ") : ''; if (cleanName && !posterFields.title1.value) posterFields.title1.value = cleanName; updatePosterPreview(); posterOverlay.classList.add('active'); setTimeout(applyZoom, 50); }
-    document.querySelector('[data-screen-poster]').addEventListener('click', openPosterMaker);
-    posterCloseBtn.addEventListener('click', () => posterOverlay.classList.remove('active'));
-    posterOverlay.addEventListener('click', (e) => { if (e.target === posterOverlay) posterOverlay.classList.remove('active'); });
-    posterPrintBtn.addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
-    posterExportBtn.addEventListener('click', () => {
-      posterExportBtn.textContent = 'Rendering...';
-      const currentTransform = posterSheet.style.transform;
-      posterSheet.style.transform = 'none';
-      html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
-        const link = document.createElement('a'); link.download = 'cineloom-poster.png'; link.href = canvas.toDataURL('image/png'); link.click();
-        posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform;
-      }).catch(err => { console.error('Export failed', err); alert('Export failed due to CORS restrictions on the poster image. Try the Print option or use a custom backdrop upload.'); posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; });
-    });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && posterOverlay.classList.contains('active')) posterOverlay.classList.remove('active'); });
-
-    function parseSubtitles(filename, content) { const ext = filename.split('.').pop().toLowerCase(); if (ext === 'vtt') return content; if (ext === 'srt') return srtToVtt(content); if (ext === 'sbv') return sbvToVtt(content); if (ext === 'ass' || ext === 'ssa') return assToVtt(content); return srtToVtt(content); }
-    function srtToVtt(srt) { let vtt = 'WEBVTT\n\n'; vtt += srt.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2'); vtt = vtt.replace(/(^|\n)(\d{2}:\d{2}),(\d{3})/g, '$1$2.$3'); return vtt; }
-    function sbvToVtt(content) { let vtt = 'WEBVTT\n\n'; const blocks = content.trim().split(/\n\s*\n/); blocks.forEach(block => { const lines = block.split('\n'); if (lines.length < 2) return; const times = lines[0].split(','); if (times.length === 2) { const start = formatSbvTime(times[0].trim()); const end = formatSbvTime(times[1].trim()); vtt += `${start} --> ${end}\n${lines.slice(1).join('\n')}\n\n`; } }); return vtt; }
-    function formatSbvTime(t) { let parts = t.replace(',', '.').split(':'); while(parts.length < 3) parts.unshift('00'); return parts.map(p => p.padStart(2, '0')).join(':'); }
-    function assToVtt(content) { let vtt = 'WEBVTT\n\n'; const lines = content.split('\n'); let inEvents = false; let textIdx = -1, startIdx = -1, endIdx = -1; for (let line of lines) { if (line.trim().startsWith('[')) inEvents = line.trim().toLowerCase() === '[events]'; if (inEvents && line.startsWith('Format:')) { const fmt = line.split(':')[1].split(',').map(s => s.trim()); textIdx = fmt.indexOf('Text'); startIdx = fmt.indexOf('Start'); endIdx = fmt.indexOf('End'); continue; } if (inEvents && line.startsWith('Dialogue:') && textIdx !== -1) { const parts = line.substring(9).split(','); if (parts.length > textIdx) { const start = formatAssTime(parts[startIdx]?.trim()); const end = formatAssTime(parts[endIdx]?.trim()); let text = parts.slice(textIdx).join(',').trim(); text = text.replace(/\{[^}]+\}/g, ''); text = text.replace(/\\N/gi, '\n'); if (start && end) vtt += `${start} --> ${end}\n${text}\n\n`; } } } return vtt; }
-    function formatAssTime(t) { if (!t) return ''; let parts = t.split(':'); while(parts.length < 3) parts.unshift('00'); let secParts = parts[2].split('.'); let sec = secParts[0].padStart(2, '0'); let ms = (secParts[1] || '0').padEnd(3, '0'); return `${parts[0].padStart(2,'0')}:${parts[1].padStart(2,'0')}:${sec}.${ms}`; }
-
-    const playerContainer = document.querySelector('.player'); const idleState = document.getElementById('idleState'); const subSyncControls = document.getElementById('subSyncControls'); const ambientGlow = document.getElementById('ambientGlow'); const audioVisualizer = document.getElementById('audioVisualizer'); const creditsOverlay = document.getElementById('creditsOverlay'); const ambientCanvas = document.createElement('canvas'); ambientCanvas.width = 50; ambientCanvas.height = 50; const ambientCtx = ambientCanvas.getContext('2d', { willReadFrequently: true }); let ambientInterval;
-    function updateAmbientLight() { const video = document.getElementById('player'); if (video.paused || video.ended || !video.videoWidth) return; try { ambientCtx.drawImage(video, 0, 0, 50, 50); const data = ambientCtx.getImageData(0, 0, 50, 50).data; let r = 0, g = 0, b = 0; for (let i = 0; i < data.length; i += 4) { r += data[i]; g += data[i+1]; b += data[i+2]; } const count = data.length / 4; r = Math.floor(r/count); g = Math.floor(g/count); b = Math.floor(b/count); ambientGlow.style.background = `rgba(${r}, ${g}, ${b}, 0.35)`; } catch (e) { ambientGlow.style.background = 'transparent'; } }
-    let audioAnalyser; function setupVisualizer() { if (!audioAnalyser || !audioContext) return; const ctx = audioVisualizer.getContext('2d'); const bufferLength = audioAnalyser.frequencyBinCount; const dataArray = new Uint8Array(bufferLength); function draw() { requestAnimationFrame(draw); if (document.getElementById('player').paused) return; audioAnalyser.getByteFrequencyData(dataArray); const width = audioVisualizer.width; const height = audioVisualizer.height; ctx.clearRect(0, 0, width, height); const barWidth = (width / bufferLength) * 2.5; let x = 0; const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(); ctx.fillStyle = accentColor; for (let i = 0; i < bufferLength; i++) { const barHeight = (dataArray[i] / 255) * height; ctx.fillRect(x, height - barHeight, barWidth - 1, barHeight); x += barWidth; } } draw(); }
-
-    // Audio Mixer Elements
-    const videoVolumeSlider = document.getElementById('videoVolumeSlider');
-    const comVolumeSlider = document.getElementById('comVolumeSlider');
-    const comAudio = new Audio();
-    let comGainNode;
-    let comSyncInterval;
-
-    function setupPlayer() {
-      if (window.audioContext) {
-        try { window.audioContext.close(); } catch(e){}
-        window.audioContext = null;
-      }
-      
-      const video = document.getElementById('player'); const errorState = playerContainer.querySelector('.error-state'); const fileVideo = playerContainer.querySelector('.file-input-video'); const fileSub = playerContainer.querySelector('.file-input-sub'); const fileCom = playerContainer.querySelector('.file-input-com'); const loadVideoBtn = playerContainer.querySelector('.load-video-btn'); const loadSubBtn = playerContainer.querySelector('.load-sub-btn'); const commentaryBtn = document.getElementById('commentaryBtn');
-      let currentVideoURL = null; let currentSubURL = null; let currentVideoMime = 'video/mp4'; let subDelay = 0; let originalCues = [];
-      let gainNode, audioInitialized = false;
-      
-      function initAudioBoost() { 
-        if (audioInitialized) return; 
-        try { 
-          window.audioContext = new (window.AudioContext || window.webkitAudioContext)(); 
-          const source = window.audioContext.createMediaElementSource(video); 
-          gainNode = window.audioContext.createGain(); 
-          audioAnalyser = window.audioContext.createGain(); 
-          audioAnalyser.fftSize = 128; 
-          source.connect(gainNode); 
-          gainNode.connect(audioAnalyser); 
-          audioAnalyser.connect(window.audioContext.destination); 
-          
-          // Commentary Audio Graph
-          comGainNode = window.audioContext.createMediaElementSource(comAudio);
-          comGainNode.connect(window.audioContext.destination);
-          
-          // Set initial volumes from sliders
-          gainNode.gain.value = videoVolumeSlider.value;
-          comGainNode.gain.value = comVolumeSlider.value;
-          
-          audioInitialized = true; 
-          setupVisualizer(); 
-        } catch (e) { console.warn("Audio boost unavailable:", e); } 
-      }
-      
-      const player = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], settings: ['captions', 'speed', 'quality'], ratio: '16:9', volume: 1, muted: false, invertTime: false, toggleInvertTime: false });
-      video.addEventListener('play', () => { if (!audioInitialized) initAudioBoost(); if (window.audioContext && window.audioContext.state === 'suspended') window.audioContext.resume(); document.body.classList.add('cinema-mode'); audioVisualizer.classList.add('active'); ambientInterval = setInterval(updateAmbientLight, 500); comAudio.play().catch(e=>{}); });
-      video.addEventListener('pause', () => { document.body.classList.remove('cinema-mode'); audioVisualizer.classList.remove('active'); clearInterval(ambientInterval); ambientGlow.style.background = 'transparent'; comAudio.pause(); });
-      video.addEventListener('ended', () => { document.body.classList.remove('cinema-mode'); audioVisualizer.classList.remove('active'); clearInterval(ambientInterval); ambientGlow.style.background = 'transparent'; comAudio.pause(); });
-      video.addEventListener('timeupdate', () => { if (video.duration > 0 && video.duration - video.currentTime < 10) creditsOverlay.classList.add('show'); else creditsOverlay.classList.remove('show'); });
-      
-      // Sync Commentary Audio
-      comSyncInterval = setInterval(() => {
-          if (!video.paused && !comAudio.paused) {
-              if (Math.abs(video.currentTime - comAudio.currentTime) > 0.3) {
-                  comAudio.currentTime = video.currentTime;
-              }
-          }
-      }, 1000);
-
-      window.addEventListener('resize', () => { audioVisualizer.width = playerContainer.offsetWidth; audioVisualizer.height = 60; }); audioVisualizer.width = playerContainer.offsetWidth; audioVisualizer.height = 60;
-      player.on('loadedmetadata', () => { errorState.classList.add('hidden'); idleState.classList.add('hidden'); });
-      player.on('error', () => { idleState.classList.add('hidden'); errorState.classList.remove('hidden'); });
-      loadVideoBtn.addEventListener('click', () => fileVideo.click());
-      commentaryBtn.addEventListener('click', () => fileCom.click());
-      
-      // Audio Mixer Listeners
-      videoVolumeSlider.addEventListener('input', () => { if (gainNode) gainNode.gain.value = videoVolumeSlider.value; });
-      comVolumeSlider.addEventListener('input', () => { if (comGainNode) comGainNode.gain.value = comVolumeSlider.value; });
-
-      fileCom.addEventListener('change', (e) => { 
-          const file = e.target.files[0]; if (!file) return; 
-          comAudio.src = URL.createObjectURL(file); 
-          commentaryBtn.style.borderColor = 'var(--accent)'; 
-          commentaryBtn.style.color = 'var(--accent)'; 
-          commentaryBtn.style.background = 'var(--accent-soft)';
-      });
-
-      fileVideo.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentVideoURL) URL.revokeObjectURL(currentVideoURL); let mimeType = file.type; const name = file.name.toLowerCase(); if (!mimeType || mimeType === '') { if (name.endsWith('.mkv')) mimeType = 'video/x-matroska'; else if (name.endsWith('.mp4')) mimeType = 'video/mp4'; else if (name.endsWith('.webm')) mimeType = 'video/webm'; else if (name.endsWith('.avi')) mimeType = 'video/x-msvideo'; else if (name.endsWith('.mov')) mimeType = 'video/quicktime'; else mimeType = 'video/mp4'; } currentVideoMime = mimeType; const blob = new Blob([file], { type: mimeType }); currentVideoURL = URL.createObjectURL(blob); errorState.classList.add('hidden'); idleState.classList.remove('hidden'); let tracks = []; if (currentSubURL) { tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }); } player.source = { type: 'video', title: file.name, sources: [{ src: currentVideoURL, type: mimeType }], tracks: tracks }; loadVideoBtn.classList.add('has-file'); loadVideoBtn.querySelector('.filename').textContent = file.name; });
-      loadSubBtn.addEventListener('click', () => fileSub.click());
-      function applySubDelay() { const track = video.textTracks[0]; if (!track || track.cues.length === 0 || originalCues.length === 0) return; for (let i = 0; i < track.cues.length; i++) { const cue = track.cues[i]; cue.startTime = Math.max(0, originalCues[i].start + subDelay); cue.endTime = Math.max(0, originalCues[i].end + subDelay); } document.getElementById('subSyncVal').textContent = (subDelay > 0 ? '+' : '') + subDelay.toFixed(1) + 's'; }
-      document.getElementById('subSyncBack').addEventListener('click', () => { subDelay -= 0.5; applySubDelay(); });
-      document.getElementById('subSyncFwd').addEventListener('click', () => { subDelay += 0.5; applySubDelay(); });
-      document.getElementById('subSyncReset').addEventListener('click', () => { subDelay = 0; applySubDelay(); });
-      fileSub.addEventListener('change', async (e) => { const file = e.target.files[0]; if (!file) return; let vttContent; try { const rawText = await file.text(); vttContent = parseSubtitles(file.name, rawText); } catch (err) { console.error('Failed to read subtitle file:', err); return; } const blob = new Blob([vttContent], { type: 'text/vtt' }); if (currentSubURL) URL.revokeObjectURL(currentSubURL); currentSubURL = URL.createObjectURL(blob); video.querySelectorAll('track').forEach(t => t.remove()); const track = document.createElement('track'); track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; video.appendChild(track); track.addEventListener('load', () => { const activeTrack = track.track; originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = 'showing'; player.toggleCaptions(true); }); const currentTime = player.currentTime; const isPlaying = !video.paused; player.source = { type: 'video', title: loadVideoBtn.querySelector('.filename').textContent || 'CineLoom', sources: [{ src: currentVideoURL, type: currentVideoMime }], tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] }; const onLoaded = () => { player.currentTime = currentTime; if (isPlaying) player.play().catch(()=>{}); player.toggleCaptions(true); const activeTrack = video.textTracks[0]; if (activeTrack) { originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; } video.removeEventListener('loadedmetadata', onLoaded); }; video.addEventListener('loadedmetadata', onLoaded); loadSubBtn.classList.add('has-file'); loadSubBtn.querySelector('.filename').textContent = file.name; });
-      document.querySelectorAll('.style-btn[data-boost]').forEach(btn => btn.addEventListener('click', () => { const boost = parseFloat(btn.dataset.boost); if (gainNode) gainNode.gain.value = boost; localStorage.setItem('cl-boost', boost); document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }));
-      const savedBoost = localStorage.getItem('cl-boost') || '3.0'; document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.toggle('active', b.dataset.boost === savedBoost));
-    }
-    setupPlayer(); updateBroadcastMarquee();
-
-    const torrentBtn = document.getElementById('torrentBtn'); const torrentInput = document.getElementById('torrentInput'); const loadVideoBtn = document.querySelector('.load-video-btn'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText'); const torrentSearchBtn = document.getElementById('torrentSearchBtn'); const torrentResults = document.getElementById('torrentResults');
-
-    async function searchTorrents(query) {
-        if (!query || query.trim().length < 3) return;
-        torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><div class="torrent-info"><span class="torrent-title">Searching YTS...</span></div></div>';
-        torrentResults.classList.add('show');
-        const apiUrl = `https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=10`;
-        const proxies = [ url => url, url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`, url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, url => `https://thingproxy.freeboard.io/fetch/${url}` ];
-        let data = null; let success = false; let lastError = null;
-        for (const proxy of proxies) {
-            try {
-                const res = await fetch(proxy(apiUrl));
-                if (!res.ok) throw new Error(`Proxy failed: ${res.statusText}`);
-                data = await res.json();
-                if (data && data.status === 'ok') { success = true; break; }
-            } catch (e) { console.warn("Fetch failed:", e.message); lastError = e; }
-        }
-        torrentResults.innerHTML = '';
-        if (success && data.data.movies && data.data.movies.length > 0) {
-            data.data.movies.forEach(movie => {
-                const torrent = movie.torrents.find(t => t.quality === '1080p' && t.type === 'web') || movie.torrents.find(t => t.quality === '1080p') || movie.torrents.find(t => t.quality === '720p');
-                if (!torrent) return;
-                const item = document.createElement('div');
-                item.className = 'torrent-item';
-                item.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg><div class="torrent-info"><span class="torrent-title">${movie.title_long} (${torrent.quality})</span><span class="torrent-meta">${torrent.type} • ${torrent.size} ${torrent.size_unit} • S:${torrent.seeds} L:${torrent.peers}</span></div>`;
-                item.addEventListener('click', () => {
-                    const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.openbittorrent.com:80&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.openwebtorrent.com`;
-                    torrentInput.value = magnet;
-                    torrentResults.classList.remove('show');
-                    startTorrentStream(magnet);
-                });
-                torrentResults.appendChild(item);
-            });
-        } else if (success && (!data.data.movies || data.data.movies.length === 0)) {
-            const item = document.createElement('div'); item.className = 'torrent-item'; item.style.cursor = 'default';
-            item.innerHTML = `<div class="torrent-info"><span class="torrent-title">No torrents found.</span></div>`;
-            torrentResults.appendChild(item);
-        } else {
-            const item = document.createElement('div'); item.className = 'torrent-item'; item.style.cursor = 'default';
-            item.innerHTML = `<div class="torrent-info"><span class="torrent-title">Search failed. Please paste a Magnet Link directly.</span></div>`;
-            torrentResults.appendChild(item);
-        }
-    }
-    torrentSearchBtn.addEventListener('click', () => { const query = torrentInput.value.trim(); if (!query) return; if (query.startsWith('magnet:')) startTorrentStream(query); else searchTorrents(query); });
-    torrentInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); torrentSearchBtn.click(); } });
-    document.addEventListener('click', (e) => { if (!e.target.closest('.torrent-row')) { torrentResults.classList.remove('show'); } });
-
-    function startTorrentStream(magnet) {
-        if (typeof WebTorrent === 'undefined') { alert('WebTorrent library failed to load.'); return; }
-        if (window.torrentClient) { window.torrentClient.destroy(); }
-        window.torrentClient = new WebTorrent();
-        loadVideoBtn.querySelector('.filename').textContent = "Connecting to peers...";
-        bufferingText.textContent = 'Connecting...'; bufferingOverlay.classList.add('show');
-        window.torrentClient.on('error', (err) => { console.error('WebTorrent Client Error:', err); alert('Torrent Error: ' + err.message); bufferingOverlay.classList.remove('show'); });
-        window.torrentClient.add(magnet, (torrent) => {
-            const file = torrent.files.find(f => f.name.endsWith('.mp4') || f.name.endsWith('.webm') || f.name.endsWith('.m4v') || f.name.endsWith('.mkv'));
-            if (!file) { alert("No playable video file found in this torrent."); loadVideoBtn.querySelector('.filename').textContent = "No file chosen"; bufferingOverlay.classList.remove('show'); return; }
-            const videoStage = document.querySelector('.video-stage');
-            const oldVideo = document.getElementById('player'); if (oldVideo) oldVideo.remove();
-            const tempContainer = document.createElement('div'); videoStage.insertBefore(tempContainer, videoStage.firstChild);
-            file.appendTo(tempContainer, { autoplay: false, controls: false }, (err, elem) => {
-                if (err) { console.error('Streaming error:', err); alert('Error streaming torrent.'); bufferingOverlay.classList.remove('show'); return; }
-                elem.id = 'player'; elem.setAttribute('playsinline', '');
-                videoStage.insertBefore(elem, tempContainer); tempContainer.remove();
-                loadVideoBtn.querySelector('.filename').textContent = `Streaming: ${file.name}`;
-                elem.addEventListener('waiting', () => { bufferingText.textContent = 'Buffering...'; bufferingOverlay.classList.add('show'); });
-                elem.addEventListener('playing', () => { bufferingOverlay.classList.remove('show'); });
-                elem.addEventListener('canplay', () => { bufferingOverlay.classList.remove('show'); });
-                elem.addEventListener('stalled', () => { bufferingText.textContent = 'Network Stalled...'; bufferingOverlay.classList.add('show'); });
-                setupPlayer(); idleState.classList.add('hidden'); errorState.classList.add('hidden');
-            });
-            torrent.on('warning', (err) => console.warn('Torrent warning:', err));
-            torrent.on('error', (err) => { console.error('Torrent file error:', err); alert('Torrent File Error: ' + err.message); bufferingOverlay.classList.remove('show'); });
-        });
-    }
-    torrentBtn.addEventListener('click', () => { const magnet = torrentInput.value.trim(); if (magnet) startTorrentStream(magnet); });
-    window.addEventListener('offline', () => { bufferingText.textContent = 'Network Disconnected...'; bufferingOverlay.classList.add('show'); });
-    window.addEventListener('online', () => { bufferingText.textContent = 'Reconnecting...'; setTimeout(() => { const video = document.getElementById('player'); if (video && !video.paused) { bufferingOverlay.classList.remove('show'); } else { bufferingText.textContent = 'Buffering...'; } }, 2000); });
-
-    const countdownBtn = document.getElementById('countdownBtn'); const countdownOverlay = document.getElementById('countdownOverlay'); const countdownText = document.getElementById('countdownText');
-    countdownBtn.addEventListener('click', () => { let count = 5; countdownOverlay.classList.add('active'); countdownText.textContent = count; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); const interval = setInterval(() => { count--; if (count > 0) { countdownText.textContent = count; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); } else { clearInterval(interval); countdownText.textContent = 'PLAY'; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); setTimeout(() => { countdownOverlay.classList.remove('active'); const player = document.getElementById('player').plyr; if (player) player.play(); }, 800); } }, 1000); });
-
-    const shortcutToggle = document.getElementById('shortcutToggle'); const shortcutsOverlay = document.getElementById('shortcutsOverlay');
-    shortcutToggle.addEventListener('click', () => shortcutsOverlay.classList.add('active'));
-    shortcutsOverlay.addEventListener('click', (e) => { if (e.target === shortcutsOverlay) shortcutsOverlay.classList.remove('active'); });
-    document.addEventListener('keydown', (e) => { const isTyping = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable; const isOverlayOpen = posterOverlay.classList.contains('active') || settingsPanel.classList.contains('open'); if (e.key === 'Escape') { shortcutsOverlay.classList.remove('active'); return; } if (e.key === '?' && !isTyping) { shortcutsOverlay.classList.toggle('active'); return; } if (isTyping || isOverlayOpen || shortcutsOverlay.classList.contains('active')) return; const player = document.getElementById('player').plyr; if (!player) return; switch(e.key) { case ' ': e.preventDefault(); player.togglePlay(); break; case 'f': case 'F': player.fullscreen.enter(); break; case 'c': case 'C': player.toggleCaptions(); break; case 'm': case 'M': player.muted = !player.muted; break; case 'ArrowLeft': player.currentTime -= 5; break; case 'ArrowRight': player.currentTime += 5; break; case 'j': case 'J': player.currentTime -= 10; break; case 'l': case 'L': player.currentTime += 10; break; } });
-
-    const voiceToggle = document.getElementById('voiceToggle'); const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; let recognition; let isListening = false;
-    if (SpeechRecognition) { recognition = new SpeechRecognition(); recognition.continuous = true; recognition.interimResults = false; recognition.lang = 'en-US'; recognition.onresult = (event) => { const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase(); console.log('Voice heard:', transcript); const player = document.getElementById('player').plyr; if (!player) return; if (transcript.includes('cineloom')) { if (transcript.includes('play')) player.play(); if (transcript.includes('pause')) player.pause(); if (transcript.includes('subtitles') || transcript.includes('captions')) player.toggleCaptions(); if (transcript.includes('mute')) player.muted = true; if (transcript.includes('unmute')) player.muted = false; if (transcript.includes('fullscreen')) player.fullscreen.enter(); if (transcript.includes('lights out') || transcript.includes('dim')) document.body.classList.add('cinema-mode'); if (transcript.includes('lights on')) document.body.classList.remove('cinema-mode'); } }; recognition.onend = () => { if (isListening) { try { recognition.start(); } catch(e) {} } }; recognition.onerror = (event) => { console.error('Speech recognition error:', event.error); }; }
-    voiceToggle.addEventListener('click', () => { if (!SpeechRecognition) { alert('Voice commands are not supported in this browser. Please try Chrome or Edge.'); return; } isListening = !isListening; voiceToggle.classList.toggle('listening', isListening); if (isListening) { try { recognition.start(); } catch(e) {} } else { try { recognition.stop(); } catch(e) {} } });
-
-    const snapshotBtn = document.getElementById('snapshotBtn');
-    snapshotBtn.addEventListener('click', () => {
-      const video = document.getElementById('player');
-      if (!video.src || video.error) { alert('Please load a video first.'); return; }
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/png');
-      
-      openPosterMaker();
-      if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL);
-      currentBackdropURL = null;
-      backdropInput.value = '';
-      posterSheet.style.backgroundImage = `url(${dataUrl})`;
-    });
+  if (posterFields.title2.value.trim() !== '') {
+    posterSheet.classList.add('double-feature');
+    posterPreview.film2Block.style.display = 'flex';
+    posterPreview.filmDivider.style.display = 'flex';
+    posterPreview.title2.textContent = posterFields.title2.value;
+    posterPreview.tagline2.textContent = posterFields.tagline2.value || '';
+    posterPreview.plot2.textContent = posterFields.plot2.value || '';
+  } else {
+    posterSheet.classList.remove('double-feature');
+    posterPreview.film2Block.style.display = 'none';
+    posterPreview.filmDivider.style.display = 'none';
+  }
+  applyZoom();
 }
+
+Object.keys(posterFields).forEach(key => {
+  const input = posterFields[key];
+  const preview = posterPreview[key];
+  if (!preview) return;
+  
+  input.addEventListener('input', () => {
+    if (document.activeElement !== preview) {
+      preview.textContent = input.value;
+      if (key === 'blurb') preview.classList.toggle('show', input.value.trim() !== '');
+      if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+    }
+    updatePosterPreview();
+  });
+  
+  if (preview.isContentEditable) {
+    preview.addEventListener('input', () => {
+      input.value = preview.textContent;
+      if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+    });
+  }
+});
+
+const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
+const subtitleStyles = { 'theme-minimal': { color: '#fff', bg: 'rgba(0,0,0,0.85)', font: 'Inter' }, 'theme-neon': { color: '#00ffff', bg: 'rgba(11,14,23,0.9)', font: 'Inter' }, 'theme-noir': { color: '#fff', bg: 'rgba(0,0,0,0.9)', font: 'Courier New' }, 'theme-halloween': { color: '#41d636', bg: 'rgba(26,11,46,0.9)', font: 'Georgia' }, 'theme-christmas': { color: '#ffd700', bg: 'rgba(139,0,0,0.9)', font: 'Georgia' }, 'theme-valentine': { color: '#ff69b4', bg: 'rgba(255,240,245,0.9)', font: 'Georgia' }, 'theme-typewriter': { color: '#333', bg: 'rgba(240,240,240,0.9)', font: 'Courier New' }, 'theme-vhs': { color: '#ff00ff', bg: 'rgba(26,26,46,0.9)', font: 'Arial Black' }, 'theme-retro': { color: '#ffeb3b', bg: 'rgba(255,64,129,0.9)', font: 'Arial Black' } };
+function updateSubtitleStyle(themeClass) { const style = subtitleStyles[themeClass] || subtitleStyles['theme-minimal']; document.documentElement.style.setProperty('--cue-text', style.color); document.documentElement.style.setProperty('--cue-bg', style.bg); document.documentElement.style.setProperty('--cue-font', style.font); }
+
+function mapGenreToTheme(genreString) { if (!genreString) return null; const genres = genreString.toLowerCase(); if (genres.includes('horror')) return 'theme-halloween'; if (genres.includes('romance')) return 'theme-valentine'; if (genres.includes('sci-fi')) return 'theme-neon'; if (genres.includes('fantasy')) return 'theme-artdeco'; if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir'; if (genres.includes('comedy')) return 'theme-orange'; if (genres.includes('western')) return 'theme-golden'; if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter'; if (genres.includes('family') || genres.includes('animation')) return 'theme-retro'; if (genres.includes('musical')) return 'theme-marquee'; if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue'; return null; }
+function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } updateSubtitleStyle(themeClass); setTimeout(applyZoom, 10); }
+function applyCustomTheme() { if (!posterSheet.classList.contains('theme-custom')) return; const bg = document.getElementById('customBg').value; const text = document.getElementById('customText').value; const accent = document.getElementById('customAccent').value; posterSheet.style.backgroundColor = bg; posterSheet.style.color = text; posterSheet.style.borderColor = accent; const overlay = posterSheet.querySelector('.ps-overlay'); const r = parseInt(bg.slice(1,3), 16); const g = parseInt(bg.slice(3,5), 16); const b = parseInt(bg.slice(5,7), 16); overlay.style.background = `rgba(${r}, ${g}, ${b}, 0.85)`; posterSheet.querySelectorAll('.ps-label, .ps-event, .ps-divider span, .ps-meta-item .k').forEach(el => el.style.color = accent); }
+['customBg', 'customText', 'customAccent'].forEach(id => document.getElementById(id).addEventListener('input', applyCustomTheme));
+
+const fontDropdown = document.getElementById('fontDropdown'); const fontToggle = document.getElementById('fontToggle'); const fontMenu = document.getElementById('fontMenu'); const fontLabel = document.getElementById('fontLabel');
+fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontDropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!fontDropdown.contains(e.target)) fontDropdown.classList.remove('open'); });
+document.querySelectorAll('.dropdown-item[data-font]').forEach(btn => btn.addEventListener('click', () => { const font = btn.dataset.font; const name = btn.textContent; document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); fontLabel.textContent = name; fontDropdown.classList.remove('open'); document.querySelectorAll('.ps-title').forEach(el => { if (font === 'default') el.style.fontFamily = ''; else el.style.fontFamily = font; }); }));
+
+const grainToggle = document.getElementById('grainToggle'); const filmGrain = document.getElementById('filmGrain');
+grainToggle.addEventListener('click', () => { grainToggle.classList.toggle('active'); filmGrain.classList.toggle('show'); });
+
+const qrToggle = document.getElementById('qrToggle');
+qrToggle.addEventListener('click', () => { qrToggle.classList.toggle('active'); const show = qrToggle.classList.contains('active'); posterPreview.qr.classList.toggle('show', show); if (show) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
+posterFields.qrLink.addEventListener('input', () => { if (qrToggle.classList.contains('active')) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
+
+document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if (btn.dataset.format === '916') posterSheet.classList.add('format-916'); else posterSheet.classList.remove('format-916'); applyZoom(); }));
+
+function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
+async function fetchSuggestions(query, target) { const apiKey = localStorage.getItem('cl-omdb-key'); if (!apiKey || query.trim().length < 3) { hideResults(target); return; } try { const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; if (data.Response === 'True' && data.Search) { data.Search.slice(0, 5).forEach(movie => { const item = document.createElement('div'); item.className = 'autocomplete-item'; item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); resultsContainer.appendChild(item); }); resultsContainer.classList.add('show'); } else { hideResults(target); } } catch (e) { hideResults(target); } }
+function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
+async function fetchMovieDetails(imdbID, target) {
+  const apiKey = localStorage.getItem('cl-omdb-key');
+  try {
+    const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`);
+    const data = await res.json();
+    if (data.Response === 'True') {
+      if (target === '1') {
+        posterFields.title1.value = data.Title || ''; posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot1.value = data.Plot || '';
+        if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster1'); img.src = data.Poster; img.classList.add('show'); }
+        posterPreview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
+        posterPreview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+      } else {
+        posterFields.title2.value = data.Title || ''; posterFields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot2.value = data.Plot || '';
+        if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster2'); img.src = data.Poster; img.classList.add('show'); }
+        posterPreview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
+        posterPreview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+      }
+      const mappedTheme = mapGenreToTheme(data.Genre); if (mappedTheme) setPosterTheme(mappedTheme, themeDisplayNames[mappedTheme]);
+      updatePosterPreview();
+    }
+  } catch (e) { console.error('Error fetching details:', e); }
+  hideResults(target); const input = document.getElementById(`search${target}`); if (input) input.value = '';
+}
+document.getElementById('search1').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '1'), 300));
+document.getElementById('search2').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '2'), 300));
+document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
+document.querySelectorAll('.clear-poster-btn').forEach(btn => btn.addEventListener('click', () => { const img = document.getElementById(`psPoster${btn.dataset.clearPoster}`); img.src = ''; img.classList.remove('show'); }));
+let currentBackdropURL = null;
+backdropInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = URL.createObjectURL(file); posterSheet.style.backgroundImage = `url(${currentBackdropURL})`; });
+clearBackdropBtn.addEventListener('click', () => { if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = ''; });
+const posterThemeDropdown = document.getElementById('posterThemeDropdown'); const posterThemeToggle = document.getElementById('posterThemeToggle'); const posterThemeMenu = document.getElementById('posterThemeMenu'); const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
+posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeDropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!posterThemeDropdown.contains(e.target)) posterThemeDropdown.classList.remove('open'); });
+document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(btn => btn.addEventListener('click', () => { setPosterTheme(btn.dataset.posterTheme, btn.textContent); posterThemeDropdown.classList.remove('open'); }));
+let posterZoom = 0.75;
+function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
+document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
+document.getElementById('zoomOut').addEventListener('click', () => { posterZoom = Math.max(0.25, posterZoom - 0.1); applyZoom(); });
+document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
+
+posterPrintBtn.addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
+posterExportBtn.addEventListener('click', () => {
+  posterExportBtn.textContent = 'Rendering...';
+  const currentTransform = posterSheet.style.transform;
+  posterSheet.style.transform = 'none';
+  html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
+    const link = document.createElement('a'); link.download = 'cineloom-poster.png'; link.href = canvas.toDataURL('image/png'); link.click();
+    posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform;
+  }).catch(err => { console.error('Export failed', err); alert('Export failed due to CORS restrictions on the poster image. Try the Print option or use a custom backdrop upload.'); posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; });
+});
+
+// Check for snapshot from Player
+const snapshot = sessionStorage.getItem('cineloom-snapshot');
+if (snapshot) {
+  posterSheet.style.backgroundImage = `url('${snapshot}')`;
+  sessionStorage.removeItem('cineloom-snapshot');
+}
+
+updatePosterPreview();
 </script>
 </body>
 </html>
