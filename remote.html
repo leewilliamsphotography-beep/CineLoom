@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>CineLoom Remote</title>
-<script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
 <style>
   :root {
     --bg: #000000;
@@ -252,8 +249,29 @@
 <!-- Screen Dimmer -->
 <div class="dimmer-overlay" id="dimmerOverlay"></div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 <script>
-console.log("CineLoom Remote v2.1.0 loaded");
+console.log("CineLoom Remote v2.3.0 (Firebase Custom) loaded");
+
+// =================================================================
+// YOUR FIREBASE CONFIG
+// =================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCWA08JzsS6o1zwyUotq1M31mnE_jdkHBI",
+  authDomain: "cineloom-955c1.firebaseapp.com",
+  databaseURL: "https://console.firebase.google.com/u/0/project/cineloom-955c1/database/cineloom-955c1-default-rtdb/data/~2F", // Inferred URL. Verify in Firebase Console.
+  projectId: "cineloom-955c1",
+  storageBucket: "cineloom-955c1.firebasestorage.app",
+  messagingSenderId: "406285683934",
+  appId: "1:406285683934:web:007f4b5dc7f88094b0064f",
+  measurementId: "G-G3QRRN32ZB"
+};
+// =================================================================
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
 const urlParams = new URLSearchParams(window.location.search);
 let roomCode = urlParams.get('room');
@@ -265,25 +283,24 @@ const entryStatus = document.getElementById('entryStatus');
 const disconnectOverlay = document.getElementById('disconnectOverlay');
 const dimmerOverlay = document.getElementById('dimmerOverlay');
 const nowPlaying = document.getElementById('nowPlaying');
-let client = null;
-let cmdTopic = '';
+let statusRef = null;
+let commandRef = null;
+let hostFound = false;
+let lastUpdateTime = Date.now();
 
-// Haptic Feedback
-function vibrate(ms = 10) {
-  if (navigator.vibrate) navigator.vibrate(ms);
-}
+function vibrate(ms = 10) { if (navigator.vibrate) navigator.vibrate(ms); }
 
 function sendCmd(action, e) {
-    if (client && client.connected) {
-      client.publish(cmdTopic, JSON.stringify({action: action}), { qos: 1 });
-      vibrate(15); // Haptic feedback
-      if (e && e.currentTarget) {
-        const btn = e.currentTarget;
-        const originalBg = btn.style.background;
-        btn.style.background = 'rgba(10, 132, 255, 0.3)';
-        setTimeout(() => { btn.style.background = originalBg; }, 200);
-      }
+  if (commandRef) {
+    commandRef.set({ action: action, timestamp: Date.now() });
+    vibrate(15);
+    if (e && e.currentTarget) {
+      const btn = e.currentTarget;
+      const originalBg = btn.style.background;
+      btn.style.background = 'rgba(10, 132, 255, 0.3)';
+      setTimeout(() => { btn.style.background = originalBg; }, 200);
     }
+  }
 }
 
 // Button Listeners
@@ -307,8 +324,7 @@ document.getElementById('rSkip90').addEventListener('click', (e) => sendCmd('ski
 
 document.getElementById('reconnectBtn').addEventListener('click', () => {
     disconnectOverlay.classList.remove('show');
-    lastUpdateTime = Date.now(); 
-    client.publish(cmdTopic, JSON.stringify({action: 'hello'}), { qos: 1 });
+    sendCmd('hello'); // Ping the host
 });
 
 // Screen Dimmer Logic
@@ -319,7 +335,7 @@ dimmerToggle.addEventListener('click', () => {
   dimmerOverlay.classList.toggle('active', isDimmed);
 });
 
-// Gesture Controls (Swipe on Now Playing card)
+// Gesture Controls
 let touchStartX = 0, touchStartY = 0;
 nowPlaying.addEventListener('touchstart', (e) => {
   touchStartX = e.changedTouches[0].screenX;
@@ -331,43 +347,13 @@ nowPlaying.addEventListener('touchend', (e) => {
   const diffY = e.changedTouches[0].screenY - touchStartY;
   
   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
-    // Horizontal swipe (Seek)
     if (diffX > 0) sendCmd('seekFwd'); else sendCmd('seekBack');
     vibrate(20);
   } else if (Math.abs(diffY) > 40) {
-    // Vertical swipe (Volume)
     if (diffY > 0) sendCmd('volumeDown'); else sendCmd('volumeUp');
     vibrate(20);
   }
 }, { passive: true });
-
-function connectToBroker(statusEl, onConnect) {
-    const brokers = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
-    let brokerIndex = 0; let connected = false;
-    function tryNext() {
-        if (brokerIndex >= brokers.length || connected) {
-            if (!connected) { statusEl.textContent = "Connection Failed."; statusEl.style.color = "#ff453a"; }
-            return;
-        }
-        const url = brokers[brokerIndex];
-        statusEl.textContent = `Connecting...`;
-        const clientId = 'cineloom-remote-' + Math.random().toString(16).substr(2, 8);
-        const client = mqtt.connect(url, { clientId: clientId, connectTimeout: 3000, reconnectPeriod: 5000 });
-        client.on('connect', () => {
-            connected = true;
-            statusEl.textContent = "Connected!";
-            statusEl.style.color = "#30d158";
-            onConnect(client);
-        });
-        client.on('error', (err) => { console.error('Broker error:', err); client.end(); });
-        client.on('close', () => { if (!connected) { brokerIndex++; tryNext(); } });
-    }
-    tryNext();
-}
-
-let lastUpdateTime = Date.now();
-let hostFound = false;
-const volBars = document.querySelectorAll('.vol-bar');
 
 function connectToHost(code) {
     if (!code || code.length !== 6) {
@@ -379,55 +365,52 @@ function connectToHost(code) {
     entryStatus.textContent = "Searching for host...";
     entryStatus.style.color = "#8e8e93";
     
-    connectToBroker(entryStatus, (c) => {
-      client = c;
-      cmdTopic = `cineloom/${roomCode}/cmd`;
-      const timeTopic = `cineloom/${roomCode}/time`;
+    statusRef = db.ref(`cineloom/${roomCode}/status`);
+    commandRef = db.ref(`cineloom/${roomCode}/command`);
+    
+    // Listen for host status updates
+    statusRef.on('value', (snapshot) => {
+      const data = snapshot.val();
       
-      const hostTimeout = setTimeout(() => {
-        if (!hostFound) {
-          entryStatus.textContent = "No active host found.";
-          entryStatus.style.color = "#ff453a";
-          if (client) client.end();
+      if (!hostFound) {
+        if (data) {
+          hostFound = true;
+          entryScreen.style.display = 'none';
+          remoteApp.style.display = 'flex';
         }
-      }, 5000);
-
-      const disconnectInterval = setInterval(() => {
-        if (hostFound && Date.now() - lastUpdateTime > 5000) {
-          disconnectOverlay.classList.add('show');
-        }
-      }, 2000);
+      }
       
-      client.on('message', (topic, message) => {
-        if (topic === timeTopic) {
-          if (!hostFound) {
-            hostFound = true;
-            clearTimeout(hostTimeout);
-            entryScreen.style.display = 'none';
-            remoteApp.style.display = 'flex';
+      if (data) {
+        lastUpdateTime = Date.now();
+        disconnectOverlay.classList.remove('show');
+        
+        document.getElementById('timeRemainingDisplay').textContent = data.timeStr || '--:--:--';
+        document.getElementById('lcdSpeed').textContent = `${data.speed}x`;
+        
+        const volBars = document.querySelectorAll('.vol-bar');
+        const volLevel = data.volume ? Math.round(data.volume * 10) : 0;
+        volBars.forEach((bar, index) => {
+          bar.classList.remove('active', 'muted');
+          if (data.muted) {
+            bar.classList.add('muted');
+          } else if (index < volLevel) {
+            bar.classList.add('active');
           }
-          lastUpdateTime = Date.now();
-          disconnectOverlay.classList.remove('show');
-          
-          const data = JSON.parse(message.toString());
-          document.getElementById('timeRemainingDisplay').textContent = data.timeStr;
-          document.getElementById('lcdSpeed').textContent = `${data.speed}x`;
-          
-          const volLevel = Math.round(data.volume * 10);
-          volBars.forEach((bar, index) => {
-            bar.classList.remove('active', 'muted');
-            if (data.muted) {
-              bar.classList.add('muted');
-            } else if (index < volLevel) {
-              bar.classList.add('active');
-            }
-          });
-        }
-      });
-      
-      client.subscribe(timeTopic);
-      client.publish(cmdTopic, JSON.stringify({action: 'hello'}), { qos: 1 });
+        });
+      } else if (hostFound) {
+        // Host disconnected
+        disconnectOverlay.classList.add('show');
+      }
     });
+
+    // Timeout if host not found in 5 seconds
+    setTimeout(() => {
+      if (!hostFound) {
+        entryStatus.textContent = "No active host found. Check code and try again.";
+        entryStatus.style.color = "#ff453a";
+        if (statusRef) statusRef.off();
+      }
+    }, 5000);
 }
 
 if (roomCode && roomCode.length === 6) {

@@ -13,7 +13,11 @@
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
-<script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
+
+<!-- Firebase SDK (Compat for easy integration) -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95); --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6; --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4); --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15); --ease: cubic-bezier(0.4, 0, 0.2, 1); --blob-opacity: 0.15; --shadow-card: 0 10px 40px rgba(0,0,0,0.4); --plyr-color-main: var(--accent); --plyr-video-background: rgba(0,0,0,0.9); --plyr-menu-background: var(--bg-elev-3); --plyr-menu-color: var(--text); --plyr-menu-border-color: var(--line); --plyr-control-icon-size: 18px; --plyr-control-spacing: 12px; --plyr-control-radius: 6px; --plyr-font-family: 'Inter', sans-serif; --plyr-font-size-small: 13px; --plyr-font-size-base: 14px; }
@@ -166,7 +170,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v1.5.0 loaded");
+console.log("CineLoom Player v1.6.0 (Firebase) loaded");
 
 const playerContainer = document.getElementById('playerContainer'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
 let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
@@ -238,25 +242,20 @@ fileSub.addEventListener('change', async (e) => {
 function saveHistory(time) {
   const videoEl = document.getElementById('player');
   if (!videoEl || !videoEl.src) return;
-  
-  // Create a unique key based on the current video source
   let key = `cl-history-${currentFilm === 1 ? film1.name : film2.name}`;
   if (key === 'cl-history-No file chosen' || key === 'cl-history-undefined') return;
-  
   localStorage.setItem(key, JSON.stringify({ time: time, name: currentFilm === 1 ? film1.name : film2.name }));
 }
 
 function checkHistory() {
   const videoEl = document.getElementById('player');
   if (!videoEl) return;
-  
   let key = `cl-history-${currentFilm === 1 ? film1.name : film2.name}`;
   if (key === 'cl-history-No file chosen' || key === 'cl-history-undefined') return;
-  
   const history = localStorage.getItem(key);
   if (history) {
     const data = JSON.parse(history);
-    if (data.time > 10) { // Only show if more than 10s in
+    if (data.time > 10) {
       document.getElementById('resumeText').textContent = `Resume from ${Math.floor(data.time / 60)}m ${Math.floor(data.time % 60)}s?`;
       document.getElementById('resumeOverlay').classList.add('show');
     }
@@ -285,7 +284,7 @@ function setupPlayer() {
 
   player.on('loadedmetadata', () => { 
     idleState.classList.add('hidden'); 
-    checkHistory(); // Check for resume prompt when video loads
+    checkHistory(); 
   });
   player.on('error', () => { idleState.classList.add('hidden'); });
   
@@ -295,7 +294,6 @@ function setupPlayer() {
     }
   });
 
-  // Save history every 5 seconds
   video.addEventListener('timeupdate', () => {
     if (saveHistoryTimer) return;
     saveHistoryTimer = setTimeout(() => {
@@ -408,7 +406,25 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') shortcutsOverlay.classList.remove('active');
 });
 
-// --- MQTT Remote Host Logic ---
+// --- Firebase Remote Host Logic ---
+// =================================================================
+// YOUR FIREBASE CONFIG
+// =================================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCWA08JzsS6o1zwyUotq1M31mnE_jdkHBI",
+  authDomain: "cineloom-955c1.firebaseapp.com",
+  databaseURL: "https://console.firebase.google.com/u/0/project/cineloom-955c1/database/cineloom-955c1-default-rtdb/data/~2F", 
+  projectId: "cineloom-955c1",
+  storageBucket: "cineloom-955c1.firebasestorage.app",
+  messagingSenderId: "406285683934",
+  appId: "1:406285683934:web:007f4b5dc7f88094b0064f",
+  measurementId: "G-G3QRRN32ZB"
+};
+// =================================================================
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 const qrOverlay = document.getElementById('qrOverlay'); 
 const qrCloseBtn = document.getElementById('qrCloseBtn'); 
 const remoteCodeDisplay = document.getElementById('remoteCodeDisplay'); 
@@ -416,157 +432,117 @@ const hostStatus = document.getElementById('hostStatus');
 const remoteActiveDot = document.getElementById('remoteActiveDot');
 const remoteCodeBadge = document.getElementById('remoteCodeBadge');
 
-let mqttClient = null; 
-let timeUpdateInterval = null;
+let statusInterval = null;
 let currentRoomCode = null;
-
-function connectToBroker(statusEl, onConnect) {
-    const brokers = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
-    let brokerIndex = 0; let connected = false;
-    function tryNext() {
-        if (brokerIndex >= brokers.length || connected) {
-            if (!connected) { statusEl.textContent = "Connection Failed. Check network."; statusEl.style.color = "#ef4444"; }
-            return;
-        }
-        const url = brokers[brokerIndex];
-        statusEl.textContent = `Connecting to network...`;
-        const clientId = 'cineloom-host-' + Math.random().toString(16).substr(2, 8);
-        const client = mqtt.connect(url, { clientId: clientId, connectTimeout: 3000, reconnectPeriod: 5000 });
-        client.on('connect', () => {
-            if (!connected) {
-                connected = true;
-                statusEl.textContent = "Host Active! You can close this window.";
-                statusEl.style.color = "#41d636";
-                remoteActiveDot.classList.add('show');
-                remoteActiveDot.classList.remove('reconnecting');
-                remoteCodeBadge.textContent = currentRoomCode;
-                remoteCodeBadge.classList.add('show');
-                onConnect(client);
-            } else {
-                statusEl.textContent = "Reconnected!";
-                statusEl.style.color = "#41d636";
-                remoteActiveDot.classList.remove('reconnecting');
-                remoteCodeBadge.classList.add('show');
-            }
-        });
-        client.on('error', (err) => { console.error('Broker error:', err); });
-        client.on('offline', () => {
-            statusEl.textContent = "Network dropped. Reconnecting...";
-            statusEl.style.color = "#f5a05f";
-            remoteActiveDot.classList.add('reconnecting');
-            remoteCodeBadge.classList.remove('show');
-        });
-        client.on('close', () => { if (!connected) { brokerIndex++; tryNext(); } });
-    }
-    tryNext();
-}
+let commandRef = null;
+let statusRef = null;
 
 document.getElementById('remoteToggle').addEventListener('click', () => {
-  if (mqttClient && mqttClient.connected) {
+  if (commandRef) {
     qrOverlay.classList.add('active');
     hostStatus.textContent = "Host Active! You can close this window.";
     hostStatus.style.color = "#41d636";
     return;
   }
+  
   remoteCodeBadge.classList.remove('show');
   currentRoomCode = Math.floor(100000 + Math.random() * 900000); 
   remoteCodeDisplay.textContent = currentRoomCode;
-  const currentPath = window.location.href; const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+  
+  const currentPath = window.location.href; 
+  const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
   document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${baseUrl}remote.html?room=${currentRoomCode}`)}`;
   qrOverlay.classList.add('active');
-  hostStatus.textContent = "Initializing host...";
+  hostStatus.textContent = "Host Active! You can close this window.";
+  hostStatus.style.color = "#41d636";
+  remoteActiveDot.classList.add('show');
+  remoteCodeBadge.textContent = currentRoomCode;
+  remoteCodeBadge.classList.add('show');
   
-  connectToBroker(hostStatus, (client) => {
-    mqttClient = client;
-    const cmdTopic = `cineloom/${currentRoomCode}/cmd`; 
-    const timeTopic = `cineloom/${currentRoomCode}/time`;
+  // Setup Firebase References
+  commandRef = db.ref(`cineloom/${currentRoomCode}/command`);
+  statusRef = db.ref(`cineloom/${currentRoomCode}/status`);
+  
+  // Listen for commands
+  commandRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
     
-    mqttClient.on('message', (topic, message) => {
-      if (topic === cmdTopic) {
-        const data = JSON.parse(message.toString());
-        console.log('Received command:', data);
-        remoteActiveDot.style.background = '#ff0000';
-        setTimeout(() => remoteActiveDot.style.background = '', 200);
-        
-        const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
-        if (!videoEl) return;
-        
-        try {
-          if (data.action === 'play1') { if (film1.url) window.switchFilm(1); videoEl.play().catch(e => console.error("Play failed:", e)); }
-          if (data.action === 'play2') { if (film2.url) window.switchFilm(2); videoEl.play().catch(e => console.error("Play failed:", e)); }
-          if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
-          if (data.action === 'playPause') { if (videoEl.paused) videoEl.play().catch(e => console.error("Play failed:", e)); else videoEl.pause(); }
-          if (data.action === 'fullscreen') { playerContainer.classList.toggle('web-fullscreen'); }
-          if (data.action === 'seekBack') { videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); }
-          if (data.action === 'seekFwd') { videoEl.currentTime = videoEl.currentTime + 10; }
-          if (data.action === 'showtime') { document.getElementById('countdownBtn').click(); }
-          
-          if (data.action === 'volumeUp') { videoEl.volume = Math.min(1, videoEl.volume + 0.1); }
-          if (data.action === 'volumeDown') { videoEl.volume = Math.max(0, videoEl.volume - 0.1); }
-          if (data.action === 'mute') { videoEl.muted = !videoEl.muted; }
-          if (data.action === 'toggleSubs') { if (window.player) window.player.toggleCaptions(); }
-          if (data.action === 'subSyncBack') { const btn = document.getElementById('subSyncBack'); if (btn) btn.click(); }
-          if (data.action === 'subSyncFwd') { const btn = document.getElementById('subSyncFwd'); if (btn) btn.click(); }
-          if (data.action === 'lights') { document.body.classList.toggle('cinema-mode'); }
-          if (data.action === 'speed') {
-              const speeds = [1, 1.25, 1.5, 2];
-              let idx = speeds.indexOf(videoEl.playbackRate);
-              idx = (idx + 1) % speeds.length;
-              videoEl.playbackRate = speeds[idx];
-          }
-          if (data.action === 'skip90') { 
-              if (!isNaN(videoEl.duration) && isFinite(videoEl.duration)) {
-                  videoEl.currentTime = Math.min(videoEl.duration, videoEl.currentTime + 90);
-              }
-          }
-        } catch (e) {
-          console.error('Remote Command Failed:', e);
-        }
+    remoteActiveDot.style.background = '#ff0000';
+    setTimeout(() => remoteActiveDot.style.background = '', 200);
+    
+    const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
+    if (!videoEl) return;
+    
+    try {
+      if (data.action === 'play1') { if (film1.url) window.switchFilm(1); videoEl.play().catch(e => console.error("Play failed:", e)); }
+      if (data.action === 'play2') { if (film2.url) window.switchFilm(2); videoEl.play().catch(e => console.error("Play failed:", e)); }
+      if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
+      if (data.action === 'playPause') { if (videoEl.paused) videoEl.play().catch(e => console.error("Play failed:", e)); else videoEl.pause(); }
+      if (data.action === 'fullscreen') { playerContainer.classList.toggle('web-fullscreen'); }
+      if (data.action === 'seekBack') { videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); }
+      if (data.action === 'seekFwd') { videoEl.currentTime = videoEl.currentTime + 10; }
+      if (data.action === 'showtime') { document.getElementById('countdownBtn').click(); }
+      
+      if (data.action === 'volumeUp') { videoEl.volume = Math.min(1, videoEl.volume + 0.1); }
+      if (data.action === 'volumeDown') { videoEl.volume = Math.max(0, videoEl.volume - 0.1); }
+      if (data.action === 'mute') { videoEl.muted = !videoEl.muted; }
+      if (data.action === 'toggleSubs') { if (window.player) window.player.toggleCaptions(); }
+      if (data.action === 'subSyncBack') { const btn = document.getElementById('subSyncBack'); if (btn) btn.click(); }
+      if (data.action === 'subSyncFwd') { const btn = document.getElementById('subSyncFwd'); if (btn) btn.click(); }
+      if (data.action === 'lights') { document.body.classList.toggle('cinema-mode'); }
+      if (data.action === 'speed') {
+          const speeds = [1, 1.25, 1.5, 2];
+          let idx = speeds.indexOf(videoEl.playbackRate);
+          idx = (idx + 1) % speeds.length;
+          videoEl.playbackRate = speeds[idx];
       }
-    });
-    
-    mqttClient.subscribe(cmdTopic, { qos: 1 }, (err) => {
-      if (err) console.error('Subscription error:', err);
-    });
-    
-    timeUpdateInterval = setInterval(() => {
-      if (mqttClient && mqttClient.connected) {
-        const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
-        let timeStr = "Paused";
-        let volume = videoEl ? videoEl.volume : 1;
-        let muted = videoEl ? videoEl.muted : false;
-        let speed = videoEl ? videoEl.playbackRate : 1;
-        
-        if (videoEl && !isNaN(videoEl.duration) && isFinite(videoEl.duration)) {
-          let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
-          const hrs = Math.floor(remaining / 3600); 
-          const mins = Math.floor((remaining % 3600) / 60); 
-          const secs = Math.floor(remaining % 60);
-          if (!videoEl.paused) {
-            timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; 
-            if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
-          } else {
-            timeStr = `Paused (${mins}m ${secs}s left)`;
+      if (data.action === 'skip90') { 
+          if (!isNaN(videoEl.duration) && isFinite(videoEl.duration)) {
+              videoEl.currentTime = Math.min(videoEl.duration, videoEl.currentTime + 90);
           }
-        } else if (videoEl && !videoEl.paused) {
-          timeStr = "Live Stream";
-        }
-        
-        mqttClient.publish(timeTopic, JSON.stringify({ timeStr, volume, muted, speed }));
       }
-    }, 1000);
+    } catch (e) {
+      console.error('Remote Command Failed:', e);
+    }
   });
+  
+  // Start broadcasting heartbeat in the background
+  statusInterval = setInterval(() => {
+    const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
+    let timeStr = "Paused";
+    let volume = videoEl ? videoEl.volume : 1;
+    let muted = videoEl ? videoEl.muted : false;
+    let speed = videoEl ? videoEl.playbackRate : 1;
+    
+    if (videoEl && !isNaN(videoEl.duration) && isFinite(videoEl.duration)) {
+      let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
+      const hrs = Math.floor(remaining / 3600); 
+      const mins = Math.floor((remaining % 3600) / 60); 
+      const secs = Math.floor(remaining % 60);
+      if (!videoEl.paused) {
+        timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; 
+        if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
+      } else {
+        timeStr = `Paused (${mins}m ${secs}s left)`;
+      }
+    } else if (videoEl && !videoEl.paused) {
+      timeStr = "Live Stream";
+    }
+    
+    statusRef.set({ timeStr, volume, muted, speed });
+  }, 1000);
 });
 
 qrCloseBtn.addEventListener('click', () => { qrOverlay.classList.remove('active'); });
 
+// --- Torrents ---
 async function searchTorrents(query) {
   if (!query || query.trim().length < 3) return;
   const torrentResults = document.getElementById('torrentResults');
   torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Searching YTS...</span></div>'; 
   torrentResults.classList.add('show');
   
-  // Use multiple YTS mirrors and proxy services for maximum reliability
   const ytsDomains = ['yts.mx', 'yts.lt'];
   const proxyBuilders = [
     (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
@@ -580,7 +556,6 @@ async function searchTorrents(query) {
   let success = false;
   let lastError = null;
   
-  // Try every domain with every proxy until one works
   for (const domain of ytsDomains) {
     if (success) break;
     const apiUrl = `https://${domain}/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=10`;
@@ -592,7 +567,6 @@ async function searchTorrents(query) {
         const res = await fetch(proxyUrl);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         data = await res.json();
-        // YTS API returns { status: 'ok' } on success, or { status: 'error', status_message: '...' } if no movies found
         if (data && (data.status === 'ok' || data.status === 'error')) {
           success = true;
         }
@@ -621,11 +595,9 @@ async function searchTorrents(query) {
         torrentResults.appendChild(item);
       });
     } else {
-      // Valid response from YTS, but no movies matched the query
       torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>No torrents found for this title.</span></div>';
     }
   } else {
-    // All proxies and domains failed
     torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Search failed. All network proxies are down. Please paste a Magnet Link directly.</span></div>';
     console.error("All CORS proxies failed. Last error:", lastError);
   }
@@ -648,7 +620,6 @@ function startTorrentStream(magnet) {
       elem.id = 'player'; elem.setAttribute('playsinline', '');
       videoStage.insertBefore(elem, tempContainer); tempContainer.remove();
       
-      // Set film1 properties so remote control and subtitle loading work
       film1.url = elem.src; 
       film1.mime = 'video/mp4'; 
       film1.name = `Streaming: ${file.name}`;
