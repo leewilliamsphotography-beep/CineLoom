@@ -170,9 +170,33 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v1.6.0 (Firebase) loaded");
+console.log("CineLoom Player v1.6.2 (Firebase Bulletproof) loaded");
 
-const playerContainer = document.getElementById('playerContainer'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
+// --- Firebase Initialization ---
+const firebaseConfig = {
+  apiKey: "AIzaSyCWA08JzsS6o1zwyUotq1M31mnE_jdkHBI",
+  authDomain: "cineloom-955c1.firebaseapp.com",
+  databaseURL: "https://cineloom-955c1-default-rtdb.firebaseio.com",
+  projectId: "cineloom-955c1",
+  storageBucket: "cineloom-955c1.firebasestorage.app",
+  messagingSenderId: "406285683934",
+  appId: "1:406285683934:web:007f4b5dc7f88094b0064f",
+  measurementId: "G-G3QRRN32ZB"
+};
+
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  console.log("Firebase initialized successfully.");
+} catch (e) {
+  console.error("Firebase Initialization Failed:", e);
+}
+
+const playerContainer = document.getElementById('playerContainer'); 
+const idleState = document.getElementById('idleState'); 
+const bufferingOverlay = document.getElementById('bufferingOverlay'); 
+const bufferingText = document.getElementById('bufferingText');
 let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let currentFilm = 1;
@@ -209,23 +233,15 @@ const fileSub = document.querySelector('.file-input-sub');
 fileSub.addEventListener('change', async (e) => { 
   const file = e.target.files[0]; if (!file) return; 
   let vttContent; 
-  try { 
-    const rawText = await file.text(); 
-    vttContent = parseSubtitles(file.name, rawText); 
-  } catch (err) { 
-    console.error('Failed to read subtitle file:', err); 
-    return; 
-  } 
+  try { const rawText = await file.text(); vttContent = parseSubtitles(file.name, rawText); } catch (err) { console.error('Failed to read subtitle file:', err); return; } 
   const blob = new Blob([vttContent], { type: 'text/vtt' }); 
   if (currentSubURL) URL.revokeObjectURL(currentSubURL); 
   currentSubURL = URL.createObjectURL(blob); 
-  
   const videoEl = document.getElementById('player');
   videoEl.querySelectorAll('track').forEach(t => t.remove()); 
   const track = document.createElement('track'); 
   track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; 
   videoEl.appendChild(track); 
-  
   track.addEventListener('load', () => { 
     const activeTrack = track.track; 
     originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); 
@@ -234,7 +250,6 @@ fileSub.addEventListener('change', async (e) => {
     for (let i = 0; i < videoEl.textTracks.length; i++) videoEl.textTracks[i].mode = 'showing'; 
     if (window.player) window.player.toggleCaptions(true); 
   }); 
-  
   document.getElementById('loadSubsName').textContent = file.name; 
 });
 
@@ -282,10 +297,7 @@ function setupPlayer() {
   const player = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], invertTime: true, toggleInvertTime: true });
   window.player = player;
 
-  player.on('loadedmetadata', () => { 
-    idleState.classList.add('hidden'); 
-    checkHistory(); 
-  });
+  player.on('loadedmetadata', () => { idleState.classList.add('hidden'); checkHistory(); });
   player.on('error', () => { idleState.classList.add('hidden'); });
   
   video.addEventListener('ended', () => { 
@@ -407,24 +419,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 // --- Firebase Remote Host Logic ---
-// =================================================================
-// YOUR FIREBASE CONFIG
-// =================================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyCWA08JzsS6o1zwyUotq1M31mnE_jdkHBI",
-  authDomain: "cineloom-955c1.firebaseapp.com",
-  databaseURL: "https://console.firebase.google.com/u/0/project/cineloom-955c1/database/cineloom-955c1-default-rtdb/data/~2F", 
-  projectId: "cineloom-955c1",
-  storageBucket: "cineloom-955c1.firebasestorage.app",
-  messagingSenderId: "406285683934",
-  appId: "1:406285683934:web:007f4b5dc7f88094b0064f",
-  measurementId: "G-G3QRRN32ZB"
-};
-// =================================================================
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
 const qrOverlay = document.getElementById('qrOverlay'); 
 const qrCloseBtn = document.getElementById('qrCloseBtn'); 
 const remoteCodeDisplay = document.getElementById('remoteCodeDisplay'); 
@@ -438,6 +432,11 @@ let commandRef = null;
 let statusRef = null;
 
 document.getElementById('remoteToggle').addEventListener('click', () => {
+  if (!db) {
+    alert("Firebase is not connected. Check your configuration and console for errors.");
+    return;
+  }
+
   if (commandRef) {
     qrOverlay.classList.add('active');
     hostStatus.textContent = "Host Active! You can close this window.";
@@ -530,7 +529,7 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
       timeStr = "Live Stream";
     }
     
-    statusRef.set({ timeStr, volume, muted, speed });
+    statusRef.set({ timeStr, volume, muted, speed }).catch(e => console.error("Firebase write failed:", e));
   }, 1000);
 });
 
