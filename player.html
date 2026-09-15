@@ -48,6 +48,12 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .site-footer { text-align: center; padding: 2rem 1rem; color: var(--text-dim); font-size: 0.75rem; opacity: 0.7; margin-top: auto; border-top: 1px solid var(--line); }
 .countdown-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 25; display: none; align-items: center; justify-content: center; } .countdown-overlay.active { display: flex; } .countdown-text { font-size: 12rem; font-weight: 900; color: #fff; text-shadow: 0 0 40px var(--accent); } @keyframes count-pulse { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
 .qr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10003; display: none; align-items: center; justify-content: center; padding: 2rem; } .qr-overlay.active { display: flex; } .qr-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px; display: flex; flex-direction: column; align-items: center; } .qr-box h3 { font-size: 1.5rem; margin-bottom: 1rem; } .qr-box p { color: var(--text-soft); margin-bottom: 1.5rem; } .remote-code-display { font-size: 2.5rem; font-weight: 800; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 1.5rem; font-family: 'Courier New', monospace; text-shadow: 0 0 15px var(--accent-glow); } .qr-code-img { width: 250px; height: 250px; border-radius: 12px; margin: 0 auto 1.5rem; display: block; background: #fff; padding: 10px; } .qr-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; }
+.qr-copy-btn { 
+  background: var(--accent); color: #fff; border: 1px solid var(--accent); 
+  padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; 
+  cursor: pointer; border-radius: 8px; transition: all 0.2s var(--ease); 
+}
+.qr-copy-btn:hover { background: var(--accent-2); border-color: var(--accent-2); }
 .host-status { margin-top: 1rem; font-size: 0.8rem; color: var(--text-dim); }
 .sub-sync-controls { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 15; display: flex; gap: 4px; align-items: center; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 4px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(8px); }
 .sub-sync-controls span { font-size: 0.75rem; color: #fff; min-width: 35px; text-align: center; font-weight: 600; }
@@ -143,12 +149,14 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <div class="qr-overlay" id="qrOverlay">
   <div class="qr-box">
-    <h3>Remote Control</h3>
-    <div class="remote-code-display" id="remoteCodeDisplay">------</div>
-    <p>Enter this code in the mobile app, or scan the QR code.</p>
-    <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code">
-    <div class="host-status" id="hostStatus">Initializing host...</div>
-    <button class="qr-close-btn" id="qrCloseBtn" style="margin-top: 1.5rem;">Close</button>
+  <h3>Remote Control</h3>
+  <div class="remote-code-display" id="remoteCodeDisplay">------</div>
+  <p>Enter this code in the mobile app, or scan the QR code.</p>
+  <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code">
+  <div class="host-status" id="hostStatus">Initializing host...</div>
+  <div style="display: flex; gap: 1rem; width: 100%; margin-top: 1.5rem;">
+    <button class="qr-close-btn" id="qrCloseBtn" style="flex: 1;">Close</button>
+    <button class="qr-copy-btn" id="qrCopyBtn" style="flex: 1;">Copy Link</button>
   </div>
 </div>
 
@@ -558,7 +566,45 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
 });
 
 qrCloseBtn.addEventListener('click', () => { qrOverlay.classList.remove('active'); });
-
+// --- Copy Watch Party Link Logic ---
+document.getElementById('qrCopyBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('qrCopyBtn');
+  const originalText = btn.textContent;
+  
+  // Construct the full URL
+  const currentPath = window.location.href; 
+  const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+  const partyUrl = `${baseUrl}remote.html?room=${currentRoomCode}`;
+  
+  try {
+    await navigator.clipboard.writeText(partyUrl);
+    btn.textContent = 'Copied!';
+    btn.style.background = '#41d636';
+    btn.style.borderColor = '#41d636';
+    
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '';
+      btn.style.borderColor = '';
+    }, 2000);
+  } catch (err) {
+    // Fallback for non-secure contexts (like local file:// testing)
+    const textArea = document.createElement('textarea');
+    textArea.value = partyUrl;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = 0;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = originalText; }, 2000);
+    } catch (e) {
+      alert('Failed to copy. URL: ' + partyUrl);
+    }
+    document.body.removeChild(textArea);
+  }
+});
 // --- Torrents ---
 async function searchTorrents(query) {
   if (!query || query.trim().length < 3) return;
