@@ -9,117 +9,235 @@
 <title>CineLoom Remote</title>
 <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
 <style>
-  body { margin: 0; padding: 0; background: linear-gradient(145deg, #08090b, #0e1015); color: #fff; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-  .entry-container { background: linear-gradient(145deg, #15171c, #0d0f13); border-radius: 36px; padding: 2.5rem 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.6); width: 100%; max-width: 360px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; align-items: center; gap: 1.5rem; text-align: center; }
-  .entry-brand { font-size: 1.25rem; font-weight: 800; letter-spacing: 0.05em; color: #fff; }
-  .entry-subtitle { font-size: 0.9rem; color: #a0a4a8; margin-top: -1rem; }
-  .code-input { background: #050607; border: 1px solid #1a1a1a; border-radius: 12px; padding: 1rem; text-align: center; font-size: 2rem; font-weight: 700; font-family: 'Courier New', monospace; color: #3b82f6; text-shadow: 0 0 15px rgba(59, 130, 246, 0.3); width: 100%; letter-spacing: 0.2em; outline: none; transition: border 0.2s; }
-  .code-input:focus { border-color: #3b82f6; }
-  .connect-btn { background: #3b82f6; color: #fff; border: none; padding: 0.9rem; font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; border-radius: 12px; width: 100%; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: all 0.2s; }
-  .connect-btn:active { transform: scale(0.96); }
-  .status-pill { font-size: 0.7rem; font-weight: 600; color: #62666d; background: rgba(255,255,255,0.05); padding: 0.3rem 0.8rem; border-radius: 999px; display: inline-block; margin-top: 0.5rem; border: 1px solid rgba(255,255,255,0.1); }
+  :root {
+    --bg: #000000;
+    --bg-card: rgba(28, 28, 30, 0.8);
+    --bg-btn: rgba(44, 44, 46, 0.9);
+    --bg-btn-active: rgba(58, 58, 60, 1);
+    --text: #ffffff;
+    --text-dim: #8e8e93;
+    --accent: #0a84ff;
+    --accent-glow: rgba(10, 132, 255, 0.4);
+    --danger: #ff453a;
+    --success: #30d158;
+    --border: rgba(255, 255, 255, 0.1);
+  }
 
-  .remote-app { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; width: 100%; }
-  .remote-device { background: linear-gradient(145deg, #15171c, #0d0f13); border-radius: 36px; padding: 1.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.6); width: 100%; max-width: 360px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 1rem; position: relative; }
-  .remote-brand { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.05em; color: #fff; text-align: center; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   
-  .remote-lcd { background: #050607; border: 1px solid #1a1a1a; border-radius: 12px; padding: 1rem; text-align: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.8); }
-  .remote-lcd-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.15em; color: #4a4a4a; margin-bottom: 0.25rem; font-weight: 700; }
-  .remote-lcd-time { font-size: 1.6rem; font-weight: 700; font-family: 'Courier New', monospace; color: #3b82f6; text-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-  .lcd-status-row { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; font-size: 0.7rem; color: #a0a4a8; }
-  .lcd-volume-wrap { display: flex; align-items: center; gap: 0.3rem; }
-  .lcd-volume-bar { width: 60px; height: 6px; background: #222; border-radius: 3px; overflow: hidden; }
-  .lcd-volume-fill { height: 100%; background: #3b82f6; width: 80%; transition: width 0.2s, background 0.2s; }
+  body { 
+    background: var(--bg); 
+    color: var(--text); 
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    min-height: 100vh; 
+    overflow: hidden; 
+    user-select: none;
+  }
+
+  /* Entry Screen */
+  .entry-container { 
+    width: 100%; max-width: 360px; 
+    background: var(--bg-card); 
+    backdrop-filter: blur(20px); 
+    border: 1px solid var(--border); 
+    border-radius: 24px; 
+    padding: 2.5rem 2rem; 
+    display: flex; flex-direction: column; align-items: center; gap: 1.5rem; 
+    text-align: center; 
+    margin: auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .entry-brand { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+  .entry-subtitle { font-size: 0.9rem; color: var(--text-dim); margin-top: -1rem; }
+  .code-input { 
+    background: rgba(0,0,0,0.5); border: 1px solid var(--border); 
+    border-radius: 12px; padding: 1rem; text-align: center; 
+    font-size: 2.5rem; font-weight: 600; 
+    color: var(--accent); width: 100%; letter-spacing: 0.2em; 
+    outline: none; transition: border 0.2s; 
+  }
+  .code-input:focus { border-color: var(--accent); }
+  .connect-btn { 
+    background: var(--accent); color: #fff; border: none; 
+    padding: 1rem; font-size: 1.1rem; font-weight: 600; 
+    cursor: pointer; border-radius: 12px; width: 100%; 
+    transition: transform 0.1s;
+  }
+  .connect-btn:active { transform: scale(0.97); }
+  .status-pill { font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem; }
+
+  /* App Layout */
+  .remote-app { 
+    display: none; 
+    flex-direction: column; 
+    width: 100%; height: 100vh; 
+    max-width: 420px; 
+    padding: 1.5rem 1rem 2rem 1rem; 
+    margin: 0 auto;
+  }
   
-  .remote-controls { display: flex; flex-direction: column; gap: 0.5rem; }
-  .remote-row { display: flex; gap: 0.5rem; justify-content: center; }
-  .remote-btn-action { background: #1a1d24; border: 1px solid rgba(255,255,255,0.06); color: #a0a4a8; padding: 0.7rem; font-family: inherit; font-size: 0.7rem; font-weight: 600; cursor: pointer; border-radius: 12px; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 0.3rem; flex: 1; min-height: 48px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); user-select: none; }
-  .remote-btn-action:active { transform: scale(0.95); background: #232730; color: #fff; }
-  .remote-btn-action svg { width: 16px; height: 16px; pointer-events: none; }
-  .remote-btn-primary { background: #3b82f6; color: #fff; border-color: transparent; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
-  .remote-btn-primary:active { background: #2563eb; }
-  .remote-btn-center { width: 60px; height: 60px; border-radius: 50%; flex: 0 0 auto; padding: 0; font-size: 0; }
-  .remote-btn-center svg { width: 24px; height: 24px; }
-  .remote-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.05); margin: 0.2rem 0; }
+  .header { display: flex; justify-content: space-between; align-items: center; padding: 0 0.5rem 1.5rem 0.5rem; }
+  .header-brand { font-size: 1.2rem; font-weight: 700; }
+  .header-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--success); }
+  .status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 5px var(--success); }
+
+  /* Now Playing Card */
+  .now-playing { 
+    background: var(--bg-card); 
+    border: 1px solid var(--border); 
+    border-radius: 16px; padding: 1.5rem; 
+    text-align: center; margin-bottom: 1.5rem; 
+  }
+  .np-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 0.5rem; }
+  .np-time { font-size: 2.5rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .np-info-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+  .np-speed { font-size: 0.9rem; font-weight: 600; color: var(--accent); background: rgba(10, 132, 255, 0.15); padding: 4px 8px; border-radius: 6px; }
+  .np-vol-wrap { display: flex; align-items: center; gap: 4px; }
+  .vol-bar { width: 4px; height: 16px; background: var(--bg-btn); border-radius: 2px; transition: background 0.2s; }
+  .vol-bar.active { background: var(--accent); box-shadow: 0 0 3px var(--accent); }
+  .vol-bar.muted { background: var(--danger) !important; box-shadow: 0 0 3px var(--danger); }
+
+  /* Controls Grid */
+  .controls-grid { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .ctrl-row { display: flex; gap: 12px; }
+  .ctrl-btn { 
+    flex: 1; background: var(--bg-btn); border: 1px solid var(--border); 
+    color: var(--text); padding: 1rem 0.5rem; 
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; 
+    border-radius: 16px; transition: all 0.15s; 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    min-height: 60px;
+  }
+  .ctrl-btn:active { transform: scale(0.96); background: var(--bg-btn-active); }
+  .ctrl-btn svg { width: 22px; height: 22px; fill: currentColor; }
+  
+  /* Primary Transport Row */
+  .transport-row { gap: 16px; margin: 1rem 0; }
+  .transport-btn { min-height: 70px; border-radius: 20px; }
+  .play-btn { 
+    flex: 1.5; background: var(--accent); color: #fff; border: none; 
+    box-shadow: 0 4px 15px var(--accent-glow); 
+  }
+  .play-btn:active { background: #0066cc; transform: scale(0.97); }
+  .play-btn svg { width: 28px; height: 28px; }
 
   /* Disconnect Overlay */
-  .disconnect-overlay { position: absolute; inset: 0; background: rgba(8,9,11,0.95); backdrop-filter: blur(4px); border-radius: 36px; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; z-index: 10; }
+  .disconnect-overlay { 
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
+    backdrop-filter: blur(20px); display: none; 
+    flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; z-index: 100; 
+  }
   .disconnect-overlay.show { display: flex; }
-  .disconnect-text { font-size: 1.1rem; color: #ef4444; font-weight: 700; }
-  .reconnect-btn { background: #3b82f6; color: #fff; border: none; padding: 0.8rem 1.5rem; font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; border-radius: 12px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+  .dc-icon { width: 60px; height: 60px; color: var(--danger); }
+  .dc-text { font-size: 1.2rem; font-weight: 600; color: var(--danger); }
+  .reconnect-btn { 
+    background: var(--accent); color: #fff; border: none; 
+    padding: 0.8rem 2rem; font-size: 1rem; font-weight: 600; 
+    cursor: pointer; border-radius: 12px; 
+    transition: transform 0.1s;
+  }
+  .reconnect-btn:active { transform: scale(0.97); }
 </style>
 </head>
 <body>
 
-<!-- Code Entry Screen -->
+<!-- Entry Screen -->
 <div class="entry-container" id="entryScreen">
-  <div class="entry-brand">CineLoom Remote</div>
-  <div class="entry-subtitle">Enter the 6-digit code shown on your TV</div>
+  <div class="entry-brand">CineLoom</div>
+  <div class="entry-subtitle">Enter the 6-digit code</div>
   <input type="text" inputmode="numeric" maxlength="6" class="code-input" id="codeInput" placeholder="123456">
   <button class="connect-btn" id="connectBtn">Connect</button>
   <div class="status-pill" id="entryStatus">Waiting for code...</div>
 </div>
 
-<!-- Remote App UI -->
+<!-- App UI -->
 <div class="remote-app" id="remoteApp">
-  <div class="remote-device">
-    <div class="remote-brand">CineLoom Remote</div>
-    
-    <div class="remote-lcd">
-      <div class="remote-lcd-label">Time Remaining</div>
-      <div class="remote-lcd-time" id="timeRemainingDisplay">--:--:--</div>
-      <div class="lcd-status-row">
-        <span id="lcdSpeed">1x</span>
-        <div class="lcd-volume-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          <div class="lcd-volume-bar"><div class="lcd-volume-fill" id="lcdVolumeFill"></div></div>
-        </div>
+  <div class="header">
+    <div class="header-brand">Remote</div>
+    <div class="header-status">
+      <div class="status-dot"></div>
+      <span id="connStatus">Connected</span>
+    </div>
+  </div>
+
+  <!-- Now Playing -->
+  <div class="now-playing">
+    <div class="np-label">Time Remaining</div>
+    <div class="np-time" id="timeRemainingDisplay">--:--:--</div>
+    <div class="np-info-row">
+      <div class="np-speed" id="lcdSpeed">1x</div>
+      <div class="np-vol-wrap" id="volBars">
+        <div class="vol-bar"></div><div class="vol-bar"></div><div class="vol-bar"></div>
+        <div class="vol-bar"></div><div class="vol-bar"></div><div class="vol-bar"></div>
+        <div class="vol-bar"></div><div class="vol-bar"></div><div class="vol-bar"></div><div class="vol-bar"></div>
       </div>
     </div>
+  </div>
 
-    <div class="remote-controls">
-      <div class="remote-row">
-        <button class="remote-btn-action" id="rPlay1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Film 1</button>
-        <button class="remote-btn-action" id="rPlay2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Film 2</button>
-        <button class="remote-btn-action" id="rSwapFilms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/></svg> Swap</button>
-      </div>
-      <div class="remote-row">
-        <button class="remote-btn-action" id="rSeekBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20L9 12l10-8v16z"/><line x1="5" y1="19" x2="5" y2="5"/></svg> -10s</button>
-        <button class="remote-btn-action remote-btn-primary remote-btn-center" id="rPlayPause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
-        <button class="remote-btn-action" id="rSeekFwd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="5" x2="19" y2="19"/></svg> +10s</button>
-      </div>
-      <div class="remote-row">
-        <button class="remote-btn-action" id="rSkip90">Skip 90s</button>
-        <button class="remote-btn-action" id="rSpeed">Speed</button>
-        <button class="remote-btn-action" id="rLights">Lights</button>
-      </div>
-      <div class="remote-divider"></div>
-      <div class="remote-row">
-        <button class="remote-btn-action" id="rSubBack">Sub -0.5s</button>
-        <button class="remote-btn-action" id="rSubs">Subs</button>
-        <button class="remote-btn-action" id="rSubFwd">Sub +0.5s</button>
-      </div>
-      <div class="remote-row">
-        <button class="remote-btn-action" id="rVolDown">Vol -</button>
-        <button class="remote-btn-action" id="rMute">Mute</button>
-        <button class="remote-btn-action" id="rVolUp">Vol +</button>
-      </div>
-      <div class="remote-divider"></div>
-      <div class="remote-row">
-        <button class="remote-btn-action" id="rFullscreen">Web Full</button>
-        <button class="remote-btn-action" id="rShowtime">Showtime</button>
-      </div>
+  <div class="controls-grid">
+    <!-- Transport -->
+    <div class="ctrl-row transport-row">
+      <button class="ctrl-btn transport-btn" id="rSeekBack">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20L9 12l10-8v16z"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+        <span>-10s</span>
+      </button>
+      <button class="ctrl-btn transport-btn play-btn" id="rPlayPause">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <button class="ctrl-btn transport-btn" id="rSeekFwd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+        <span>+10s</span>
+      </button>
     </div>
 
-    <div class="disconnect-overlay" id="disconnectOverlay">
-      <div class="disconnect-text">Host Disconnected</div>
-      <button class="reconnect-btn" id="reconnectBtn">Reconnect</button>
+    <!-- Media Actions -->
+    <div class="ctrl-row">
+      <button class="ctrl-btn" id="rSkip90">Skip 90s</button>
+      <button class="ctrl-btn" id="rSpeed">Speed</button>
+      <button class="ctrl-btn" id="rLights">Lights</button>
+      <button class="ctrl-btn" id="rFullscreen">Web Full</button>
+    </div>
+
+    <!-- Content -->
+    <div class="ctrl-row">
+      <button class="ctrl-btn" id="rPlay1">Film 1</button>
+      <button class="ctrl-btn" id="rSwapFilms">Swap</button>
+      <button class="ctrl-btn" id="rPlay2">Film 2</button>
+    </div>
+
+    <!-- Subtitles -->
+    <div class="ctrl-row">
+      <button class="ctrl-btn" id="rSubBack">Sub -</button>
+      <button class="ctrl-btn" id="rSubs">Subs</button>
+      <button class="ctrl-btn" id="rSubFwd">Sub +</button>
+    </div>
+
+    <!-- Volume -->
+    <div class="ctrl-row">
+      <button class="ctrl-btn" id="rVolDown">Vol -</button>
+      <button class="ctrl-btn" id="rMute">Mute</button>
+      <button class="ctrl-btn" id="rVolUp">Vol +</button>
+    </div>
+
+    <!-- System -->
+    <div class="ctrl-row">
+      <button class="ctrl-btn" id="rShowtime" style="background: var(--accent); color: #fff; border: none;">Showtime</button>
     </div>
   </div>
 </div>
 
+<!-- Disconnect Overlay -->
+<div class="disconnect-overlay" id="disconnectOverlay">
+  <svg class="dc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07A10 10 0 0 1 19.07 4.93M4.93 4.93l14.14 14.14"/></svg>
+  <div class="dc-text">Host Disconnected</div>
+  <button class="reconnect-btn" id="reconnectBtn">Reconnect</button>
+</div>
+
 <script>
-console.log("CineLoom Remote v1.3.0 loaded");
+console.log("CineLoom Remote v2.0.0 loaded");
 
 const urlParams = new URLSearchParams(window.location.search);
 let roomCode = urlParams.get('room');
@@ -136,12 +254,15 @@ function sendCmd(action, e) {
     if (client && client.connected) {
       client.publish(cmdTopic, JSON.stringify({action: action}), { qos: 1 });
       if (e && e.currentTarget) {
-        e.currentTarget.style.boxShadow = '0 0 15px #3b82f6';
-        setTimeout(() => { e.currentTarget.style.boxShadow = ''; }, 300);
+        const btn = e.currentTarget;
+        const originalBg = btn.style.background;
+        btn.style.background = 'rgba(10, 132, 255, 0.3)';
+        setTimeout(() => { btn.style.background = originalBg; }, 200);
       }
     }
 }
 
+// Button Listeners
 document.getElementById('rPlay1').addEventListener('click', (e) => sendCmd('play1', e));
 document.getElementById('rPlay2').addEventListener('click', (e) => sendCmd('play2', e));
 document.getElementById('rSwapFilms').addEventListener('click', (e) => sendCmd('swapFilms', e));
@@ -162,7 +283,7 @@ document.getElementById('rSkip90').addEventListener('click', (e) => sendCmd('ski
 
 document.getElementById('reconnectBtn').addEventListener('click', () => {
     disconnectOverlay.classList.remove('show');
-    lastUpdateTime = Date.now(); // Reset timer
+    lastUpdateTime = Date.now(); 
     client.publish(cmdTopic, JSON.stringify({action: 'hello'}), { qos: 1 });
 });
 
@@ -171,7 +292,7 @@ function connectToBroker(statusEl, onConnect) {
     let brokerIndex = 0; let connected = false;
     function tryNext() {
         if (brokerIndex >= brokers.length || connected) {
-            if (!connected) { statusEl.textContent = "Connection Failed."; statusEl.style.color = "#ef4444"; }
+            if (!connected) { statusEl.textContent = "Connection Failed."; statusEl.style.color = "#ff453a"; }
             return;
         }
         const url = brokers[brokerIndex];
@@ -181,7 +302,7 @@ function connectToBroker(statusEl, onConnect) {
         client.on('connect', () => {
             connected = true;
             statusEl.textContent = "Connected!";
-            statusEl.style.color = "#41d636";
+            statusEl.style.color = "#30d158";
             onConnect(client);
         });
         client.on('error', (err) => { console.error('Broker error:', err); client.end(); });
@@ -192,16 +313,17 @@ function connectToBroker(statusEl, onConnect) {
 
 let lastUpdateTime = Date.now();
 let hostFound = false;
+const volBars = document.querySelectorAll('.vol-bar');
 
 function connectToHost(code) {
     if (!code || code.length !== 6) {
       entryStatus.textContent = "Invalid code. Must be 6 digits.";
-      entryStatus.style.color = "#ef4444";
+      entryStatus.style.color = "#ff453a";
       return;
     }
     roomCode = code;
     entryStatus.textContent = "Searching for host...";
-    entryStatus.style.color = "#a0a4a8";
+    entryStatus.style.color = "#8e8e93";
     
     connectToBroker(entryStatus, (c) => {
       client = c;
@@ -210,8 +332,8 @@ function connectToHost(code) {
       
       const hostTimeout = setTimeout(() => {
         if (!hostFound) {
-          entryStatus.textContent = "No active host found. Check code and try again.";
-          entryStatus.style.color = "#ef4444";
+          entryStatus.textContent = "No active host found.";
+          entryStatus.style.color = "#ff453a";
           if (client) client.end();
         }
       }, 5000);
@@ -237,14 +359,16 @@ function connectToHost(code) {
           document.getElementById('timeRemainingDisplay').textContent = data.timeStr;
           document.getElementById('lcdSpeed').textContent = `${data.speed}x`;
           
-          const fill = document.getElementById('lcdVolumeFill');
-          if (data.muted) {
-            fill.style.width = '0%';
-            fill.style.background = '#ef4444';
-          } else {
-            fill.style.width = `${data.volume * 100}%`;
-            fill.style.background = '#3b82f6';
-          }
+          // Update Volume Bars
+          const volLevel = Math.round(data.volume * 10);
+          volBars.forEach((bar, index) => {
+            bar.classList.remove('active', 'muted');
+            if (data.muted) {
+              bar.classList.add('muted');
+            } else if (index < volLevel) {
+              bar.classList.add('active');
+            }
+          });
         }
       });
       
