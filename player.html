@@ -204,6 +204,30 @@ let currentSubURL = null;
 let subDelay = 0; 
 let originalCues = [];
 let saveHistoryTimer = null;
+let movieData = null;
+
+async function fetchTrivia(title) {
+  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
+  try {
+    // Clean up the filename to search OMDb
+    let cleanTitle = title.replace(/^Streaming:\s*/, '').replace(/\.[^/.]+$/, '').replace(/[._]/g, ' ');
+    const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(cleanTitle)}&apikey=${apiKey}`);
+    const data = await res.json();
+    if (data.Response === 'True') {
+      movieData = {
+        director: data.Director,
+        actors: data.Actors,
+        awards: data.Awards,
+        plot: data.Plot
+      };
+    } else {
+      movieData = null;
+    }
+  } catch (e) {
+    console.error('Trivia fetch failed', e);
+    movieData = null;
+  }
+}
 
 // --- Subtitle Parsing & Sync Logic ---
 function parseSubtitles(filename, content) { const ext = filename.split('.').pop().toLowerCase(); if (ext === 'vtt') return content; if (ext === 'srt') return srtToVtt(content); if (ext === 'sbv') return sbvToVtt(content); if (ext === 'ass' || ext === 'ssa') return assToVtt(content); return srtToVtt(content); }
@@ -529,7 +553,7 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
       timeStr = "Live Stream";
     }
     
-    statusRef.set({ timeStr, volume, muted, speed }).catch(e => console.error("Firebase write failed:", e));
+    statusRef.set({ timeStr, volume, muted, speed, movieData }).catch(e => console.error("Firebase write failed:", e));
   }, 1000);
 });
 
@@ -622,6 +646,8 @@ function startTorrentStream(magnet) {
       film1.url = elem.src; 
       film1.mime = 'video/mp4'; 
       film1.name = `Streaming: ${file.name}`;
+      fetchTrivia(film1.name);
+      fetchTrivia(film2.name);
       document.getElementById('loadFilm1Name').textContent = film1.name;
       
       elem.addEventListener('waiting', () => { bufferingText.textContent = 'Buffering...'; bufferingOverlay.classList.add('show'); });

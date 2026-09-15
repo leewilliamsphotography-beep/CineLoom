@@ -6,6 +6,10 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>CineLoom Remote</title>
 <style>
+      .np-trivia { 
+    font-size: 0.75rem; color: var(--text-dim); margin-top: 1rem; 
+    min-height: 2.5rem; text-align: center; opacity: 0; transition: opacity 0.4s ease; 
+  }
   :root {
     --bg: #000000;
     --bg-card: rgba(28, 28, 30, 0.8);
@@ -177,6 +181,7 @@
     <div class="np-label">Time Remaining</div>
     <div class="np-time" id="timeRemainingDisplay">--:--:--</div>
     <div class="np-info-row">
+            <div class="np-trivia" id="triviaText">Loading trivia...</div>
       <div class="np-speed" id="lcdSpeed">1x</div>
       <div class="np-vol-wrap" id="volBars">
         <div class="vol-bar"></div><div class="vol-bar"></div><div class="vol-bar"></div>
@@ -370,6 +375,35 @@ function connectToHost(code) {
     
     // Listen for host status updates
     statusRef.on('value', (snapshot) => {
+                // Update Trivia
+        let triviaItems = [];
+        if (data.movieData) {
+          if (data.movieData.director && data.movieData.director !== 'N/A') triviaItems.push(`🎬 Dir: ${data.movieData.director}`);
+          if (data.movieData.actors && data.movieData.actors !== 'N/A') triviaItems.push(`⭐ Cast: ${data.movieData.actors.split(',').slice(0, 2).join(', ')}`);
+          if (data.movieData.awards && data.movieData.awards !== 'N/A') triviaItems.push(`🏆 ${data.movieData.awards}`);
+          if (data.movieData.plot && data.movieData.plot !== 'N/A') triviaItems.push(`📝 ${data.movieData.plot}`);
+        }
+        
+        const triviaEl = document.getElementById('triviaText');
+        if (triviaItems.length > 0) {
+          if (!window.triviaInterval) {
+            let triviaIndex = 0;
+            triviaEl.textContent = triviaItems[0];
+            triviaEl.style.opacity = 1;
+            window.triviaInterval = setInterval(() => {
+              triviaIndex = (triviaIndex + 1) % triviaItems.length;
+              triviaEl.style.opacity = 0;
+              setTimeout(() => {
+                triviaEl.textContent = triviaItems[triviaIndex];
+                triviaEl.style.opacity = 1;
+              }, 400);
+            }, 8000);
+          }
+        } else {
+          if (window.triviaInterval) { clearInterval(window.triviaInterval); window.triviaInterval = null; }
+          triviaEl.textContent = 'No trivia available for this title.';
+          triviaEl.style.opacity = 1;
+        }
       const data = snapshot.val();
       
       if (!hostFound) {
