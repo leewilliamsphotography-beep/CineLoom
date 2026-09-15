@@ -318,7 +318,7 @@ body.cinema-mode header { pointer-events: none; }
       <div class="player-header"><span class="screen-label">Now Showing</span><div class="header-actions-row"><button class="snapshot-btn" id="snapshotBtn" aria-label="Capture Frame for Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Snapshot</button><button class="countdown-btn" id="countdownBtn" aria-label="Start Showtime Countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Start Showtime</button><button class="poster-mini-btn" data-screen-poster="1" aria-label="Create Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Create Poster</button></div></div>
       <div class="actions-row"><button class="load-btn load-video-btn" type="button" aria-label="Load Film"><span class="label">Load Film</span><span class="filename">No file chosen</span></button><button class="load-btn load-sub-btn" type="button" aria-label="Add Subtitles"><span class="label">Add Subtitles</span><span class="filename">No file chosen</span></button></div>
       <div class="torrent-row">
-        <input type="text" id="torrentInput" class="torrent-input" placeholder="Search Movies/TV (YTS+TPB) or paste Magnet Link...">
+        <input type="text" id="torrentInput" class="torrent-input" placeholder="Search Movies (YTS) or paste Magnet Link...">
         <button type="button" class="torrent-search-btn" id="torrentSearchBtn" aria-label="Search Torrents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
         <button type="button" class="torrent-btn" id="torrentBtn">Stream</button>
         <div class="torrent-results" id="torrentResults"></div>
@@ -561,7 +561,6 @@ function updateAmbientLight() { const video = document.getElementById('player');
 let audioAnalyser; function setupVisualizer() { if (!audioAnalyser || !audioContext) return; const ctx = audioVisualizer.getContext('2d'); const bufferLength = audioAnalyser.frequencyBinCount; const dataArray = new Uint8Array(bufferLength); function draw() { requestAnimationFrame(draw); if (document.getElementById('player').paused) return; audioAnalyser.getByteFrequencyData(dataArray); const width = audioVisualizer.width; const height = audioVisualizer.height; ctx.clearRect(0, 0, width, height); const barWidth = (width / bufferLength) * 2.5; let x = 0; const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(); ctx.fillStyle = accentColor; for (let i = 0; i < bufferLength; i++) { const barHeight = (dataArray[i] / 255) * height; ctx.fillRect(x, height - barHeight, barWidth - 1, barHeight); x += barWidth; } } draw(); }
 
 function setupPlayer() {
-  // Clean up old Audio Context to prevent memory leaks when loading new videos
   if (window.audioContext) {
     try { window.audioContext.close(); } catch(e){}
     window.audioContext = null;
@@ -606,7 +605,7 @@ function setupPlayer() {
   document.getElementById('subSyncReset').addEventListener('click', () => { subDelay = 0; applySubDelay(); });
   fileSub.addEventListener('change', async (e) => { const file = e.target.files[0]; if (!file) return; let vttContent; try { const rawText = await file.text(); vttContent = parseSubtitles(file.name, rawText); } catch (err) { console.error('Failed to read subtitle file:', err); return; } const blob = new Blob([vttContent], { type: 'text/vtt' }); if (currentSubURL) URL.revokeObjectURL(currentSubURL); currentSubURL = URL.createObjectURL(blob); video.querySelectorAll('track').forEach(t => t.remove()); const track = document.createElement('track'); track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; video.appendChild(track); track.addEventListener('load', () => { const activeTrack = track.track; originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = 'showing'; player.toggleCaptions(true); }); const currentTime = player.currentTime; const isPlaying = !video.paused; player.source = { type: 'video', title: loadVideoBtn.querySelector('.filename').textContent || 'CineLoom', sources: [{ src: currentVideoURL, type: currentVideoMime }], tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] }; const onLoaded = () => { player.currentTime = currentTime; if (isPlaying) player.play().catch(()=>{}); player.toggleCaptions(true); const activeTrack = video.textTracks[0]; if (activeTrack) { originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; } video.removeEventListener('loadedmetadata', onLoaded); }; video.addEventListener('loadedmetadata', onLoaded); loadSubBtn.classList.add('has-file'); loadSubBtn.querySelector('.filename').textContent = file.name; });
   document.querySelectorAll('.style-btn[data-boost]').forEach(btn => btn.addEventListener('click', () => { const boost = parseFloat(btn.dataset.boost); if (gainNode) gainNode.gain.value = boost; localStorage.setItem('cl-boost', boost); document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }));
-  const savedBoost = localStorage.getItem('cl-boost') || '3.0'; document.querySelectorAll('.style-btn[data-boost']).forEach(b => b.classList.toggle('active', b.dataset.boost === savedBoost));
+  const savedBoost = localStorage.getItem('cl-boost') || '3.0'; document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.toggle('active', b.dataset.boost === savedBoost));
 }
 setupPlayer(); updateBroadcastMarquee();
 
@@ -621,117 +620,81 @@ const bufferingText = document.getElementById('bufferingText');
 const torrentSearchBtn = document.getElementById('torrentSearchBtn');
 const torrentResults = document.getElementById('torrentResults');
 
-function formatBytes(bytes) {
-    if (!bytes) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let i = 0;
-    let size = parseInt(bytes);
-    while (size >= 1024 && i < units.length - 1) {
-        size /= 1024;
-        i++;
-    }
-    return `${size.toFixed(2)} ${units[i]}`;
-}
-
 async function searchTorrents(query) {
     if (!query || query.trim().length < 3) return;
     
-    torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><div class="torrent-info"><span class="torrent-title">Searching YTS & Pirate Bay...</span></div></div>';
+    torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><div class="torrent-info"><span class="torrent-title">Searching YTS...</span></div></div>';
     torrentResults.classList.add('show');
     
-    const results = [];
+    const apiUrl = `https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=10`;
     
-    // 1. Search YTS API
-    try {
-        const ytsUrl = `https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=5`;
-        let ytsData = null;
+    const proxies = [
+        url => url, // 1. Try direct fetch
+        url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`, // 2. Fallback proxy
+        url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, // 3. Fallback proxy
+        url => `https://thingproxy.freeboard.io/fetch/${url}` // 4. Fallback proxy
+    ];
+    
+    let data = null;
+    let success = false;
+    let lastError = null;
+    
+    for (const proxy of proxies) {
         try {
-            const res = await fetch(ytsUrl);
-            if (res.ok) ytsData = await res.json();
-        } catch (e) {
-            const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(ytsUrl)}`;
-            const res = await fetch(proxyUrl);
-            if (res.ok) ytsData = await res.json();
-        }
-        
-        if (ytsData && ytsData.status === 'ok' && ytsData.data.movies) {
-            ytsData.data.movies.forEach(movie => {
-                const torrent = movie.torrents.find(t => t.quality === '1080p' && t.type === 'web') || 
-                                movie.torrents.find(t => t.quality === '1080p') || 
-                                movie.torrents.find(t => t.quality === '720p');
-                if (torrent) {
-                    results.push({
-                        title: `${movie.title_long} [${torrent.quality}]`,
-                        meta: `YTS • ${torrent.type} • ${torrent.size} ${torrent.size_unit} • S:${torrent.seeds} L:${torrent.peers}`,
-                        hash: torrent.hash,
-                        name: movie.title
-                    });
-                }
-            });
-        }
-    } catch (e) {
-        console.warn("YTS search failed:", e);
-    }
-
-    // 2. Search Pirate Bay (apibay.org)
-    try {
-        const tpbUrl = `https://apibay.org/q.php?q=${encodeURIComponent(query)}`;
-        let tpbData = null;
-        try {
-            const res = await fetch(tpbUrl);
-            if (res.ok) tpbData = await res.json();
-        } catch (e) {
-            const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(tpbUrl)}`;
-            const res = await fetch(proxyUrl);
-            if (res.ok) tpbData = await res.json();
-        }
-        
-        if (tpbData && Array.isArray(tpbData)) {
-            // Filter for video categories (200-209) and sort by seeders
-            const filtered = tpbData.filter(t => 
-                (t.category.startsWith("2") || t.category === "500") && parseInt(t.seeders) > 0
-            ).sort((a, b) => parseInt(b.seeders) - parseInt(a.seeders)).slice(0, 5);
+            const res = await fetch(proxy(apiUrl));
+            if (!res.ok) throw new Error(`Proxy failed: ${res.statusText}`);
             
-            filtered.forEach(t => {
-                results.push({
-                    title: t.name,
-                    meta: `TPB • Size: ${formatBytes(t.size)} • S:${t.seeders} L:${t.leechers}`,
-                    hash: t.info_hash,
-                    name: t.name
-                });
-            });
+            data = await res.json();
+            if (data && data.status === 'ok') {
+                success = true;
+                break; // Exit loop on success
+            }
+        } catch (e) {
+            console.warn("Fetch failed:", e.message);
+            lastError = e;
         }
-    } catch (e) {
-        console.warn("Pirate Bay search failed:", e);
     }
 
     torrentResults.innerHTML = '';
     
-    if (results.length > 0) {
-        results.forEach(r => {
+    if (success && data.data.movies && data.data.movies.length > 0) {
+        data.data.movies.forEach(movie => {
+            // Prefer 1080p Web, then 1080p, then 720p
+            const torrent = movie.torrents.find(t => t.quality === '1080p' && t.type === 'web') || 
+                            movie.torrents.find(t => t.quality === '1080p') || 
+                            movie.torrents.find(t => t.quality === '720p');
+            if (!torrent) return;
+            
             const item = document.createElement('div');
             item.className = 'torrent-item';
             item.innerHTML = `
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                 <div class="torrent-info">
-                    <span class="torrent-title">${r.title}</span>
-                    <span class="torrent-meta">${r.meta}</span>
+                    <span class="torrent-title">${movie.title_long} (${torrent.quality})</span>
+                    <span class="torrent-meta">${torrent.type} • ${torrent.size} ${torrent.size_unit} • S:${torrent.seeds} L:${torrent.peers}</span>
                 </div>
             `;
             item.addEventListener('click', () => {
-                const magnet = `magnet:?xt=urn:btih:${r.hash}&dn=${encodeURIComponent(r.name)}&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.openbittorrent.com:80&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.openwebtorrent.com`;
+                const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.openbittorrent.com:80&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.openwebtorrent.com`;
                 torrentInput.value = magnet;
                 torrentResults.classList.remove('show');
                 startTorrentStream(magnet);
             });
             torrentResults.appendChild(item);
         });
+    } else if (success && (!data.data.movies || data.data.movies.length === 0)) {
+        const item = document.createElement('div');
+        item.className = 'torrent-item';
+        item.style.cursor = 'default';
+        item.innerHTML = `<div class="torrent-info"><span class="torrent-title">No torrents found.</span></div>`;
+        torrentResults.appendChild(item);
     } else {
         const item = document.createElement('div');
         item.className = 'torrent-item';
         item.style.cursor = 'default';
-        item.innerHTML = `<div class="torrent-info"><span class="torrent-title">No torrents found. Try pasting a Magnet Link directly.</span></div>`;
+        item.innerHTML = `<div class="torrent-info"><span class="torrent-title">Search failed. Please paste a Magnet Link directly.</span></div>`;
         torrentResults.appendChild(item);
+        console.error("All CORS proxies failed. Last error:", lastError);
     }
 }
 
