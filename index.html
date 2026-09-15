@@ -83,17 +83,13 @@ header.scrolled { background: color-mix(in srgb, var(--bg) 80%, transparent); ba
 main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relative; z-index: 10; flex: 1; width: 100%; }
 .player { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(16px); box-shadow: var(--shadow-card); position: relative; transition: border-color 0.2s var(--ease); }
 .player:hover { border-color: var(--line-strong); }
-.player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); }
+.player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); gap: 0.75rem; flex-wrap: wrap; }
 .screen-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
 .header-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-.poster-mini-btn, .countdown-btn, .snapshot-btn, .commentary-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; }
-.poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .commentary-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .commentary-btn svg { width: 14px; height: 14px; }
-.actions-row { display: flex; gap: 1rem; padding: 1.25rem; border-bottom: 1px solid var(--line); }
-.load-btn { flex: 1; background: rgba(255,255,255,0.02); border: 1px dashed var(--line-strong); color: var(--text); padding: 1.25rem 1rem; font-family: inherit; font-size: 0.9rem; font-weight: 500; cursor: pointer; border-radius: 10px; transition: all 0.2s var(--ease); text-align: center; display: flex; flex-direction: column; gap: 0.25rem; min-height: 80px; justify-content: center; }
-.load-btn:hover { border-color: var(--accent); border-style: solid; background: var(--accent-soft); transform: translateY(-1px); }
-.load-btn .label { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-.load-btn .filename { font-size: 0.85rem; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
+.poster-mini-btn, .countdown-btn, .snapshot-btn, .commentary-btn, .load-media-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; }
+.poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .commentary-btn:hover, .load-media-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .commentary-btn svg, .load-media-btn svg { width: 14px; height: 14px; }
+.actions-row { display: none; } /* Hidden to declutter UI, replaced by Load button & Drag/Drop */
 
 .torrent-row { position: relative; display: flex; gap: 0.5rem; padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--line); }
 .torrent-input { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; }
@@ -113,7 +109,8 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .torrent-title { font-size: 0.85rem; color: var(--text); font-weight: 500; }
 .torrent-meta { font-size: 0.75rem; color: var(--text-dim); }
 
-.video-stage { position: relative; aspect-ratio: 16/9; background: #000; overflow: hidden; }
+.video-stage { position: relative; aspect-ratio: 16/9; background: #000; overflow: hidden; transition: outline 0.2s ease; }
+.video-stage.drag-over { outline: 2px dashed var(--accent); outline-offset: -10px; }
 .video-stage .plyr { height: 100%; width: 100%; }
 .video-stage video { width: 100%; height: 100%; display: block; background: #000; cursor: pointer; }
 .plyr--video .plyr__controls { background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); padding: 20px 10px 10px; backdrop-filter: blur(8px); }
@@ -170,15 +167,24 @@ body.cinema-mode header { pointer-events: none; }
 .qr-close-btn:hover { border-color: var(--text-soft); color: var(--text); }
 
 /* Mobile Remote UI */
-.remote-app { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; background: var(--bg); color: var(--text); text-align: center; }
-.remote-app .remote-title { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; }
-.remote-app .remote-status { font-size: 1.2rem; color: var(--accent); margin-bottom: 3rem; font-weight: 600; }
-.remote-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; width: 100%; max-width: 500px; }
-.remote-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text); padding: 2rem 1rem; font-family: inherit; font-size: 1.5rem; font-weight: 700; cursor: pointer; border-radius: 16px; transition: all 0.2s var(--ease); display: flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 100px; }
-.remote-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.remote-btn:active { transform: scale(0.95); }
-.remote-btn svg { width: 32px; height: 32px; }
-.remote-btn.wide { grid-column: span 2; }
+.remote-app { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; background: linear-gradient(145deg, #08090b, #0e1015); color: var(--text); text-align: center; }
+.remote-device { background: linear-gradient(145deg, #15171c, #0d0f13); border-radius: 36px; padding: 2rem 1.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.05); width: 100%; max-width: 340px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 1.5rem; }
+.remote-brand { font-size: 1.25rem; font-weight: 800; letter-spacing: 0.05em; color: var(--text); }
+.remote-status-pill { font-size: 0.7rem; font-weight: 600; color: var(--text-dim); background: var(--bg-elev-2); padding: 0.3rem 0.8rem; border-radius: 999px; display: inline-block; margin-top: 0.25rem; border: 1px solid var(--line); }
+.remote-lcd { background: #050607; border: 1px solid #1a1a1a; border-radius: 12px; padding: 1.2rem 1rem; text-align: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.8); }
+.remote-lcd-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: #4a4a4a; margin-bottom: 0.25rem; font-weight: 700; }
+.remote-lcd-time { font-size: 2.2rem; font-weight: 700; font-family: 'Courier New', monospace; color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
+.remote-controls { display: flex; flex-direction: column; gap: 0.75rem; }
+.remote-row { display: flex; gap: 0.75rem; justify-content: center; }
+.remote-btn-action { background: #1a1d24; border: 1px solid rgba(255,255,255,0.06); color: var(--text-soft); padding: 0.9rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 14px; transition: all 0.15s var(--ease); display: flex; align-items: center; justify-content: center; gap: 0.4rem; flex: 1; min-height: 56px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+.remote-btn-action:hover { background: #232730; color: var(--text); border-color: var(--line-strong); }
+.remote-btn-action:active { transform: scale(0.96); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.remote-btn-action svg { width: 18px; height: 18px; }
+.remote-btn-primary { background: var(--accent); color: #fff; border-color: transparent; box-shadow: 0 4px 15px var(--accent-glow); }
+.remote-btn-primary:hover { background: var(--accent-2); color: #fff; }
+.remote-btn-center { width: 72px; height: 72px; border-radius: 50%; flex: 0 0 auto; padding: 0; font-size: 0; }
+.remote-btn-center svg { width: 28px; height: 28px; }
+.remote-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.05); margin: 0.5rem 0; }
 
 @media print { @page { size: A4; margin: 0; } body * { visibility: hidden !important; } .poster-sheet, .poster-sheet * { visibility: visible !important; } .poster-sheet { position: absolute; left: 0; top: 0; box-shadow: none; transform: none !important; margin: 0 !important; border: none !important; } .poster-overlay { position: static !important; background: none !important; backdrop-filter: none !important; padding: 0 !important; } .poster-modal, .poster-editor, .poster-preview-wrap { display: contents !important; background: none !important; border: none !important; padding: 0 !important; text-align: left !important; } }
 @media (max-width: 900px) { .poster-modal { grid-template-columns: 1fr; height: 95vh; } .poster-editor { border-right: none; border-bottom: 1px solid var(--line); max-height: 40vh; } header { padding: 1rem 1.5rem; } .brand-text { font-size: 1.1rem; } .brand-logo svg { height: 32px; } main { padding: 0 1rem 2rem; } }
@@ -191,14 +197,41 @@ body.cinema-mode header { pointer-events: none; }
 
 <!-- Mobile Remote UI -->
 <div class="remote-app" id="mobileRemoteApp">
-  <div class="remote-title">CineLoom Remote</div>
-  <div class="remote-status" id="remoteStatus">Connecting...</div>
-  <div class="remote-btn-grid">
-    <button class="remote-btn" id="rPlayPause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play</button>
-    <button class="remote-btn" id="rFullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg> Fullscreen</button>
-    <button class="remote-btn" id="rSeekBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20L9 12l10-8v16z"/><line x1="5" y1="19" x2="5" y2="5"/></svg> -10s</button>
-    <button class="remote-btn" id="rSeekFwd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="5" x2="19" y2="19"/></svg> +10s</button>
-    <button class="remote-btn wide" id="rShowtime"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Start Showtime</button>
+  <div class="remote-device">
+    <div>
+      <div class="remote-brand">CineLoom Remote</div>
+      <div class="remote-status-pill" id="remoteStatus">Connecting...</div>
+    </div>
+    
+    <div class="remote-lcd">
+      <div class="remote-lcd-label">Time Remaining</div>
+      <div class="remote-lcd-time" id="timeRemainingDisplay">--:--:--</div>
+    </div>
+
+    <div class="remote-controls">
+      <!-- Row 1: Select Film -->
+      <div class="remote-row">
+        <button class="remote-btn-action" id="rPlay1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Film 1</button>
+        <button class="remote-btn-action" id="rPlay2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Film 2</button>
+      </div>
+
+      <div class="remote-divider"></div>
+
+      <!-- Row 2: Transport Controls -->
+      <div class="remote-row">
+        <button class="remote-btn-action" id="rSeekBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20L9 12l10-8v16z"/><line x1="5" y1="19" x2="5" y2="5"/></svg> -10s</button>
+        <button class="remote-btn-action remote-btn-primary remote-btn-center" id="rPlayPause"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
+        <button class="remote-btn-action" id="rSeekFwd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="5" x2="19" y2="19"/></svg> +10s</button>
+      </div>
+
+      <div class="remote-divider"></div>
+
+      <!-- Row 3: System Controls -->
+      <div class="remote-row">
+        <button class="remote-btn-action" id="rFullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg> Fullscreen</button>
+        <button class="remote-btn-action" id="rShowtime"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Showtime</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -246,11 +279,24 @@ body.cinema-mode header { pointer-events: none; }
   </div>
 </header>
 <main>
-  <section class="hero" aria-labelledby="hero-title"><h1 id="hero-title">CineLoom</h1><p>Load a film below to begin. You can also generate a printable A4 poster for a single feature or a double bill.</p></section>
+  <section class="hero" aria-labelledby="hero-title"><h1 id="hero-title">CineLoom</h1><p>Drag & drop or click load to begin. Stream torrents, generate posters, or control playback via your phone.</p></section>
   <section class="players" aria-label="Video Player">
     <div class="player" data-screen="1" aria-label="Screen 1">
-      <div class="player-header"><span class="screen-label">Now Showing</span><div class="header-actions-row"><button class="commentary-btn" id="commentaryBtn" aria-label="Load Commentary Track"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> Commentary</button><button class="snapshot-btn" id="snapshotBtn" aria-label="Capture Frame for Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Snapshot</button><button class="countdown-btn" id="countdownBtn" aria-label="Start Showtime Countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Start Showtime</button><button class="poster-mini-btn" data-screen-poster="1" aria-label="Create Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Create Poster</button></div></div>
-      <div class="actions-row"><button class="load-btn load-video-btn" type="button" aria-label="Load Film"><span class="label">Load Film</span><span class="filename">No file chosen</span></button><button class="load-btn load-sub-btn" type="button" aria-label="Add Subtitles"><span class="label">Add Subtitles</span><span class="filename">No file chosen</span></button></div>
+      <div class="player-header">
+          <span class="screen-label">Now Showing</span>
+          <div class="header-actions-row">
+              <button class="load-media-btn" id="loadMediaBtn" aria-label="Load Media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Load</button>
+              <button class="commentary-btn" id="commentaryBtn" aria-label="Load Commentary Track"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> Commentary</button>
+              <button class="snapshot-btn" id="snapshotBtn" aria-label="Capture Frame for Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Snapshot</button>
+              <button class="countdown-btn" id="countdownBtn" aria-label="Start Showtime Countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Start Showtime</button>
+              <button class="poster-mini-btn" data-screen-poster="1" aria-label="Create Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Create Poster</button>
+          </div>
+      </div>
+      <div class="actions-row">
+          <button class="load-btn load-video-btn active-film" data-film="1" type="button" aria-label="Load Film 1"><span class="label">Load Film 1</span><span class="filename">No file chosen</span></button>
+          <button class="load-btn load-video-btn" data-film="2" type="button" aria-label="Load Film 2"><span class="label">Load Film 2</span><span class="filename">No file chosen</span></button>
+          <button class="load-btn load-sub-btn" type="button" aria-label="Add Subtitles"><span class="label">Add Subtitles</span><span class="filename">No file chosen</span></button>
+      </div>
       <div class="torrent-row">
         <input type="text" id="torrentInput" class="torrent-input" placeholder="Search Movies (YTS) or paste Magnet Link...">
         <button type="button" class="torrent-search-btn" id="torrentSearchBtn" aria-label="Search Torrents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
@@ -268,7 +314,11 @@ body.cinema-mode header { pointer-events: none; }
         <div class="credits-overlay" id="creditsOverlay"><div class="credits-text">Thank you for watching with CineLoom</div></div>
         <div class="countdown-overlay" id="countdownOverlay"><div class="countdown-text" id="countdownText"></div></div>
       </div>
-      <input type="file" class="file-input file-input-video" accept="*/*" aria-hidden="true" tabindex="-1"><input type="file" class="file-input file-input-sub" accept=".vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream" aria-hidden="true" tabindex="-1"><input type="file" class="file-input file-input-com" accept="audio/*" aria-hidden="true" tabindex="-1">
+      <input type="file" class="file-input file-input-video-1" accept="*/*" aria-hidden="true" tabindex="-1">
+      <input type="file" class="file-input file-input-video-2" accept="*/*" aria-hidden="true" tabindex="-1">
+      <input type="file" class="file-input file-input-sub" accept=".vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream" aria-hidden="true" tabindex="-1">
+      <input type="file" class="file-input file-input-com" accept="audio/*" aria-hidden="true" tabindex="-1">
+      <input type="file" class="file-input" id="unifiedFileInput" accept="video/*,.vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream,audio/*" multiple aria-hidden="true" tabindex="-1">
     </div>
   </section>
 </main>
@@ -308,11 +358,19 @@ if (remoteId) {
             remoteStatus.textContent = "Connected!";
             remoteStatus.style.color = "#41d636";
             
+            document.getElementById('rPlay1').addEventListener('click', () => conn.send({action: 'play1'}));
+            document.getElementById('rPlay2').addEventListener('click', () => conn.send({action: 'play2'}));
             document.getElementById('rPlayPause').addEventListener('click', () => conn.send({action: 'playPause'}));
             document.getElementById('rFullscreen').addEventListener('click', () => conn.send({action: 'fullscreen'}));
             document.getElementById('rSeekBack').addEventListener('click', () => conn.send({action: 'seekBack'}));
             document.getElementById('rSeekFwd').addEventListener('click', () => conn.send({action: 'seekFwd'}));
             document.getElementById('rShowtime').addEventListener('click', () => conn.send({action: 'showtime'}));
+        });
+
+        conn.on('data', (data) => {
+            if (data.action === 'timeUpdate') {
+                document.getElementById('timeRemainingDisplay').textContent = data.timeStr;
+            }
         });
         
         conn.on('error', () => { remoteStatus.textContent = "Connection lost."; remoteStatus.style.color = "#ef4444"; });
@@ -336,9 +394,31 @@ if (remoteId) {
             document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
             qrOverlay.classList.add('active');
             
+            let remoteConn = null;
             peer.on('connection', (conn) => {
+                remoteConn = conn;
+                conn.on('open', () => {
+                    const timeUpdateInterval = setInterval(() => {
+                        if (remoteConn && remoteConn.open) {
+                            const videoEl = document.getElementById('player');
+                            if (videoEl && !videoEl.paused && videoEl.duration) {
+                                let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
+                                const hrs = Math.floor(remaining / 3600);
+                                const mins = Math.floor((remaining % 3600) / 60);
+                                const secs = Math.floor(remaining % 60);
+                                let timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+                                if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
+                                remoteConn.send({ action: 'timeUpdate', timeStr: timeStr });
+                            }
+                        } else {
+                            clearInterval(timeUpdateInterval);
+                        }
+                    }, 1000);
+                });
                 conn.on('data', (data) => {
                     if (!player) return;
+                    if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); player.play(); }
+                    if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); player.play(); }
                     if (data.action === 'playPause') player.togglePlay();
                     if (data.action === 'fullscreen') player.fullscreen.enter();
                     if (data.action === 'seekBack') player.currentTime -= 10;
@@ -386,144 +466,151 @@ if (remoteId) {
     const savedCueStyles = JSON.parse(localStorage.getItem('cl-cue-styles') || 'null');
     if (savedCueStyles) { cueFont.value = savedCueStyles.font; cueText.value = savedCueStyles.text; cueShadow.value = savedCueStyles.shadow; applyCueStyles(); }
 
-    const posterOverlay = document.getElementById('posterOverlay'); const posterCloseBtn = document.getElementById('posterCloseBtn'); const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
-    const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
-    const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), film2Block: document.getElementById('psFilm2'), filmDivider: document.getElementById('psFilmDivider'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), event: document.getElementById('psEvent') };
+    // Poster Maker Block - Safely wrapped to avoid crashing if HTML is missing
+    const posterOverlay = document.getElementById('posterOverlay');
+    if (posterOverlay) {
+        const posterCloseBtn = document.getElementById('posterCloseBtn'); const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
+        const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
+        const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), film2Block: document.getElementById('psFilm2'), filmDivider: document.getElementById('psFilmDivider'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), event: document.getElementById('psEvent') };
 
-    function updateBroadcastMarquee() { const marqueeContent = document.getElementById('marqueeContent'); if (!marqueeContent) return; let feedText = "Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. "; if (posterFields.title1.value) { feedText += `TONIGHT: ${posterFields.title1.value}. `; if (posterFields.tagline1.value) feedText += `Genre/Rating: ${posterFields.tagline1.value}. `; if (posterFields.plot1.value) feedText += `Plot: ${posterFields.plot1.value} `; } if (posterFields.title2.value) { feedText += `ALSO SHOWING: ${posterFields.title2.value}. `; if (posterFields.plot2.value) feedText += `Plot: ${posterFields.plot2.value} `; } marqueeContent.innerHTML = `<span>${feedText}</span><span>${feedText}</span>`; }
+        function updateBroadcastMarquee() { const marqueeContent = document.getElementById('marqueeContent'); if (!marqueeContent) return; let feedText = "Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. "; if (posterFields.title1.value) { feedText += `TONIGHT: ${posterFields.title1.value}. `; if (posterFields.tagline1.value) feedText += `Genre/Rating: ${posterFields.tagline1.value}. `; if (posterFields.plot1.value) feedText += `Plot: ${posterFields.plot1.value} `; } if (posterFields.title2.value) { feedText += `ALSO SHOWING: ${posterFields.title2.value}. `; if (posterFields.plot2.value) feedText += `Plot: ${posterFields.plot2.value} `; } marqueeContent.innerHTML = `<span>${feedText}</span><span>${feedText}</span>`; }
 
-    function updatePosterPreview() {
-      posterPreview.title1.textContent = posterFields.title1.value || 'Film Title';
-      posterPreview.tagline1.textContent = posterFields.tagline1.value || '';
-      posterPreview.plot1.textContent = posterFields.plot1.value || '';
-      posterPreview.date.textContent = posterFields.date.value || '—';
-      posterPreview.time.textContent = posterFields.time.value || '—';
-      posterPreview.venue.textContent = posterFields.venue.value || '—';
-      posterPreview.notes.textContent = posterFields.notes.value || '';
-      posterPreview.blurb.textContent = posterFields.blurb.value || '';
-      posterPreview.blurb.classList.toggle('show', posterFields.blurb.value.trim() !== '');
-      
-      const footerText = posterFields.footer.value || '';
-      posterPreview.footer.textContent = footerText;
-      posterPreview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
+        function updatePosterPreview() {
+          posterPreview.title1.textContent = posterFields.title1.value || 'Film Title';
+          posterPreview.tagline1.textContent = posterFields.tagline1.value || '';
+          posterPreview.plot1.textContent = posterFields.plot1.value || '';
+          posterPreview.date.textContent = posterFields.date.value || '—';
+          posterPreview.time.textContent = posterFields.time.value || '—';
+          posterPreview.venue.textContent = posterFields.venue.value || '—';
+          posterPreview.notes.textContent = posterFields.notes.value || '';
+          posterPreview.blurb.textContent = posterFields.blurb.value || '';
+          posterPreview.blurb.classList.toggle('show', posterFields.blurb.value.trim() !== '');
+          
+          const footerText = posterFields.footer.value || '';
+          posterPreview.footer.textContent = footerText;
+          posterPreview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
 
-      if (posterFields.title2.value.trim() !== '') {
-        posterSheet.classList.add('double-feature');
-        posterPreview.film2Block.style.display = 'flex';
-        posterPreview.filmDivider.style.display = 'flex';
-        posterPreview.title2.textContent = posterFields.title2.value;
-        posterPreview.tagline2.textContent = posterFields.tagline2.value || '';
-        posterPreview.plot2.textContent = posterFields.plot2.value || '';
-      } else {
-        posterSheet.classList.remove('double-feature');
-        posterPreview.film2Block.style.display = 'none';
-        posterPreview.filmDivider.style.display = 'none';
-      }
-      updateBroadcastMarquee();
-      applyZoom();
-    }
-
-    Object.keys(posterFields).forEach(key => {
-      const input = posterFields[key];
-      const preview = posterPreview[key];
-      if (!preview) return;
-      
-      input.addEventListener('input', () => {
-        if (document.activeElement !== preview) {
-          preview.textContent = input.value;
-          if (key === 'blurb') preview.classList.toggle('show', input.value.trim() !== '');
-          if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
-        }
-        updatePosterPreview();
-      });
-      
-      if (preview.isContentEditable) {
-        preview.addEventListener('input', () => {
-          input.value = preview.textContent;
-          if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
-        });
-      }
-    });
-    posterPreview.event.addEventListener('input', () => updateBroadcastMarquee());
-
-    const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
-    const subtitleStyles = { 'theme-minimal': { color: '#fff', bg: 'rgba(0,0,0,0.85)', font: 'Inter' }, 'theme-neon': { color: '#00ffff', bg: 'rgba(11,14,23,0.9)', font: 'Inter' }, 'theme-noir': { color: '#fff', bg: 'rgba(0,0,0,0.9)', font: 'Courier New' }, 'theme-halloween': { color: '#41d636', bg: 'rgba(26,11,46,0.9)', font: 'Georgia' }, 'theme-christmas': { color: '#ffd700', bg: 'rgba(139,0,0,0.9)', font: 'Georgia' }, 'theme-valentine': { color: '#ff69b4', bg: 'rgba(255,240,245,0.9)', font: 'Georgia' }, 'theme-typewriter': { color: '#333', bg: 'rgba(240,240,240,0.9)', font: 'Courier New' }, 'theme-vhs': { color: '#ff00ff', bg: 'rgba(26,26,46,0.9)', font: 'Arial Black' }, 'theme-retro': { color: '#ffeb3b', bg: 'rgba(255,64,129,0.9)', font: 'Arial Black' } };
-    function updateSubtitleStyle(themeClass) { const style = subtitleStyles[themeClass] || subtitleStyles['theme-minimal']; document.documentElement.style.setProperty('--cue-text', style.color); document.documentElement.style.setProperty('--cue-bg', style.bg); document.documentElement.style.setProperty('--cue-font', style.font); }
-
-    function mapGenreToTheme(genreString) { if (!genreString) return null; const genres = genreString.toLowerCase(); if (genres.includes('horror')) return 'theme-halloween'; if (genres.includes('romance')) return 'theme-valentine'; if (genres.includes('sci-fi')) return 'theme-neon'; if (genres.includes('fantasy')) return 'theme-artdeco'; if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir'; if (genres.includes('comedy')) return 'theme-orange'; if (genres.includes('western')) return 'theme-golden'; if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter'; if (genres.includes('family') || genres.includes('animation')) return 'theme-retro'; if (genres.includes('musical')) return 'theme-marquee'; if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue'; return null; }
-    function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } updateSubtitleStyle(themeClass); setTimeout(applyZoom, 10); }
-
-    const fontDropdown = document.getElementById('fontDropdown'); const fontToggle = document.getElementById('fontToggle'); const fontMenu = document.getElementById('fontMenu'); const fontLabel = document.getElementById('fontLabel');
-    fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontDropdown.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (!fontDropdown.contains(e.target)) fontDropdown.classList.remove('open'); });
-    document.querySelectorAll('.dropdown-item[data-font]').forEach(btn => btn.addEventListener('click', () => { const font = btn.dataset.font; const name = btn.textContent; document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); fontLabel.textContent = name; fontDropdown.classList.remove('open'); document.querySelectorAll('.ps-title').forEach(el => { if (font === 'default') el.style.fontFamily = ''; else el.style.fontFamily = font; }); }));
-
-    const grainToggle = document.getElementById('grainToggle'); const filmGrain = document.getElementById('filmGrain');
-    grainToggle.addEventListener('click', () => { grainToggle.classList.toggle('active'); filmGrain.classList.toggle('show'); });
-
-    const qrToggle = document.getElementById('qrToggle');
-    qrToggle.addEventListener('click', () => { qrToggle.classList.toggle('active'); const show = qrToggle.classList.contains('active'); posterPreview.qr.classList.toggle('show', show); if (show) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
-    posterFields.qrLink.addEventListener('input', () => { if (qrToggle.classList.contains('active')) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
-
-    document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if (btn.dataset.format === '916') posterSheet.classList.add('format-916'); else posterSheet.classList.remove('format-916'); applyZoom(); }));
-
-    function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
-    async function fetchSuggestions(query, target) { const apiKey = localStorage.getItem('cl-omdb-key'); if (!apiKey || query.trim().length < 3) { hideResults(target); return; } try { const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; if (data.Response === 'True' && data.Search) { data.Search.slice(0, 5).forEach(movie => { const item = document.createElement('div'); item.className = 'autocomplete-item'; item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); resultsContainer.appendChild(item); }); resultsContainer.classList.add('show'); } else { hideResults(target); } } catch (e) { hideResults(target); } }
-    function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
-    async function fetchMovieDetails(imdbID, target) {
-      const apiKey = localStorage.getItem('cl-omdb-key');
-      try {
-        const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`);
-        const data = await res.json();
-        if (data.Response === 'True') {
-          if (target === '1') {
-            posterFields.title1.value = data.Title || ''; posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot1.value = data.Plot || '';
-            if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster1'); img.src = data.Poster; img.classList.add('show'); }
-            posterPreview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-            posterPreview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+          if (posterFields.title2.value.trim() !== '') {
+            posterSheet.classList.add('double-feature');
+            posterPreview.film2Block.style.display = 'flex';
+            posterPreview.filmDivider.style.display = 'flex';
+            posterPreview.title2.textContent = posterFields.title2.value;
+            posterPreview.tagline2.textContent = posterFields.tagline2.value || '';
+            posterPreview.plot2.textContent = posterFields.plot2.value || '';
           } else {
-            posterFields.title2.value = data.Title || ''; posterFields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot2.value = data.Plot || '';
-            if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster2'); img.src = data.Poster; img.classList.add('show'); }
-            posterPreview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-            posterPreview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+            posterSheet.classList.remove('double-feature');
+            posterPreview.film2Block.style.display = 'none';
+            posterPreview.filmDivider.style.display = 'none';
           }
-          const mappedTheme = mapGenreToTheme(data.Genre); if (mappedTheme) setPosterTheme(mappedTheme, themeDisplayNames[mappedTheme]);
-          updatePosterPreview();
+          updateBroadcastMarquee();
+          applyZoom();
         }
-      } catch (e) { console.error('Error fetching details:', e); }
-      hideResults(target); const input = document.getElementById(`search${target}`); if (input) input.value = '';
+
+        Object.keys(posterFields).forEach(key => {
+          const input = posterFields[key];
+          const preview = posterPreview[key];
+          if (!preview) return;
+          
+          input.addEventListener('input', () => {
+            if (document.activeElement !== preview) {
+              preview.textContent = input.value;
+              if (key === 'blurb') preview.classList.toggle('show', input.value.trim() !== '');
+              if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+            }
+            updatePosterPreview();
+          });
+          
+          if (preview.isContentEditable) {
+            preview.addEventListener('input', () => {
+              input.value = preview.textContent;
+              if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+            });
+          }
+        });
+        posterPreview.event.addEventListener('input', () => updateBroadcastMarquee());
+
+        const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
+        const subtitleStyles = { 'theme-minimal': { color: '#fff', bg: 'rgba(0,0,0,0.85)', font: 'Inter' }, 'theme-neon': { color: '#00ffff', bg: 'rgba(11,14,23,0.9)', font: 'Inter' }, 'theme-noir': { color: '#fff', bg: 'rgba(0,0,0,0.9)', font: 'Courier New' }, 'theme-halloween': { color: '#41d636', bg: 'rgba(26,11,46,0.9)', font: 'Georgia' }, 'theme-christmas': { color: '#ffd700', bg: 'rgba(139,0,0,0.9)', font: 'Georgia' }, 'theme-valentine': { color: '#ff69b4', bg: 'rgba(255,240,245,0.9)', font: 'Georgia' }, 'theme-typewriter': { color: '#333', bg: 'rgba(240,240,240,0.9)', font: 'Courier New' }, 'theme-vhs': { color: '#ff00ff', bg: 'rgba(26,26,46,0.9)', font: 'Arial Black' }, 'theme-retro': { color: '#ffeb3b', bg: 'rgba(255,64,129,0.9)', font: 'Arial Black' } };
+        function updateSubtitleStyle(themeClass) { const style = subtitleStyles[themeClass] || subtitleStyles['theme-minimal']; document.documentElement.style.setProperty('--cue-text', style.color); document.documentElement.style.setProperty('--cue-bg', style.bg); document.documentElement.style.setProperty('--cue-font', style.font); }
+
+        function mapGenreToTheme(genreString) { if (!genreString) return null; const genres = genreString.toLowerCase(); if (genres.includes('horror')) return 'theme-halloween'; if (genres.includes('romance')) return 'theme-valentine'; if (genres.includes('sci-fi')) return 'theme-neon'; if (genres.includes('fantasy')) return 'theme-artdeco'; if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir'; if (genres.includes('comedy')) return 'theme-orange'; if (genres.includes('western')) return 'theme-golden'; if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter'; if (genres.includes('family') || genres.includes('animation')) return 'theme-retro'; if (genres.includes('musical')) return 'theme-marquee'; if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue'; return null; }
+        function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } updateSubtitleStyle(themeClass); setTimeout(applyZoom, 10); }
+
+        const fontDropdown = document.getElementById('fontDropdown'); const fontToggle = document.getElementById('fontToggle'); const fontMenu = document.getElementById('fontMenu'); const fontLabel = document.getElementById('fontLabel');
+        fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontDropdown.classList.toggle('open'); });
+        document.addEventListener('click', (e) => { if (!fontDropdown.contains(e.target)) fontDropdown.classList.remove('open'); });
+        document.querySelectorAll('.dropdown-item[data-font]').forEach(btn => btn.addEventListener('click', () => { const font = btn.dataset.font; const name = btn.textContent; document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); fontLabel.textContent = name; fontDropdown.classList.remove('open'); document.querySelectorAll('.ps-title').forEach(el => { if (font === 'default') el.style.fontFamily = ''; else el.style.fontFamily = font; }); }));
+
+        const grainToggle = document.getElementById('grainToggle'); const filmGrain = document.getElementById('filmGrain');
+        grainToggle.addEventListener('click', () => { grainToggle.classList.toggle('active'); filmGrain.classList.toggle('show'); });
+
+        const qrToggle = document.getElementById('qrToggle');
+        qrToggle.addEventListener('click', () => { qrToggle.classList.toggle('active'); const show = qrToggle.classList.contains('active'); posterPreview.qr.classList.toggle('show', show); if (show) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
+        posterFields.qrLink.addEventListener('input', () => { if (qrToggle.classList.contains('active')) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
+
+        document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if (btn.dataset.format === '916') posterSheet.classList.add('format-916'); else posterSheet.classList.remove('format-916'); applyZoom(); }));
+
+        function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
+        async function fetchSuggestions(query, target) { const apiKey = localStorage.getItem('cl-omdb-key'); if (!apiKey || query.trim().length < 3) { hideResults(target); return; } try { const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; if (data.Response === 'True' && data.Search) { data.Search.slice(0, 5).forEach(movie => { const item = document.createElement('div'); item.className = 'autocomplete-item'; item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); resultsContainer.appendChild(item); }); resultsContainer.classList.add('show'); } else { hideResults(target); } } catch (e) { hideResults(target); } }
+        function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
+        async function fetchMovieDetails(imdbID, target) {
+          const apiKey = localStorage.getItem('cl-omdb-key');
+          try {
+            const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`);
+            const data = await res.json();
+            if (data.Response === 'True') {
+              if (target === '1') {
+                posterFields.title1.value = data.Title || ''; posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot1.value = data.Plot || '';
+                if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster1'); img.src = data.Poster; img.classList.add('show'); }
+                posterPreview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
+                posterPreview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+              } else {
+                posterFields.title2.value = data.Title || ''; posterFields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot2.value = data.Plot || '';
+                if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster2'); img.src = data.Poster; img.classList.add('show'); }
+                posterPreview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
+                posterPreview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+              }
+              const mappedTheme = mapGenreToTheme(data.Genre); if (mappedTheme) setPosterTheme(mappedTheme, themeDisplayNames[mappedTheme]);
+              updatePosterPreview();
+            }
+          } catch (e) { console.error('Error fetching details:', e); }
+          hideResults(target); const input = document.getElementById(`search${target}`); if (input) input.value = '';
+        }
+        document.getElementById('search1').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '1'), 300));
+        document.getElementById('search2').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '2'), 300));
+        document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
+        document.querySelectorAll('.clear-poster-btn').forEach(btn => btn.addEventListener('click', () => { const img = document.getElementById(`psPoster${btn.dataset.clearPoster}`); img.src = ''; img.classList.remove('show'); }));
+        let currentBackdropURL = null;
+        backdropInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = URL.createObjectURL(file); posterSheet.style.backgroundImage = `url(${currentBackdropURL})`; });
+        clearBackdropBtn.addEventListener('click', () => { if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = ''; });
+        const posterThemeDropdown = document.getElementById('posterThemeDropdown'); const posterThemeToggle = document.getElementById('posterThemeToggle'); const posterThemeMenu = document.getElementById('posterThemeMenu'); const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
+        posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeDropdown.classList.toggle('open'); });
+        document.addEventListener('click', (e) => { if (!posterThemeDropdown.contains(e.target)) posterThemeDropdown.classList.remove('open'); });
+        document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(btn => btn.addEventListener('click', () => { setPosterTheme(btn.dataset.posterTheme, btn.textContent); posterThemeDropdown.classList.remove('open'); }));
+        let posterZoom = 0.75;
+        function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
+        document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
+        document.getElementById('zoomOut').addEventListener('click', () => { posterZoom = Math.max(0.25, posterZoom - 0.1); applyZoom(); });
+        document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
+        function openPosterMaker() { const filenameEl = document.querySelector('.load-video-btn[data-film="1"] .filename'); const filename = filenameEl.textContent.trim(); const cleanName = (filename && filename !== 'No file chosen' && !filename.startsWith('Streaming')) ? filename.replace(/\.[^/.]+$/, "").replace(/[._]/g, " ") : ''; if (cleanName && !posterFields.title1.value) posterFields.title1.value = cleanName; updatePosterPreview(); posterOverlay.classList.add('active'); setTimeout(applyZoom, 50); }
+        document.querySelector('[data-screen-poster]').addEventListener('click', openPosterMaker);
+        posterCloseBtn.addEventListener('click', () => posterOverlay.classList.remove('active'));
+        posterOverlay.addEventListener('click', (e) => { if (e.target === posterOverlay) posterOverlay.classList.remove('active'); });
+        posterPrintBtn.addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
+        posterExportBtn.addEventListener('click', () => {
+          posterExportBtn.textContent = 'Rendering...';
+          const currentTransform = posterSheet.style.transform;
+          posterSheet.style.transform = 'none';
+          html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
+            const link = document.createElement('a'); link.download = 'cineloom-poster.png'; link.href = canvas.toDataURL('image/png'); link.click();
+            posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform;
+          }).catch(err => { console.error('Export failed', err); alert('Export failed due to CORS restrictions on the poster image. Try the Print option or use a custom backdrop upload.'); posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; });
+        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && posterOverlay.classList.contains('active')) posterOverlay.classList.remove('active'); });
+    } else {
+        // Fallback if poster elements are completely missing
+        document.querySelector('[data-screen-poster]').addEventListener('click', () => alert('Poster Maker HTML is missing in this snippet.'));
     }
-    document.getElementById('search1').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '1'), 300));
-    document.getElementById('search2').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '2'), 300));
-    document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
-    document.querySelectorAll('.clear-poster-btn').forEach(btn => btn.addEventListener('click', () => { const img = document.getElementById(`psPoster${btn.dataset.clearPoster}`); img.src = ''; img.classList.remove('show'); }));
-    let currentBackdropURL = null;
-    backdropInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = URL.createObjectURL(file); posterSheet.style.backgroundImage = `url(${currentBackdropURL})`; });
-    clearBackdropBtn.addEventListener('click', () => { if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = ''; });
-    const posterThemeDropdown = document.getElementById('posterThemeDropdown'); const posterThemeToggle = document.getElementById('posterThemeToggle'); const posterThemeMenu = document.getElementById('posterThemeMenu'); const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
-    posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeDropdown.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (!posterThemeDropdown.contains(e.target)) posterThemeDropdown.classList.remove('open'); });
-    document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(btn => btn.addEventListener('click', () => { setPosterTheme(btn.dataset.posterTheme, btn.textContent); posterThemeDropdown.classList.remove('open'); }));
-    let posterZoom = 0.75;
-    function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
-    document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
-    document.getElementById('zoomOut').addEventListener('click', () => { posterZoom = Math.max(0.25, posterZoom - 0.1); applyZoom(); });
-    document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
-    function openPosterMaker() { const filenameEl = document.querySelector('.load-video-btn .filename'); const filename = filenameEl.textContent.trim(); const cleanName = (filename && filename !== 'No file chosen' && !filename.startsWith('Streaming')) ? filename.replace(/\.[^/.]+$/, "").replace(/[._]/g, " ") : ''; if (cleanName && !posterFields.title1.value) posterFields.title1.value = cleanName; updatePosterPreview(); posterOverlay.classList.add('active'); setTimeout(applyZoom, 50); }
-    document.querySelector('[data-screen-poster]').addEventListener('click', openPosterMaker);
-    posterCloseBtn.addEventListener('click', () => posterOverlay.classList.remove('active'));
-    posterOverlay.addEventListener('click', (e) => { if (e.target === posterOverlay) posterOverlay.classList.remove('active'); });
-    posterPrintBtn.addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
-    posterExportBtn.addEventListener('click', () => {
-      posterExportBtn.textContent = 'Rendering...';
-      const currentTransform = posterSheet.style.transform;
-      posterSheet.style.transform = 'none';
-      html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
-        const link = document.createElement('a'); link.download = 'cineloom-poster.png'; link.href = canvas.toDataURL('image/png'); link.click();
-        posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform;
-      }).catch(err => { console.error('Export failed', err); alert('Export failed due to CORS restrictions on the poster image. Try the Print option or use a custom backdrop upload.'); posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; });
-    });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && posterOverlay.classList.contains('active')) posterOverlay.classList.remove('active'); });
 
     function parseSubtitles(filename, content) { const ext = filename.split('.').pop().toLowerCase(); if (ext === 'vtt') return content; if (ext === 'srt') return srtToVtt(content); if (ext === 'sbv') return sbvToVtt(content); if (ext === 'ass' || ext === 'ssa') return assToVtt(content); return srtToVtt(content); }
     function srtToVtt(srt) { let vtt = 'WEBVTT\n\n'; vtt += srt.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2'); vtt = vtt.replace(/(^|\n)(\d{2}:\d{2}),(\d{3})/g, '$1$2.$3'); return vtt; }
@@ -549,8 +636,21 @@ if (remoteId) {
         window.audioContext = null;
       }
       
-      const video = document.getElementById('player'); const errorState = playerContainer.querySelector('.error-state'); const fileVideo = playerContainer.querySelector('.file-input-video'); const fileSub = playerContainer.querySelector('.file-input-sub'); const fileCom = playerContainer.querySelector('.file-input-com'); const loadVideoBtn = playerContainer.querySelector('.load-video-btn'); const loadSubBtn = playerContainer.querySelector('.load-sub-btn'); const commentaryBtn = document.getElementById('commentaryBtn');
-      let currentVideoURL = null; let currentSubURL = null; let currentVideoMime = 'video/mp4'; let subDelay = 0; let originalCues = [];
+      const video = document.getElementById('player'); const errorState = playerContainer.querySelector('.error-state'); 
+      const fileVideo1 = playerContainer.querySelector('.file-input-video-1');
+      const fileVideo2 = playerContainer.querySelector('.file-input-video-2');
+      const fileSub = playerContainer.querySelector('.file-input-sub'); const fileCom = playerContainer.querySelector('.file-input-com');
+      const loadVideoBtn1 = playerContainer.querySelector('.load-video-btn[data-film="1"]');
+      const loadVideoBtn2 = playerContainer.querySelector('.load-video-btn[data-film="2"]');
+      const loadSubBtn = playerContainer.querySelector('.load-sub-btn'); 
+      const commentaryBtn = document.getElementById('commentaryBtn');
+      
+      let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
+      let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
+      let currentFilm = 1;
+      let currentVideoMime = 'video/mp4'; 
+      let currentSubURL = null; 
+      let subDelay = 0; let originalCues = [];
       let gainNode, audioInitialized = false;
       
       function initAudioBoost() { 
@@ -578,10 +678,33 @@ if (remoteId) {
         } catch (e) { console.warn("Audio boost unavailable:", e); } 
       }
       
-      const player = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], settings: ['captions', 'speed', 'quality'], ratio: '16:9', volume: 1, muted: false, invertTime: false, toggleInvertTime: false });
+      const player = new Plyr(video, { 
+          controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], 
+          settings: ['captions', 'speed', 'quality'], 
+          ratio: '16:9', 
+          volume: 1, 
+          muted: false, 
+          invertTime: true, // Automatically displays time remaining countdown in player UI
+          toggleInvertTime: true 
+      });
+      
       video.addEventListener('play', () => { if (!audioInitialized) initAudioBoost(); if (window.audioContext && window.audioContext.state === 'suspended') window.audioContext.resume(); document.body.classList.add('cinema-mode'); audioVisualizer.classList.add('active'); ambientInterval = setInterval(updateAmbientLight, 500); comAudio.play().catch(e=>{}); });
       video.addEventListener('pause', () => { document.body.classList.remove('cinema-mode'); audioVisualizer.classList.remove('active'); clearInterval(ambientInterval); ambientGlow.style.background = 'transparent'; comAudio.pause(); });
-      video.addEventListener('ended', () => { document.body.classList.remove('cinema-mode'); audioVisualizer.classList.remove('active'); clearInterval(ambientInterval); ambientGlow.style.background = 'transparent'; comAudio.pause(); });
+      video.addEventListener('ended', () => { 
+          document.body.classList.remove('cinema-mode'); 
+          audioVisualizer.classList.remove('active'); 
+          clearInterval(ambientInterval); 
+          ambientGlow.style.background = 'transparent'; 
+          comAudio.pause();
+          
+          // Double Feature Auto-advance
+          if (currentFilm === 1 && film2.url) {
+              setTimeout(() => {
+                  switchFilm(2);
+                  player.play();
+              }, 2000);
+          }
+      });
       video.addEventListener('timeupdate', () => { if (video.duration > 0 && video.duration - video.currentTime < 10) creditsOverlay.classList.add('show'); else creditsOverlay.classList.remove('show'); });
       
       // Sync Commentary Audio
@@ -596,7 +719,9 @@ if (remoteId) {
       window.addEventListener('resize', () => { audioVisualizer.width = playerContainer.offsetWidth; audioVisualizer.height = 60; }); audioVisualizer.width = playerContainer.offsetWidth; audioVisualizer.height = 60;
       player.on('loadedmetadata', () => { errorState.classList.add('hidden'); idleState.classList.add('hidden'); });
       player.on('error', () => { idleState.classList.add('hidden'); errorState.classList.remove('hidden'); });
-      loadVideoBtn.addEventListener('click', () => fileVideo.click());
+      
+      loadVideoBtn1.addEventListener('click', () => fileVideo1.click());
+      loadVideoBtn2.addEventListener('click', () => fileVideo2.click());
       commentaryBtn.addEventListener('click', () => fileCom.click());
       
       // Audio Mixer Listeners
@@ -611,19 +736,136 @@ if (remoteId) {
           commentaryBtn.style.background = 'var(--accent-soft)';
       });
 
-      fileVideo.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentVideoURL) URL.revokeObjectURL(currentVideoURL); let mimeType = file.type; const name = file.name.toLowerCase(); if (!mimeType || mimeType === '') { if (name.endsWith('.mkv')) mimeType = 'video/x-matroska'; else if (name.endsWith('.mp4')) mimeType = 'video/mp4'; else if (name.endsWith('.webm')) mimeType = 'video/webm'; else if (name.endsWith('.avi')) mimeType = 'video/x-msvideo'; else if (name.endsWith('.mov')) mimeType = 'video/quicktime'; else mimeType = 'video/mp4'; } currentVideoMime = mimeType; const blob = new Blob([file], { type: mimeType }); currentVideoURL = URL.createObjectURL(blob); errorState.classList.add('hidden'); idleState.classList.remove('hidden'); let tracks = []; if (currentSubURL) { tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }); } player.source = { type: 'video', title: file.name, sources: [{ src: currentVideoURL, type: mimeType }], tracks: tracks }; loadVideoBtn.classList.add('has-file'); loadVideoBtn.querySelector('.filename').textContent = file.name; });
+      function switchFilm(filmNum) {
+          currentFilm = filmNum;
+          const f = filmNum === 1 ? film1 : film2;
+          if (!f.url) return;
+
+          const tracks = [];
+          if (currentSubURL) {
+              tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true });
+          }
+          
+          player.source = {
+              type: 'video',
+              title: f.name,
+              sources: [{ src: f.url, type: f.mime }],
+              tracks: tracks
+          };
+          
+          loadVideoBtn1.classList.toggle('active-film', filmNum === 1);
+          loadVideoBtn2.classList.toggle('active-film', filmNum === 2);
+      }
+      window.switchFilm = switchFilm; // Expose to Remote Control
+
+      function handleVideoFileLoad(e, filmNum) {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const filmObj = filmNum === 1 ? film1 : film2;
+          if (filmObj.url) URL.revokeObjectURL(filmObj.url);
+
+          let mimeType = file.type;
+          const name = file.name.toLowerCase();
+          if (!mimeType || mimeType === '') {
+              if (name.endsWith('.mkv')) mimeType = 'video/x-matroska';
+              else if (name.endsWith('.mp4')) mimeType = 'video/mp4';
+              else if (name.endsWith('.webm')) mimeType = 'video/webm';
+              else if (name.endsWith('.avi')) mimeType = 'video/x-msvideo';
+              else if (name.endsWith('.mov')) mimeType = 'video/quicktime';
+              else mimeType = 'video/mp4';
+          }
+          filmObj.mime = mimeType;
+          filmObj.url = URL.createObjectURL(new Blob([file], { type: mimeType }));
+          filmObj.name = file.name;
+
+          const loadBtn = filmNum === 1 ? loadVideoBtn1 : loadVideoBtn2;
+          loadBtn.classList.add('has-file');
+          loadBtn.querySelector('.filename').textContent = file.name;
+
+          switchFilm(filmNum);
+      }
+
+      fileVideo1.addEventListener('change', (e) => handleVideoFileLoad(e, 1));
+      fileVideo2.addEventListener('change', (e) => handleVideoFileLoad(e, 2));
+
       loadSubBtn.addEventListener('click', () => fileSub.click());
       function applySubDelay() { const track = video.textTracks[0]; if (!track || track.cues.length === 0 || originalCues.length === 0) return; for (let i = 0; i < track.cues.length; i++) { const cue = track.cues[i]; cue.startTime = Math.max(0, originalCues[i].start + subDelay); cue.endTime = Math.max(0, originalCues[i].end + subDelay); } document.getElementById('subSyncVal').textContent = (subDelay > 0 ? '+' : '') + subDelay.toFixed(1) + 's'; }
       document.getElementById('subSyncBack').addEventListener('click', () => { subDelay -= 0.5; applySubDelay(); });
       document.getElementById('subSyncFwd').addEventListener('click', () => { subDelay += 0.5; applySubDelay(); });
       document.getElementById('subSyncReset').addEventListener('click', () => { subDelay = 0; applySubDelay(); });
-      fileSub.addEventListener('change', async (e) => { const file = e.target.files[0]; if (!file) return; let vttContent; try { const rawText = await file.text(); vttContent = parseSubtitles(file.name, rawText); } catch (err) { console.error('Failed to read subtitle file:', err); return; } const blob = new Blob([vttContent], { type: 'text/vtt' }); if (currentSubURL) URL.revokeObjectURL(currentSubURL); currentSubURL = URL.createObjectURL(blob); video.querySelectorAll('track').forEach(t => t.remove()); const track = document.createElement('track'); track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; video.appendChild(track); track.addEventListener('load', () => { const activeTrack = track.track; originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = 'showing'; player.toggleCaptions(true); }); const currentTime = player.currentTime; const isPlaying = !video.paused; player.source = { type: 'video', title: loadVideoBtn.querySelector('.filename').textContent || 'CineLoom', sources: [{ src: currentVideoURL, type: currentVideoMime }], tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] }; const onLoaded = () => { player.currentTime = currentTime; if (isPlaying) player.play().catch(()=>{}); player.toggleCaptions(true); const activeTrack = video.textTracks[0]; if (activeTrack) { originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; } video.removeEventListener('loadedmetadata', onLoaded); }; video.addEventListener('loadedmetadata', onLoaded); loadSubBtn.classList.add('has-file'); loadSubBtn.querySelector('.filename').textContent = file.name; });
+      fileSub.addEventListener('change', async (e) => { const file = e.target.files[0]; if (!file) return; let vttContent; try { const rawText = await file.text(); vttContent = parseSubtitles(file.name, rawText); } catch (err) { console.error('Failed to read subtitle file:', err); return; } const blob = new Blob([vttContent], { type: 'text/vtt' }); if (currentSubURL) URL.revokeObjectURL(currentSubURL); currentSubURL = URL.createObjectURL(blob); video.querySelectorAll('track').forEach(t => t.remove()); const track = document.createElement('track'); track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; video.appendChild(track); track.addEventListener('load', () => { const activeTrack = track.track; originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = 'showing'; player.toggleCaptions(true); }); const currentTime = player.currentTime; const isPlaying = !video.paused; player.source = { type: 'video', title: loadVideoBtn1.querySelector('.filename').textContent || 'CineLoom', sources: [{ src: (currentFilm === 1 ? film1.url : film2.url), type: (currentFilm === 1 ? film1.mime : film2.mime) }], tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] }; const onLoaded = () => { player.currentTime = currentTime; if (isPlaying) player.play().catch(()=>{}); player.toggleCaptions(true); const activeTrack = video.textTracks[0]; if (activeTrack) { originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; } video.removeEventListener('loadedmetadata', onLoaded); }; video.addEventListener('loadedmetadata', onLoaded); loadSubBtn.classList.add('has-file'); loadSubBtn.querySelector('.filename').textContent = file.name; });
       document.querySelectorAll('.style-btn[data-boost]').forEach(btn => btn.addEventListener('click', () => { const boost = parseFloat(btn.dataset.boost); if (gainNode) gainNode.gain.value = boost; localStorage.setItem('cl-boost', boost); document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }));
       const savedBoost = localStorage.getItem('cl-boost') || '3.0'; document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.toggle('active', b.dataset.boost === savedBoost));
-    }
-    setupPlayer(); updateBroadcastMarquee();
 
-    const torrentBtn = document.getElementById('torrentBtn'); const torrentInput = document.getElementById('torrentInput'); const loadVideoBtn = document.querySelector('.load-video-btn'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText'); const torrentSearchBtn = document.getElementById('torrentSearchBtn'); const torrentResults = document.getElementById('torrentResults');
+      // Unified Load Button & Drag/Drop Logic
+      const loadMediaBtn = document.getElementById('loadMediaBtn');
+      const unifiedFileInput = document.getElementById('unifiedFileInput');
+      const videoStage = document.querySelector('.video-stage');
+
+      function processFiles(files) {
+          let videoCount = 0;
+          let subFound = false;
+          let comFound = false;
+          
+          Array.from(files).forEach(file => {
+              const name = file.name.toLowerCase();
+              const isVideo = file.type.startsWith('video/') || name.endsWith('.mkv') || name.endsWith('.mp4') || name.endsWith('.webm') || name.endsWith('.avi') || name.endsWith('.mov');
+              const isSub = name.endsWith('.vtt') || name.endsWith('.srt') || name.endsWith('.sbv') || name.endsWith('.ass') || name.endsWith('.sub') || name.endsWith('.txt') || file.type === 'text/vtt';
+              const isAudio = file.type.startsWith('audio/');
+              
+              if (isVideo && videoCount === 0) {
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  fileVideo1.files = dt.files;
+                  fileVideo1.dispatchEvent(new Event('change'));
+                  videoCount++;
+              } else if (isVideo && videoCount === 1) {
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  fileVideo2.files = dt.files;
+                  fileVideo2.dispatchEvent(new Event('change'));
+                  videoCount++;
+              } else if (isSub && !subFound) {
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  fileSub.files = dt.files;
+                  fileSub.dispatchEvent(new Event('change'));
+                  subFound = true;
+              } else if (isAudio && !comFound) {
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  fileCom.files = dt.files;
+                  fileCom.dispatchEvent(new Event('change'));
+                  comFound = true;
+              }
+          });
+      }
+
+      loadMediaBtn.addEventListener('click', () => unifiedFileInput.click());
+      unifiedFileInput.addEventListener('change', (e) => {
+          processFiles(e.target.files);
+          e.target.value = ''; // Reset
+      });
+
+      videoStage.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          videoStage.classList.add('drag-over');
+      });
+      videoStage.addEventListener('dragleave', () => {
+          videoStage.classList.remove('drag-over');
+      });
+      videoStage.addEventListener('drop', (e) => {
+          e.preventDefault();
+          videoStage.classList.remove('drag-over');
+          if (e.dataTransfer.files.length > 0) {
+              processFiles(e.dataTransfer.files);
+          }
+      });
+    }
+    setupPlayer(); 
+
+    const torrentBtn = document.getElementById('torrentBtn'); const torrentInput = document.getElementById('torrentInput'); const loadVideoBtn1 = document.querySelector('.load-video-btn[data-film="1"]'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText'); const torrentSearchBtn = document.getElementById('torrentSearchBtn'); const torrentResults = document.getElementById('torrentResults');
 
     async function searchTorrents(query) {
         if (!query || query.trim().length < 3) return;
@@ -674,12 +916,12 @@ if (remoteId) {
         if (typeof WebTorrent === 'undefined') { alert('WebTorrent library failed to load.'); return; }
         if (window.torrentClient) { window.torrentClient.destroy(); }
         window.torrentClient = new WebTorrent();
-        loadVideoBtn.querySelector('.filename').textContent = "Connecting to peers...";
+        loadVideoBtn1.querySelector('.filename').textContent = "Connecting to peers...";
         bufferingText.textContent = 'Connecting...'; bufferingOverlay.classList.add('show');
         window.torrentClient.on('error', (err) => { console.error('WebTorrent Client Error:', err); alert('Torrent Error: ' + err.message); bufferingOverlay.classList.remove('show'); });
         window.torrentClient.add(magnet, (torrent) => {
             const file = torrent.files.find(f => f.name.endsWith('.mp4') || f.name.endsWith('.webm') || f.name.endsWith('.m4v') || f.name.endsWith('.mkv'));
-            if (!file) { alert("No playable video file found in this torrent."); loadVideoBtn.querySelector('.filename').textContent = "No file chosen"; bufferingOverlay.classList.remove('show'); return; }
+            if (!file) { alert("No playable video file found in this torrent."); loadVideoBtn1.querySelector('.filename').textContent = "No file chosen"; bufferingOverlay.classList.remove('show'); return; }
             const videoStage = document.querySelector('.video-stage');
             const oldVideo = document.getElementById('player'); if (oldVideo) oldVideo.remove();
             const tempContainer = document.createElement('div'); videoStage.insertBefore(tempContainer, videoStage.firstChild);
@@ -687,7 +929,7 @@ if (remoteId) {
                 if (err) { console.error('Streaming error:', err); alert('Error streaming torrent.'); bufferingOverlay.classList.remove('show'); return; }
                 elem.id = 'player'; elem.setAttribute('playsinline', '');
                 videoStage.insertBefore(elem, tempContainer); tempContainer.remove();
-                loadVideoBtn.querySelector('.filename').textContent = `Streaming: ${file.name}`;
+                loadVideoBtn1.querySelector('.filename').textContent = `Streaming: ${file.name}`;
                 elem.addEventListener('waiting', () => { bufferingText.textContent = 'Buffering...'; bufferingOverlay.classList.add('show'); });
                 elem.addEventListener('playing', () => { bufferingOverlay.classList.remove('show'); });
                 elem.addEventListener('canplay', () => { bufferingOverlay.classList.remove('show'); });
@@ -705,11 +947,6 @@ if (remoteId) {
     const countdownBtn = document.getElementById('countdownBtn'); const countdownOverlay = document.getElementById('countdownOverlay'); const countdownText = document.getElementById('countdownText');
     countdownBtn.addEventListener('click', () => { let count = 5; countdownOverlay.classList.add('active'); countdownText.textContent = count; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); const interval = setInterval(() => { count--; if (count > 0) { countdownText.textContent = count; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); } else { clearInterval(interval); countdownText.textContent = 'PLAY'; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); setTimeout(() => { countdownOverlay.classList.remove('active'); const player = document.getElementById('player').plyr; if (player) player.play(); }, 800); } }, 1000); });
 
-    const shortcutToggle = document.getElementById('shortcutToggle'); const shortcutsOverlay = document.getElementById('shortcutsOverlay');
-    shortcutToggle.addEventListener('click', () => shortcutsOverlay.classList.add('active'));
-    shortcutsOverlay.addEventListener('click', (e) => { if (e.target === shortcutsOverlay) shortcutsOverlay.classList.remove('active'); });
-    document.addEventListener('keydown', (e) => { const isTyping = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable; const isOverlayOpen = posterOverlay.classList.contains('active') || settingsPanel.classList.contains('open'); if (e.key === 'Escape') { shortcutsOverlay.classList.remove('active'); return; } if (e.key === '?' && !isTyping) { shortcutsOverlay.classList.toggle('active'); return; } if (isTyping || isOverlayOpen || shortcutsOverlay.classList.contains('active')) return; const player = document.getElementById('player').plyr; if (!player) return; switch(e.key) { case ' ': e.preventDefault(); player.togglePlay(); break; case 'f': case 'F': player.fullscreen.enter(); break; case 'c': case 'C': player.toggleCaptions(); break; case 'm': case 'M': player.muted = !player.muted; break; case 'ArrowLeft': player.currentTime -= 5; break; case 'ArrowRight': player.currentTime += 5; break; case 'j': case 'J': player.currentTime -= 10; break; case 'l': case 'L': player.currentTime += 10; break; } });
-
     const voiceToggle = document.getElementById('voiceToggle'); const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; let recognition; let isListening = false;
     if (SpeechRecognition) { recognition = new SpeechRecognition(); recognition.continuous = true; recognition.interimResults = false; recognition.lang = 'en-US'; recognition.onresult = (event) => { const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase(); console.log('Voice heard:', transcript); const player = document.getElementById('player').plyr; if (!player) return; if (transcript.includes('cineloom')) { if (transcript.includes('play')) player.play(); if (transcript.includes('pause')) player.pause(); if (transcript.includes('subtitles') || transcript.includes('captions')) player.toggleCaptions(); if (transcript.includes('mute')) player.muted = true; if (transcript.includes('unmute')) player.muted = false; if (transcript.includes('fullscreen')) player.fullscreen.enter(); if (transcript.includes('lights out') || transcript.includes('dim')) document.body.classList.add('cinema-mode'); if (transcript.includes('lights on')) document.body.classList.remove('cinema-mode'); } }; recognition.onend = () => { if (isListening) { try { recognition.start(); } catch(e) {} } }; recognition.onerror = (event) => { console.error('Speech recognition error:', event.error); }; }
     voiceToggle.addEventListener('click', () => { if (!SpeechRecognition) { alert('Voice commands are not supported in this browser. Please try Chrome or Edge.'); return; } isListening = !isListening; voiceToggle.classList.toggle('listening', isListening); if (isListening) { try { recognition.start(); } catch(e) {} } else { try { recognition.stop(); } catch(e) {} } });
@@ -724,11 +961,20 @@ if (remoteId) {
       canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
       const dataUrl = canvas.toDataURL('image/png');
       
-      openPosterMaker();
-      if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL);
-      currentBackdropURL = null;
-      backdropInput.value = '';
-      posterSheet.style.backgroundImage = `url(${dataUrl})`;
+      const posterOverlay = document.getElementById('posterOverlay');
+      if (posterOverlay && typeof openPosterMaker === 'function') {
+          openPosterMaker();
+          if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL);
+          currentBackdropURL = null;
+          backdropInput.value = '';
+          posterSheet.style.backgroundImage = `url(${dataUrl})`;
+      } else {
+          // Fallback if poster maker is missing
+          const link = document.createElement('a');
+          link.download = 'cineloom-snapshot.png';
+          link.href = dataUrl;
+          link.click();
+      }
     });
 }
 </script>
