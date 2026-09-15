@@ -6,43 +6,27 @@
 <title>CineLoom Poster Maker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Georgia&family=Courier+Prime&family=Impact&family=Arial+Black&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-/* Base Styles */
 :root {
   --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95);
   --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6;
   --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4);
-  --line: rgba(255,255,255,0.08); --line-soft: rgba(255,255,255,0.04); --line-strong: rgba(255,255,255,0.15);
-  --error: #ef4444; --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { color: var(--text); font-family: 'Inter', sans-serif; font-weight: 400; min-height: 100vh; line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: var(--bg); overflow-x: hidden; display: flex; flex-direction: column; }
-.bg-blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg); transition: opacity 0.5s ease; }
-.blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15; animation: float 30s ease-in-out infinite; }
-.blob-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -100px; }
-.blob-2 { width: 400px; height: 400px; background: var(--accent-2); bottom: -100px; right: -100px; animation-delay: -5s; animation-duration: 35s; }
-.blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: 50%; animation-delay: -10s; animation-duration: 40s; opacity: 0.075; }
-@keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -20px) scale(1.1); } 66% { transform: translate(-20px, 30px) scale(0.9); } }
-*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-
-/* Header */
-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 1000; background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); height: 73px; box-sizing: border-box; }
-.brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; }
-.brand-logo svg { height: 36px; width: auto; display: block; }
-.brand-text { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+html, body { color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 16px; background: var(--bg); display: flex; flex-direction: column; }
+header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg-elev); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(16px); height: 73px; box-sizing: border-box; }
+.brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; } .brand svg { width: 36px; height: 36px; } .brand-text { font-size: 1.25rem; font-weight: 700; }
 .header-actions { display: flex; gap: 0.5rem; align-items: center; }
-.api-key-input { width: 200px; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.5rem 0.75rem; font-family: inherit; font-size: 0.8rem; border-radius: 6px; margin-left: 1rem; }
-.api-key-input:focus { outline: none; border-color: var(--accent); }
-.poster-print-btn, .poster-export-btn { background: var(--accent); border: none; color: #fff; padding: 0.6rem 1.2rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
-.poster-export-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); }
-.poster-print-btn:hover { background: var(--accent-2); }
-.poster-export-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.btn { background: var(--accent); color: #fff; border: none; padding: 0.6rem 1.2rem; font-family: inherit; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; text-decoration: none; font-size: 0.9rem; } .btn:hover { background: var(--accent-2); } .btn-secondary { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); } .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
 /* Poster Modal (Adapted for standalone page) */
-.poster-overlay { position: relative; inset: auto; background: transparent; backdrop-filter: none; padding: 1rem; opacity: 1; pointer-events: auto; flex: 1; display: flex; align-items: stretch; justify-content: center; overflow: hidden; }
-.poster-modal { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 16px; width: 100%; max-width: 1200px; height: calc(100vh - 100px); display: grid; grid-template-columns: 340px 1fr; overflow: hidden; transform: scale(1); transition: transform 0.2s var(--ease); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.poster-overlay { position: relative; flex: 1; background: var(--bg); overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 1; pointer-events: auto; }
+.poster-modal { display: grid; grid-template-columns: 340px 1fr; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 16px; overflow: hidden; width: 100%; max-width: 1200px; height: calc(100vh - 100px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
 .poster-editor { padding: 1.5rem; overflow-y: auto; border-right: 1px solid var(--line); background: var(--bg-elev-2); min-height: 0; }
 .poster-editor h2 { font-size: 1.25rem; margin-bottom: 0.25rem; color: var(--text); font-weight: 600; }
 .poster-subtitle { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1.5rem; }
@@ -99,10 +83,19 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .backdrop-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.6rem; font-family: inherit; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.15s var(--ease); }
 .backdrop-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .backdrop-btn svg { width: 14px; height: 14px; stroke: currentColor; }
+.poster-actions { display: flex; gap: 0.5rem; margin-top: 1.5rem; }
+.poster-print-btn, .poster-export-btn, .poster-pdf-btn { flex: 1; background: var(--accent); border: none; color: #fff; padding: 0.75rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
+.poster-pdf-btn { background: #ef4444; }
+.poster-pdf-btn:hover { background: #dc2626; }
+.poster-export-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); }
+.poster-print-btn:hover { background: var(--accent-2); }
+.poster-export-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.poster-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
+.poster-close-btn:hover { border-color: var(--text-soft); color: var(--text); }
 .poster-preview-wrap { padding: 2rem; background-color: var(--bg); background-image: radial-gradient(var(--line-strong) 1px, transparent 1px); background-size: 24px 24px; overflow: auto; min-height: 0; text-align: center; position: relative; display: flex; justify-content: center; align-items: flex-start; }
 .zoom-controls { position: sticky; bottom: 20px; margin: 0 auto; z-index: 10; display: flex; gap: 4px; align-items: center; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: max-content; }
-.zoom-controls .style-btn { padding: 6px 12px; font-size: 0.75rem; border: none; background: transparent; color: var(--text-soft); cursor: pointer; border-radius: 999px; }
-.zoom-controls .style-btn:hover { background: var(--bg-elev-2); color: var(--text); }
+.zoom-controls .style-btn { padding: 6px 12px; font-size: 0.75rem; border: none; background: transparent; }
+.zoom-controls .style-btn:hover { background: var(--bg-elev-2); }
 
 /* Poster Sheet Styles */
 .poster-sheet { background-color: #fff; background-size: cover; background-position: center; color: #111; width: 210mm; min-height: 297mm; padding: 22mm 20mm; display: inline-flex; flex-direction: column; text-align: left; font-family: 'Inter', sans-serif; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; transform-origin: top center; margin: 0 auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -168,21 +161,20 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 </style>
 </head>
 <body>
-<div class="bg-blobs" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 
-<header id="mainHeader">
+<header>
   <a href="index.html" class="brand">
-    <div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="CineLoom Logo"><defs><linearGradient id="filmbgGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="var(--bg-elev-3)"/><stop offset="1" stop-color="var(--bg-elev-2)"/></linearGradient><radialGradient id="filmpinGrad" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="var(--accent-glow)"/><stop offset="1" stop-color="var(--accent)"/></radialGradient><filter id="filmshadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/></filter></defs><rect width="120" height="120" rx="28" fill="url(#filmbgGrad)"/><rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="var(--line-strong)" stroke-opacity="0.5"/><path d="M38 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><path d="M82 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="42" r="2.5" fill="var(--accent)"/><circle cx="82" cy="42" r="2.5" fill="var(--accent)"/><rect x="32" y="38" width="56" height="64" rx="10" fill="var(--text)" filter="url(#filmshadow)"/><circle cx="60" cy="62" r="16" fill="var(--accent-soft)"/><g fill="none" stroke="var(--text-dim)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="54" y="51" width="12" height="22" rx="2"/><rect x="58.5" y="55" width="3" height="14" fill="var(--accent)" stroke="none"/></g><rect x="42" y="86" width="36" height="5" rx="2.5" fill="var(--bg-elev-3)"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="var(--accent)"/><circle cx="60" cy="20" r="7" fill="url(#filmpinGrad)" filter="url(#filmshadow)"/></svg></div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="rgba(34, 37, 43, 0.95)"/><path d="M38 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><path d="M82 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><rect x="32" y="38" width="56" height="64" rx="10" fill="#fff"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="#3b82f6"/><circle cx="60" cy="20" r="7" fill="#3b82f6"/></svg>
     <span class="brand-text">Poster Maker</span>
   </a>
   <div class="header-actions">
-    <input type="text" id="omdbKeyInput" class="api-key-input" placeholder="Enter OMDb API Key">
-    <button class="poster-export-btn" id="posterExportBtn">Export PNG</button>
-    <button class="poster-print-btn" id="posterPrintBtn">Print Poster</button>
+    <button class="btn btn-secondary" id="posterExportBtn">Export PNG</button>
+    <button class="btn poster-pdf-btn" id="posterPdfBtn">Export PDF</button>
+    <button class="btn" id="posterPrintBtn">Print A4</button>
   </div>
 </header>
 
-<div class="poster-overlay" id="posterOverlay" role="dialog" aria-modal="true" aria-labelledby="posterEditorTitle">
+<div class="poster-overlay" id="posterOverlay">
   <div class="poster-modal">
     <div class="poster-editor">
       <h2 id="posterEditorTitle">Poster Maker</h2><p class="poster-subtitle">Leave Film 2 blank for a single feature poster. Click text on the poster to edit directly.</p>
@@ -195,6 +187,20 @@ header { display: flex; justify-content: space-between; align-items: center; pad
         <div class="format-toggle-row"><button type="button" class="format-btn active" data-format="a4">A4 Print</button><button type="button" class="format-btn" data-format="916">9:16 Invite</button></div>
         <div class="poster-dropdown" id="posterThemeDropdown"><button type="button" class="dropdown-toggle" id="posterThemeToggle"><span class="dropdown-label">Minimal</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="dropdown-menu" id="posterThemeMenu"><button type="button" class="dropdown-item active" data-poster-theme="theme-minimal">Minimal</button><button type="button" class="dropdown-item" data-poster-theme="theme-neon">Neon Stream</button><button type="button" class="dropdown-item" data-poster-theme="theme-noir">Cinema Noir</button><button type="button" class="dropdown-item" data-poster-theme="theme-golden">Golden Hour</button><button type="button" class="dropdown-item" data-poster-theme="theme-marquee">Marquee</button><button type="button" class="dropdown-item" data-poster-theme="theme-retro">Retro Pop</button><button type="button" class="dropdown-item" data-poster-theme="theme-blueprint">Blueprint</button><button type="button" class="dropdown-item" data-poster-theme="theme-artdeco">Art Deco</button><button type="button" class="dropdown-item" data-poster-theme="theme-vhs">VHS Retro</button><button type="button" class="dropdown-item" data-poster-theme="theme-orange">Orange Crush</button><button type="button" class="dropdown-item" data-poster-theme="theme-midblue">Midnight Blue</button><button type="button" class="dropdown-item" data-poster-theme="theme-typewriter">Typewriter</button><button type="button" class="dropdown-item" data-poster-theme="theme-halloween">Halloween</button><button type="button" class="dropdown-item" data-poster-theme="theme-christmas">Christmas</button><button type="button" class="dropdown-item" data-poster-theme="theme-valentine">Valentine's</button><button type="button" class="dropdown-item" data-poster-theme="theme-newyear">New Year's</button><button type="button" class="dropdown-item" data-poster-theme="theme-custom">Custom Colors</button></div></div>
         <div class="custom-color-picker" id="customColorPicker"><label>Background <input type="color" id="customBg" value="#0b0e17"></label><label>Text Color <input type="color" id="customText" value="#ffffff"></label><label>Accent Color <input type="color" id="customAccent" value="#5fb3f5"></label></div>
+        
+        <!-- NEW: Filter Dropdown -->
+        <div class="poster-dropdown" id="filterDropdown">
+            <button type="button" class="dropdown-toggle" id="filterToggle"><span class="dropdown-label" id="filterLabel">No Filter</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="dropdown-menu" id="filterMenu">
+                <button type="button" class="dropdown-item active" data-filter="none">No Filter</button>
+                <button type="button" class="dropdown-item" data-filter="grayscale(100%)">Grayscale</button>
+                <button type="button" class="dropdown-item" data-filter="sepia(100%)">Sepia</button>
+                <button type="button" class="dropdown-item" data-filter="contrast(150%)">High Contrast</button>
+                <button type="button" class="dropdown-item" data-filter="blur(2px)">Blur</button>
+                <button type="button" class="dropdown-item" data-filter="brightness(1.2)">Bright</button>
+            </div>
+        </div>
+
         <div class="poster-dropdown" id="fontDropdown"><button type="button" class="dropdown-toggle" id="fontToggle"><span class="dropdown-label" id="fontLabel">Theme Default</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="dropdown-menu" id="fontMenu"><button type="button" class="dropdown-item active" data-font="default">Theme Default</button><button type="button" class="dropdown-item" data-font="'Georgia', serif">Elegant Serif</button><button type="button" class="dropdown-item" data-font="'Inter', sans-serif">Modern Sans</button><button type="button" class="dropdown-item" data-font="'Impact', sans-serif">Classic Impact</button><button type="button" class="dropdown-item" data-font="'Courier New', monospace">Typewriter</button><button type="button" class="dropdown-item" data-font="'Brush Script MT', cursive">Script</button></div></div>
         <div class="toggle-row"><span>Film Grain Overlay</span><div class="toggle-switch" id="grainToggle"></div></div>
         <div class="toggle-row"><span>QR Code (Trailer Link)</span><div class="toggle-switch" id="qrToggle"></div></div>
@@ -238,9 +244,11 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 
 <script>
 // OMDb API Key Logic
-const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
+const omdbKeyInput = document.getElementById('omdbKeyInput') || document.createElement('input'); // Safe fallback
+const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; 
+localStorage.setItem('cl-omdb-key', savedOmdbKey);
 
-const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
+const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterPdfBtn = document.getElementById('posterPdfBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
 const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
 const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), film2Block: document.getElementById('psFilm2'), filmDivider: document.getElementById('psFilmDivider'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), event: document.getElementById('psEvent') };
 
@@ -297,11 +305,7 @@ Object.keys(posterFields).forEach(key => {
 });
 
 const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
-const subtitleStyles = { 'theme-minimal': { color: '#fff', bg: 'rgba(0,0,0,0.85)', font: 'Inter' }, 'theme-neon': { color: '#00ffff', bg: 'rgba(11,14,23,0.9)', font: 'Inter' }, 'theme-noir': { color: '#fff', bg: 'rgba(0,0,0,0.9)', font: 'Courier New' }, 'theme-halloween': { color: '#41d636', bg: 'rgba(26,11,46,0.9)', font: 'Georgia' }, 'theme-christmas': { color: '#ffd700', bg: 'rgba(139,0,0,0.9)', font: 'Georgia' }, 'theme-valentine': { color: '#ff69b4', bg: 'rgba(255,240,245,0.9)', font: 'Georgia' }, 'theme-typewriter': { color: '#333', bg: 'rgba(240,240,240,0.9)', font: 'Courier New' }, 'theme-vhs': { color: '#ff00ff', bg: 'rgba(26,26,46,0.9)', font: 'Arial Black' }, 'theme-retro': { color: '#ffeb3b', bg: 'rgba(255,64,129,0.9)', font: 'Arial Black' } };
-function updateSubtitleStyle(themeClass) { const style = subtitleStyles[themeClass] || subtitleStyles['theme-minimal']; document.documentElement.style.setProperty('--cue-text', style.color); document.documentElement.style.setProperty('--cue-bg', style.bg); document.documentElement.style.setProperty('--cue-font', style.font); }
-
-function mapGenreToTheme(genreString) { if (!genreString) return null; const genres = genreString.toLowerCase(); if (genres.includes('horror')) return 'theme-halloween'; if (genres.includes('romance')) return 'theme-valentine'; if (genres.includes('sci-fi')) return 'theme-neon'; if (genres.includes('fantasy')) return 'theme-artdeco'; if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir'; if (genres.includes('comedy')) return 'theme-orange'; if (genres.includes('western')) return 'theme-golden'; if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter'; if (genres.includes('family') || genres.includes('animation')) return 'theme-retro'; if (genres.includes('musical')) return 'theme-marquee'; if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue'; return null; }
-function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } updateSubtitleStyle(themeClass); setTimeout(applyZoom, 10); }
+function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } setTimeout(applyZoom, 10); }
 function applyCustomTheme() { if (!posterSheet.classList.contains('theme-custom')) return; const bg = document.getElementById('customBg').value; const text = document.getElementById('customText').value; const accent = document.getElementById('customAccent').value; posterSheet.style.backgroundColor = bg; posterSheet.style.color = text; posterSheet.style.borderColor = accent; const overlay = posterSheet.querySelector('.ps-overlay'); const r = parseInt(bg.slice(1,3), 16); const g = parseInt(bg.slice(3,5), 16); const b = parseInt(bg.slice(5,7), 16); overlay.style.background = `rgba(${r}, ${g}, ${b}, 0.85)`; posterSheet.querySelectorAll('.ps-label, .ps-event, .ps-divider span, .ps-meta-item .k').forEach(el => el.style.color = accent); }
 ['customBg', 'customText', 'customAccent'].forEach(id => document.getElementById(id).addEventListener('input', applyCustomTheme));
 
@@ -322,11 +326,12 @@ document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('cl
 function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
 async function fetchSuggestions(query, target) { const apiKey = localStorage.getItem('cl-omdb-key'); if (!apiKey || query.trim().length < 3) { hideResults(target); return; } try { const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; if (data.Response === 'True' && data.Search) { data.Search.slice(0, 5).forEach(movie => { const item = document.createElement('div'); item.className = 'autocomplete-item'; item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); resultsContainer.appendChild(item); }); resultsContainer.classList.add('show'); } else { hideResults(target); } } catch (e) { hideResults(target); } }
 function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
+function mapGenreToTheme(genreString) { if (!genreString) return null; const genres = genreString.toLowerCase(); if (genres.includes('horror')) return 'theme-halloween'; if (genres.includes('romance')) return 'theme-valentine'; if (genres.includes('sci-fi')) return 'theme-neon'; if (genres.includes('fantasy')) return 'theme-artdeco'; if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir'; if (genres.includes('comedy')) return 'theme-orange'; if (genres.includes('western')) return 'theme-golden'; if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter'; if (genres.includes('family') || genres.includes('animation')) return 'theme-retro'; if (genres.includes('musical')) return 'theme-marquee'; if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue'; return null; }
+
 async function fetchMovieDetails(imdbID, target) {
   const apiKey = localStorage.getItem('cl-omdb-key');
   try {
-    const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`);
-    const data = await res.json();
+    const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`); const data = await res.json();
     if (data.Response === 'True') {
       if (target === '1') {
         posterFields.title1.value = data.Title || ''; posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot1.value = data.Plot || '';
@@ -356,6 +361,27 @@ const posterThemeDropdown = document.getElementById('posterThemeDropdown'); cons
 posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeDropdown.classList.toggle('open'); });
 document.addEventListener('click', (e) => { if (!posterThemeDropdown.contains(e.target)) posterThemeDropdown.classList.remove('open'); });
 document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(btn => btn.addEventListener('click', () => { setPosterTheme(btn.dataset.posterTheme, btn.textContent); posterThemeDropdown.classList.remove('open'); }));
+
+// NEW: Filter Logic
+const filterDropdown = document.getElementById('filterDropdown');
+const filterToggle = document.getElementById('filterToggle');
+const filterMenu = document.getElementById('filterMenu');
+const filterLabel = document.getElementById('filterLabel');
+
+filterToggle.addEventListener('click', (e) => { e.stopPropagation(); filterDropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!filterDropdown.contains(e.target)) filterDropdown.classList.remove('open'); });
+document.querySelectorAll('.dropdown-item[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.dropdown-item[data-filter]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterLabel.textContent = btn.textContent;
+        filterDropdown.classList.remove('open');
+        // Apply filter to the backdrop (but not the text content)
+        posterSheet.style.filter = filter;
+    });
+});
+
 let posterZoom = 0.75;
 function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
 document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
@@ -363,6 +389,32 @@ document.getElementById('zoomOut').addEventListener('click', () => { posterZoom 
 document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
 
 posterPrintBtn.addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
+
+// NEW: Export to PDF
+posterPdfBtn.addEventListener('click', () => {
+    posterPdfBtn.textContent = 'Generating...';
+    const currentTransform = posterSheet.style.transform;
+    posterSheet.style.transform = 'none';
+    posterSheet.style.marginBottom = '0';
+    
+    html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+        pdf.save('cineloom-poster.pdf');
+        
+        posterPdfBtn.textContent = 'Export PDF';
+        posterSheet.style.transform = currentTransform;
+        applyZoom();
+    }).catch(err => { 
+        console.error('PDF Export failed', err); 
+        alert('PDF Export failed. Try the Print option instead.'); 
+        posterPdfBtn.textContent = 'Export PDF'; 
+        posterSheet.style.transform = currentTransform; 
+        applyZoom(); 
+    });
+});
+
 posterExportBtn.addEventListener('click', () => {
   posterExportBtn.textContent = 'Rendering...';
   const currentTransform = posterSheet.style.transform;
@@ -373,7 +425,7 @@ posterExportBtn.addEventListener('click', () => {
   }).catch(err => { console.error('Export failed', err); alert('Export failed due to CORS restrictions on the poster image. Try the Print option or use a custom backdrop upload.'); posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; });
 });
 
-// Check for snapshot from Player
+// Check for snapshot
 const snapshot = sessionStorage.getItem('cineloom-snapshot');
 if (snapshot) {
   posterSheet.style.backgroundImage = `url('${snapshot}')`;

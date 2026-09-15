@@ -83,13 +83,17 @@
   .header-brand { font-size: 1.2rem; font-weight: 700; }
   .header-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--success); }
   .status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 5px var(--success); }
+  .dimmer-btn { background: var(--bg-btn); border: none; color: var(--text-dim); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .dimmer-btn svg { width: 16px; height: 16px; }
 
-  /* Now Playing Card */
+  /* Now Playing Card (Gesture Pad) */
   .now-playing { 
     background: var(--bg-card); 
     border: 1px solid var(--border); 
     border-radius: 16px; padding: 1.5rem; 
     text-align: center; margin-bottom: 1.5rem; 
+    position: relative;
+    touch-action: none; /* Prevent scrolling while swiping */
   }
   .np-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 0.5rem; }
   .np-time { font-size: 2.5rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
@@ -99,6 +103,7 @@
   .vol-bar { width: 4px; height: 16px; background: var(--bg-btn); border-radius: 2px; transition: background 0.2s; }
   .vol-bar.active { background: var(--accent); box-shadow: 0 0 3px var(--accent); }
   .vol-bar.muted { background: var(--danger) !important; box-shadow: 0 0 3px var(--danger); }
+  .gesture-hint { font-size: 0.65rem; color: var(--text-dim); margin-top: 1rem; opacity: 0.6; }
 
   /* Controls Grid */
   .controls-grid { display: flex; flex-direction: column; gap: 12px; flex: 1; }
@@ -140,6 +145,10 @@
     transition: transform 0.1s;
   }
   .reconnect-btn:active { transform: scale(0.97); }
+
+  /* Screen Dimmer Overlay */
+  .dimmer-overlay { position: fixed; inset: 0; background: #000; z-index: 99; display: none; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .dimmer-overlay.active { display: block; opacity: 0.7; }
 </style>
 </head>
 <body>
@@ -161,10 +170,13 @@
       <div class="status-dot"></div>
       <span id="connStatus">Connected</span>
     </div>
+    <button class="dimmer-btn" id="dimmerToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
   </div>
 
-  <!-- Now Playing -->
-  <div class="now-playing">
+  <!-- Now Playing (Gesture Pad) -->
+  <div class="now-playing" id="nowPlaying">
     <div class="np-label">Time Remaining</div>
     <div class="np-time" id="timeRemainingDisplay">--:--:--</div>
     <div class="np-info-row">
@@ -175,6 +187,7 @@
         <div class="vol-bar"></div><div class="vol-bar"></div><div class="vol-bar"></div><div class="vol-bar"></div>
       </div>
     </div>
+    <div class="gesture-hint">Swipe ↔ to Seek • ↕ for Volume</div>
   </div>
 
   <div class="controls-grid">
@@ -236,8 +249,11 @@
   <button class="reconnect-btn" id="reconnectBtn">Reconnect</button>
 </div>
 
+<!-- Screen Dimmer -->
+<div class="dimmer-overlay" id="dimmerOverlay"></div>
+
 <script>
-console.log("CineLoom Remote v2.0.0 loaded");
+console.log("CineLoom Remote v2.1.0 loaded");
 
 const urlParams = new URLSearchParams(window.location.search);
 let roomCode = urlParams.get('room');
@@ -247,12 +263,20 @@ const codeInput = document.getElementById('codeInput');
 const connectBtn = document.getElementById('connectBtn');
 const entryStatus = document.getElementById('entryStatus');
 const disconnectOverlay = document.getElementById('disconnectOverlay');
+const dimmerOverlay = document.getElementById('dimmerOverlay');
+const nowPlaying = document.getElementById('nowPlaying');
 let client = null;
 let cmdTopic = '';
+
+// Haptic Feedback
+function vibrate(ms = 10) {
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
 
 function sendCmd(action, e) {
     if (client && client.connected) {
       client.publish(cmdTopic, JSON.stringify({action: action}), { qos: 1 });
+      vibrate(15); // Haptic feedback
       if (e && e.currentTarget) {
         const btn = e.currentTarget;
         const originalBg = btn.style.background;
@@ -286,6 +310,36 @@ document.getElementById('reconnectBtn').addEventListener('click', () => {
     lastUpdateTime = Date.now(); 
     client.publish(cmdTopic, JSON.stringify({action: 'hello'}), { qos: 1 });
 });
+
+// Screen Dimmer Logic
+const dimmerToggle = document.getElementById('dimmerToggle');
+let isDimmed = false;
+dimmerToggle.addEventListener('click', () => {
+  isDimmed = !isDimmed;
+  dimmerOverlay.classList.toggle('active', isDimmed);
+});
+
+// Gesture Controls (Swipe on Now Playing card)
+let touchStartX = 0, touchStartY = 0;
+nowPlaying.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+nowPlaying.addEventListener('touchend', (e) => {
+  const diffX = e.changedTouches[0].screenX - touchStartX;
+  const diffY = e.changedTouches[0].screenY - touchStartY;
+  
+  if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+    // Horizontal swipe (Seek)
+    if (diffX > 0) sendCmd('seekFwd'); else sendCmd('seekBack');
+    vibrate(20);
+  } else if (Math.abs(diffY) > 40) {
+    // Vertical swipe (Volume)
+    if (diffY > 0) sendCmd('volumeDown'); else sendCmd('volumeUp');
+    vibrate(20);
+  }
+}, { passive: true });
 
 function connectToBroker(statusEl, onConnect) {
     const brokers = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
@@ -359,7 +413,6 @@ function connectToHost(code) {
           document.getElementById('timeRemainingDisplay').textContent = data.timeStr;
           document.getElementById('lcdSpeed').textContent = `${data.speed}x`;
           
-          // Update Volume Bars
           const volLevel = Math.round(data.volume * 10);
           volBars.forEach((bar, index) => {
             bar.classList.remove('active', 'muted');

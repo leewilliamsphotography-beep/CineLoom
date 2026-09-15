@@ -24,7 +24,7 @@ video::cue { font-size: 1.8em; background: rgba(0,0,0,0.85); color: #fff; text-s
 header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 1000; background: transparent; border-bottom: 1px solid transparent; } header.scrolled { background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(16px); border-bottom-color: var(--line); }
 .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; } .brand-logo svg { height: 36px; width: auto; display: block; } .brand-text { font-size: 1.25rem; font-weight: 700; }
 .header-actions { margin-left: auto; position: relative; display: flex; gap: 0.5rem; align-items: center; }
-.settings-btn, .remote-btn, .nav-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s var(--ease); flex-shrink: 0; text-decoration: none; position: relative; } .settings-btn:hover, .remote-btn:hover, .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .settings-btn svg, .remote-btn svg, .nav-btn svg { width: 18px; height: 18px; }
+.settings-btn, .remote-btn, .nav-btn, .shortcut-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s var(--ease); flex-shrink: 0; text-decoration: none; position: relative; } .settings-btn:hover, .remote-btn:hover, .nav-btn:hover, .shortcut-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .settings-btn svg, .remote-btn svg, .nav-btn svg, .shortcut-btn svg { width: 18px; height: 18px; }
 .remote-active-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #41d636; border-radius: 50%; display: none; box-shadow: 0 0 5px #41d636; } .remote-active-dot.show { display: block; } .remote-active-dot.reconnecting { background: #f5a05f; box-shadow: 0 0 5px #f5a05f; }
 .remote-code-badge { background: var(--accent-soft); color: var(--accent); padding: 0.4rem 0.8rem; border-radius: 6px; font-family: 'Courier New', monospace; font-weight: 700; font-size: 0.9rem; border: 1px solid var(--accent); display: none; margin-right: 0.5rem; letter-spacing: 0.1em; } .remote-code-badge.show { display: block; }
 .hero { padding: 4rem 2rem 2rem; max-width: 800px; margin: 0 auto; text-align: center; position: relative; z-index: 5; } .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.1; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 0.75rem; text-shadow: 0 4px 20px rgba(0,0,0,0.6); } .hero p { color: var(--text-soft); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
@@ -49,6 +49,23 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .sub-sync-controls span { font-size: 0.75rem; color: #fff; min-width: 35px; text-align: center; font-weight: 600; }
 .sub-sync-controls .style-btn { padding: 4px 8px; font-size: 0.7rem; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 999px; cursor: pointer; }
 .sub-sync-controls .style-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* Keyboard Shortcuts Overlay */
+.shortcuts-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); z-index: 10004; display: none; align-items: center; justify-content: center; }
+.shortcuts-overlay.active { display: flex; }
+.shortcuts-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 16px; padding: 2rem; width: 90%; max-width: 500px; }
+.shortcuts-box h3 { font-size: 1.2rem; margin-bottom: 1.5rem; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+.shortcut-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.shortcut-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--line); }
+.shortcut-item span { color: var(--text-soft); font-size: 0.9rem; }
+.shortcut-key { background: var(--bg); border: 1px solid var(--line-strong); border-radius: 4px; padding: 2px 8px; font-family: monospace; font-size: 0.8rem; color: var(--text); }
+
+/* Resume Overlay */
+.resume-overlay { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); border: 1px solid var(--line-strong); border-radius: 8px; padding: 1rem; display: none; flex-direction: column; gap: 0.5rem; z-index: 15; }
+.resume-overlay.show { display: flex; }
+.resume-text { color: #fff; font-size: 0.9rem; font-weight: 600; }
+.resume-btn { background: var(--accent); color: #fff; border: none; padding: 0.5rem 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; align-self: flex-start; }
+
 @media (max-width: 900px) { header { padding: 1rem 1.5rem; } main { padding: 0 1rem 2rem; } .remote-code-badge { display: none !important; } }
 </style>
 </head>
@@ -62,6 +79,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
     <a href="poster.html" class="nav-btn" aria-label="Open Poster Maker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></a>
     <div class="remote-code-badge" id="remoteCodeBadge">------</div>
     <button class="remote-btn" id="remoteToggle" aria-label="Open Remote Control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><div class="remote-active-dot" id="remoteActiveDot"></div></button>
+    <button class="shortcut-btn" id="shortcutToggle" aria-label="Keyboard Shortcuts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M6 16h.01M10 16h.01M14 16h.01M18 16h.01"/></svg></button>
     <button class="settings-btn" id="settingsToggle" aria-label="Open Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
     <div class="settings-dropdown" id="settingsPanel" style="position: absolute; top: calc(100% + 8px); right: 0; width: 300px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 12px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); backdrop-filter: blur(24px); opacity: 0; transform: translateY(-10px) scale(0.95); pointer-events: none; transition: all 0.2s var(--ease); z-index: 1000;">
       <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; padding: 8px 8px 8px; letter-spacing: 0.05em;">OMDb API Key</div>
@@ -105,6 +123,10 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
         <div class="buffering-overlay" id="bufferingOverlay"><div class="spinner"></div><span id="bufferingText">Buffering...</span></div>
         <div class="sub-sync-controls" id="subSyncControls" style="display: none;"><button class="style-btn" id="subSyncBack" type="button">-0.5s</button><span id="subSyncVal">0.0s</span><button class="style-btn" id="subSyncFwd" type="button">+0.5s</button><button class="style-btn" id="subSyncReset" type="button" style="margin-left: 4px;">Reset</button></div>
         <div class="countdown-overlay" id="countdownOverlay"><div class="countdown-text" id="countdownText"></div></div>
+        <div class="resume-overlay" id="resumeOverlay">
+          <div class="resume-text" id="resumeText">Continue watching?</div>
+          <button class="resume-btn" id="resumeBtn">Resume</button>
+        </div>
       </div>
       <input type="file" class="file-input file-input-video-1" accept="*/*" aria-hidden="true" tabindex="-1">
       <input type="file" class="file-input file-input-video-2" accept="*/*" aria-hidden="true" tabindex="-1">
@@ -126,9 +148,25 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
   </div>
 </div>
 
+<div class="shortcuts-overlay" id="shortcutsOverlay">
+  <div class="shortcuts-box">
+    <h3>Keyboard Shortcuts</h3>
+    <div class="shortcut-list">
+      <div class="shortcut-item"><span>Play / Pause</span><span class="shortcut-key">Space</span></div>
+      <div class="shortcut-item"><span>Fullscreen</span><span class="shortcut-key">F</span></div>
+      <div class="shortcut-item"><span>Captions</span><span class="shortcut-key">C</span></div>
+      <div class="shortcut-item"><span>Mute</span><span class="shortcut-key">M</span></div>
+      <div class="shortcut-item"><span>Seek Back 10s</span><span class="shortcut-key">J</span></div>
+      <div class="shortcut-item"><span>Seek Fwd 10s</span><span class="shortcut-key">L</span></div>
+      <div class="shortcut-item"><span>Seek Back 5s</span><span class="shortcut-key">←</span></div>
+      <div class="shortcut-item"><span>Seek Fwd 5s</span><span class="shortcut-key">→</span></div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v1.4.2 loaded");
+console.log("CineLoom Player v1.5.0 loaded");
 
 const playerContainer = document.getElementById('playerContainer'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
 let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
@@ -137,6 +175,7 @@ let currentFilm = 1;
 let currentSubURL = null; 
 let subDelay = 0; 
 let originalCues = [];
+let saveHistoryTimer = null;
 
 // --- Subtitle Parsing & Sync Logic ---
 function parseSubtitles(filename, content) { const ext = filename.split('.').pop().toLowerCase(); if (ext === 'vtt') return content; if (ext === 'srt') return srtToVtt(content); if (ext === 'sbv') return sbvToVtt(content); if (ext === 'ass' || ext === 'ssa') return assToVtt(content); return srtToVtt(content); }
@@ -195,6 +234,46 @@ fileSub.addEventListener('change', async (e) => {
   document.getElementById('loadSubsName').textContent = file.name; 
 });
 
+// --- Watch History & Resume Logic ---
+function saveHistory(time) {
+  const videoEl = document.getElementById('player');
+  if (!videoEl || !videoEl.src) return;
+  
+  // Create a unique key based on the current video source
+  let key = `cl-history-${currentFilm === 1 ? film1.name : film2.name}`;
+  if (key === 'cl-history-No file chosen' || key === 'cl-history-undefined') return;
+  
+  localStorage.setItem(key, JSON.stringify({ time: time, name: currentFilm === 1 ? film1.name : film2.name }));
+}
+
+function checkHistory() {
+  const videoEl = document.getElementById('player');
+  if (!videoEl) return;
+  
+  let key = `cl-history-${currentFilm === 1 ? film1.name : film2.name}`;
+  if (key === 'cl-history-No file chosen' || key === 'cl-history-undefined') return;
+  
+  const history = localStorage.getItem(key);
+  if (history) {
+    const data = JSON.parse(history);
+    if (data.time > 10) { // Only show if more than 10s in
+      document.getElementById('resumeText').textContent = `Resume from ${Math.floor(data.time / 60)}m ${Math.floor(data.time % 60)}s?`;
+      document.getElementById('resumeOverlay').classList.add('show');
+    }
+  }
+}
+
+document.getElementById('resumeBtn').addEventListener('click', () => {
+  const videoEl = document.getElementById('player');
+  let key = `cl-history-${currentFilm === 1 ? film1.name : film2.name}`;
+  const history = localStorage.getItem(key);
+  if (history && videoEl) {
+    const data = JSON.parse(history);
+    videoEl.currentTime = data.time;
+  }
+  document.getElementById('resumeOverlay').classList.remove('show');
+});
+
 // --- Player Setup ---
 function setupPlayer() {
   const video = document.getElementById('player'); 
@@ -204,7 +283,10 @@ function setupPlayer() {
   const player = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], invertTime: true, toggleInvertTime: true });
   window.player = player;
 
-  player.on('loadedmetadata', () => { idleState.classList.add('hidden'); });
+  player.on('loadedmetadata', () => { 
+    idleState.classList.add('hidden'); 
+    checkHistory(); // Check for resume prompt when video loads
+  });
   player.on('error', () => { idleState.classList.add('hidden'); });
   
   video.addEventListener('ended', () => { 
@@ -213,23 +295,29 @@ function setupPlayer() {
     }
   });
 
+  // Save history every 5 seconds
+  video.addEventListener('timeupdate', () => {
+    if (saveHistoryTimer) return;
+    saveHistoryTimer = setTimeout(() => {
+      saveHistory(video.currentTime);
+      saveHistoryTimer = null;
+    }, 5000);
+  });
+
   function switchFilm(filmNum) {
     currentFilm = filmNum;
     const f = filmNum === 1 ? film1 : film2;
     if (!f.url) return;
     
-    // If subtitles are loaded, include them in the source!
     const tracks = [];
     if (currentSubURL) {
         tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true });
     }
     player.source = { type: 'video', title: f.name, sources: [{ src: f.url, type: f.mime }], tracks: tracks };
     
-    // Re-apply sub sync after switching
     const onLoaded = () => {
         const activeTrack = video.textTracks[0];
         if (activeTrack && originalCues.length > 0) {
-            // Reset originalCues if switching films
             originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime }));
             applySubDelay();
         }
@@ -309,6 +397,16 @@ settingsToggle.addEventListener('click', (e) => { e.stopPropagation(); settingsP
 document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) { settingsPanel.classList.remove('open'); settingsToggle.classList.remove('active'); } });
 
 const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
+
+// --- Keyboard Shortcuts Overlay ---
+const shortcutsOverlay = document.getElementById('shortcutsOverlay');
+const shortcutToggle = document.getElementById('shortcutToggle');
+shortcutToggle.addEventListener('click', () => shortcutsOverlay.classList.add('active'));
+shortcutsOverlay.addEventListener('click', (e) => { if (e.target === shortcutsOverlay) shortcutsOverlay.classList.remove('active'); });
+document.addEventListener('keydown', (e) => { 
+  if (e.key === '?' && !e.target.matches('input, textarea')) shortcutsOverlay.classList.toggle('active');
+  if (e.key === 'Escape') shortcutsOverlay.classList.remove('active');
+});
 
 // --- MQTT Remote Host Logic ---
 const qrOverlay = document.getElementById('qrOverlay'); 
