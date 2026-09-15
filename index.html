@@ -3,990 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CineLoom</title>
-
+<title>CineLoom Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Georgia&family=Courier+Prime&family=Impact&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
-<script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95);
   --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6;
   --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4);
-  --line: rgba(255,255,255,0.08); --line-soft: rgba(255,255,255,0.04); --line-strong: rgba(255,255,255,0.15);
-  --error: #ef4444; --ease: cubic-bezier(0.4, 0, 0.2, 1); 
-  --cue-size: 1.8em; --cue-bg: rgba(0,0,0,0.85); --cue-text: #ffffff; --cue-font: 'Inter', sans-serif; --cue-shadow: #000000;
-  --blob-opacity: 0.15; --shadow-card: 0 10px 40px rgba(0,0,0,0.4);
-  --plyr-color-main: var(--accent); --plyr-video-background: rgba(0,0,0,0.9); --plyr-menu-background: var(--bg-elev-3);
-  --plyr-menu-color: var(--text); --plyr-menu-border-color: var(--line); --plyr-control-icon-size: 18px;
-  --plyr-control-spacing: 12px; --plyr-control-radius: 6px; --plyr-font-family: 'Inter', sans-serif; --plyr-font-size-small: 13px; --plyr-font-size-base: 14px;
+  --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
-html[data-theme="light"] { --bg: #f8f9fa; --bg-elev: rgba(255,255,255,0.7); --bg-elev-2: rgba(255,255,255,0.85); --bg-elev-3: rgba(255,255,255,0.98); --text: #0f172a; --text-soft: #475569; --text-dim: #94a3b8; --accent: #2563eb; --accent-2: #db2777; --accent-soft: rgba(37,99,235,0.08); --accent-glow: rgba(37,99,235,0.2); --line: rgba(0,0,0,0.08); --line-soft: rgba(0,0,0,0.04); --line-strong: rgba(0,0,0,0.15); --blob-opacity: 0.1; --shadow-card: 0 10px 40px rgba(0,0,0,0.05); }
-html[data-theme="theater"] { --bg: #0a0606; --bg-elev: rgba(22,16,13,0.6); --bg-elev-2: rgba(31,23,19,0.7); --bg-elev-3: rgba(42,32,26,0.9); --text: #fff; --text-soft: #e4dcd8; --text-dim: #8a7a70; --accent: #f5a05f; --accent-2: #f55f7a; --blob-opacity: 0.2; }
-html[data-theme="midnight"] { --bg: #060410; --bg-elev: rgba(15,13,22,0.6); --bg-elev-2: rgba(22,19,31,0.7); --bg-elev-3: rgba(29,26,42,0.9); --text: #fff; --text-soft: #e4d8e4; --text-dim: #7a6e7a; --accent: #c98aff; --accent-2: #5f7aff; --blob-opacity: 0.15; }
-html[data-theme="mono"] { --bg: #000; --bg-elev: rgba(20,20,20,0.6); --bg-elev-2: rgba(30,30,30,0.7); --bg-elev-3: rgba(45,45,45,0.9); --text: #fff; --text-soft: #e0e0e0; --text-dim: #808080; --accent: #fff; --accent-2: #888; --line: rgba(255,255,255,0.15); --line-soft: rgba(255,255,255,0.05); --line-strong: rgba(255,255,255,0.3); --blob-opacity: 0.1; }
-html[data-theme="spring"] { --bg: #0c1410; --bg-elev: rgba(20,30,22,0.6); --bg-elev-2: rgba(26,38,28,0.7); --bg-elev-3: rgba(32,48,34,0.95); --text: #f5fff0; --text-soft: #d8e8d4; --text-dim: #8aa080; --accent: #7dd87d; --accent-2: #ff8fb1; --blob-opacity: 0.15; }
-html[data-theme="summer"] { --bg: #0d0a05; --bg-elev: rgba(30,22,13,0.6); --bg-elev-2: rgba(38,28,16,0.7); --bg-elev-3: rgba(48,36,20,0.95); --text: #fffdf5; --text-soft: #f0e8d4; --text-dim: #b0a080; --accent: #ffb84d; --accent-2: #ff5e5e; --blob-opacity: 0.2; }
-html[data-theme="autumn"] { --bg: #0e0805; --bg-elev: rgba(30,18,13,0.6); --bg-elev-2: rgba(40,24,18,0.7); --bg-elev-3: rgba(52,32,24,0.95); --text: #fff5ed; --text-soft: #e8d4c4; --text-dim: #b08a70; --accent: #e87a3e; --accent-2: #b8351f; --blob-opacity: 0.2; }
-html[data-theme="winter"] { --bg: #050a14; --bg-elev: rgba(13,20,32,0.6); --bg-elev-2: rgba(18,28,42,0.7); --bg-elev-3: rgba(24,36,52,0.95); --text: #f0f8ff; --text-soft: #d4e0e8; --text-dim: #8090a0; --accent: #5fb3d8; --accent-2: #c4e8ff; --blob-opacity: 0.15; }
-
-html, body { color: var(--text); font-family: 'Inter', sans-serif; font-weight: 400; min-height: 100vh; line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; transition: background 0.4s var(--ease), color 0.4s var(--ease); background: var(--bg); overflow-x: hidden; display: flex; flex-direction: column; }
-.bg-blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg); transition: opacity 0.5s ease; }
-.blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: var(--blob-opacity); animation: float 30s ease-in-out infinite; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { color: var(--text); font-family: 'Inter', sans-serif; font-weight: 400; min-height: 100vh; line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; background: var(--bg); overflow-x: hidden; display: flex; flex-direction: column; }
+.bg-blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg); }
+.blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15; animation: float 30s ease-in-out infinite; }
 .blob-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -100px; }
-.blob-2 { width: 400px; height: 400px; background: var(--accent-2); bottom: -100px; right: -100px; animation-delay: -5s; animation-duration: 35s; }
-.blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: 50%; animation-delay: -10s; animation-duration: 40s; opacity: calc(var(--blob-opacity) * 0.5); }
+.blob-2 { width: 400px; height: 400px; background: var(--accent-2); bottom: -100px; right: -100px; animation-delay: -5s; }
+.blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: 50%; animation-delay: -10s; }
 @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -20px) scale(1.1); } 66% { transform: translate(-20px, 30px) scale(0.9); } }
-*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-video::cue { font-family: var(--cue-font); color: var(--cue-text); background: var(--cue-bg); font-size: var(--cue-size); text-shadow: 0 0 3px var(--cue-shadow), 0 0 5px var(--cue-shadow); line-height: 1.4; padding: 0.1em 0.3em; border-radius: 4px; }
 
-header { display: flex; justify-content: flex-start; align-items: center; padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 1000; background: transparent; border-bottom: 1px solid transparent; transition: background 0.3s var(--ease), border-color 0.3s var(--ease), backdrop-filter 0.3s var(--ease), opacity 0.5s ease; }
-header.scrolled { background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: var(--line); }
-.brand { display: flex; align-items: center; gap: 0.75rem; }
-.brand-logo svg { height: 36px; width: auto; display: block; }
-.brand-text { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
-.header-actions { margin-left: auto; position: relative; display: flex; gap: 0.5rem; align-items: center; }
-.settings-btn, .shortcut-btn, .voice-btn, .remote-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s var(--ease); flex-shrink: 0; }
-.settings-btn:hover, .shortcut-btn:hover, .voice-btn:hover, .remote-btn:hover, .settings-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.settings-btn svg, .shortcut-btn svg, .voice-btn svg, .remote-btn svg { width: 18px; height: 18px; }
-.voice-btn.listening { background: var(--accent); color: #fff; border-color: var(--accent); animation: pulse-mic 1.5s infinite; }
-@keyframes pulse-mic { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
-.settings-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 300px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 12px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); backdrop-filter: blur(24px); opacity: 0; transform: translateY(-10px) scale(0.95); pointer-events: none; transition: all 0.2s var(--ease); z-index: 1000; max-height: 85vh; overflow-y: auto; }
-.settings-dropdown.open { opacity: 1; transform: none; pointer-events: auto; }
-.panel-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; padding: 8px 8px 8px; letter-spacing: 0.05em; margin-top: 12px; }
-.panel-label:first-child { margin-top: 0; }
-.theme-btn { display: flex; align-items: center; gap: 10px; padding: 8px; background: transparent; border: 1px solid transparent; color: var(--text-soft); border-radius: 6px; cursor: pointer; transition: all 0.15s var(--ease); font-family: inherit; font-size: 0.85rem; text-align: left; font-weight: 500; width: 100%; }
-.theme-btn:hover { background: var(--bg-elev-2); color: var(--text); }
-.theme-btn.active { border-color: var(--line-strong); color: var(--text); background: var(--accent-soft); }
-.theme-swatch { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
-.sub-style-row { display: flex; gap: 6px; padding: 4px; }
-.style-btn { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-soft); padding: 6px 0; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
-.style-btn:hover { border-color: var(--line-strong); color: var(--text); background: var(--bg-elev-2); }
-.style-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.api-key-input, .color-input, .select-input { width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.5rem 0.75rem; font-family: inherit; font-size: 0.8rem; border-radius: 6px; margin-bottom: 0.5rem; }
-.api-key-input:focus, .color-input:focus, .select-input:focus { outline: none; border-color: var(--accent); }
-.color-input { height: 36px; padding: 2px; cursor: pointer; }
-.mixer-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.mixer-row label { font-size: 0.8rem; color: var(--text-soft); width: 80px; }
-.mixer-row input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 6px; background: var(--line-strong); border-radius: 3px; outline: none; }
-.mixer-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
-.hero { padding: 4rem 2rem 2rem; max-width: 800px; margin: 0 auto; text-align: center; position: relative; z-index: 5; transition: opacity 0.5s ease; }
-.hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.1; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 0.75rem; text-shadow: 0 4px 20px rgba(0,0,0,0.6); }
-.hero p { color: var(--text-soft); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
-main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relative; z-index: 10; flex: 1; width: 100%; }
-.player { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(16px); box-shadow: var(--shadow-card); position: relative; transition: border-color 0.2s var(--ease); }
-.player:hover { border-color: var(--line-strong); }
-.player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); gap: 0.75rem; flex-wrap: wrap; }
-.screen-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
-.header-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-.poster-mini-btn, .countdown-btn, .snapshot-btn, .load-media-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; }
-.poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .load-media-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .load-media-btn svg { width: 14px; height: 14px; }
-.actions-row { display: none; } /* Hidden to declutter UI, replaced by Load button & Drag/Drop */
+header { display: flex; justify-content: center; align-items: center; padding: 2rem; }
+.brand-text { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); text-align: center; }
+main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+.hero { text-align: center; margin-bottom: 4rem; }
+.hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; letter-spacing: -0.04em; margin-bottom: 1rem; text-shadow: 0 4px 20px rgba(0,0,0,0.6); }
+.hero p { color: var(--text-soft); font-size: 1.2rem; max-width: 600px; margin: 0 auto; }
 
-.load-dropdown { position: relative; display: flex; }
-.load-menu { position: absolute; top: calc(100% + 8px); right: 0; width: 240px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 8px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; display: none; flex-direction: column; gap: 2px; }
-.load-menu.open { display: flex; }
-.load-item { background: transparent; border: 1px solid transparent; color: var(--text-soft); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; border-radius: 6px; text-align: left; display: flex; align-items: center; gap: 0.6rem; transition: all 0.15s var(--ease); width: 100%; }
-.load-item:hover { background: var(--accent-soft); color: var(--accent); }
-.load-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-.load-item-content { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
-.load-item-label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
-.load-item:hover .load-item-label { color: var(--accent); }
-.load-item-filename { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.load-menu-divider { height: 1px; background: var(--line); margin: 4px 0; }
-
-.torrent-row { position: relative; display: flex; gap: 0.5rem; padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--line); }
-.torrent-input { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; }
-.torrent-input:focus { outline: none; border-color: var(--accent); }
-.torrent-btn, .torrent-search-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; justify-content: center; }
-.torrent-btn { background: var(--accent); border-color: var(--accent); color: #fff; }
-.torrent-btn:hover { background: var(--accent-2); }
-.torrent-search-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.torrent-search-btn svg { width: 16px; height: 16px; }
-.torrent-warning { font-size: 0.7rem; color: var(--text-dim); padding: 0.5rem 1.25rem 1rem; border-bottom: 1px solid var(--line); text-align: center; }
-.torrent-results { position: absolute; top: 55px; left: 1.25rem; right: 1.25rem; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; max-height: 300px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; }
-.torrent-results.show { display: flex; }
-.torrent-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem; border-radius: 4px; cursor: pointer; transition: background 0.15s var(--ease); }
-.torrent-item:hover { background: var(--bg-elev-2); }
-.torrent-item svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
-.torrent-info { display: flex; flex-direction: column; }
-.torrent-title { font-size: 0.85rem; color: var(--text); font-weight: 500; }
-.torrent-meta { font-size: 0.75rem; color: var(--text-dim); }
-
-.video-stage { position: relative; aspect-ratio: 16/9; background: #000; overflow: hidden; transition: outline 0.2s ease; }
-.video-stage.drag-over { outline: 2px dashed var(--accent); outline-offset: -10px; }
-.video-stage .plyr { height: 100%; width: 100%; }
-.video-stage video { width: 100%; height: 100%; display: block; background: #000; cursor: pointer; }
-.plyr--video .plyr__controls { background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); padding: 20px 10px 10px; backdrop-filter: blur(8px); }
-.plyr--video .plyr__control--overlaid { background: var(--accent); color: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent-glow); }
-.idle-broadcast-state { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; overflow: hidden; }
-.idle-broadcast-state.hidden { display: none; }
-.idle-broadcast-state::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2) 1px, transparent 1px, transparent 3px); pointer-events: none; z-index: 2; animation: flicker 0.1s infinite; }
-@keyframes flicker { 0% { opacity: 0.9; } 50% { opacity: 1; } 100% { opacity: 0.95; } }
-.broadcast-logo { color: #e0e0e0; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.5; animation: pulse-broadcast 2s infinite ease-in-out; display: flex; align-items: center; gap: 1rem; z-index: 3; }
-.broadcast-logo svg { width: 28px; height: 28px; }
-@keyframes pulse-broadcast { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.02); } }
-.broadcast-marquee { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: #111; border-top: 1px solid #333; border-bottom: 1px solid #333; overflow: hidden; display: flex; align-items: center; white-space: nowrap; z-index: 3; }
-.marquee-content { display: flex; white-space: nowrap; animation: scroll-left 40s linear infinite; color: #e0e0e0; font-family: 'Courier New', monospace; font-size: 0.85rem; }
-.marquee-content span { padding-right: 50px; }
-@keyframes scroll-left { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
-.error-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; background: radial-gradient(circle at center, var(--bg-elev-2) 0%, #000 80%); text-align: center; padding: 2rem; z-index: 10; }
-.error-state.hidden { display: none; }
-.error-state .prompt { color: var(--error); font-size: 1.25rem; font-weight: 600; }
-.error-state .hint { color: var(--text-soft); font-size: 1rem; max-width: 400px; line-height: 1.5; }
-.sub-sync-controls { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 15; display: flex; gap: 4px; align-items: center; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 4px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(8px); }
-.sub-sync-controls span { font-size: 0.75rem; color: #fff; min-width: 35px; text-align: center; font-weight: 600; }
-.sub-sync-controls .style-btn { padding: 4px 8px; font-size: 0.7rem; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 999px; cursor: pointer; }
-.sub-sync-controls .style-btn:hover { background: rgba(255,255,255,0.1); }
-#audioVisualizer { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 14; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; }
-#audioVisualizer.active { opacity: 0.8; }
-.credits-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 60%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 80px; opacity: 0; pointer-events: none; transition: opacity 1s ease; z-index: 15; }
-.credits-overlay.show { opacity: 1; }
-.credits-text { color: #fff; font-size: 1.5rem; font-weight: 600; letter-spacing: 0.05em; text-shadow: 0 2px 10px rgba(0,0,0,0.8); text-align: center; }
-
-.buffering-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 20; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #fff; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.1rem; }
-.buffering-overlay.show { display: flex; }
-.spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.file-input { position: absolute; width: 0; height: 0; opacity: 0; }
-.site-footer { text-align: center; padding: 2rem 1rem; color: var(--text-dim); font-size: 0.75rem; opacity: 0.7; position: relative; z-index: 5; margin-top: auto; border-top: 1px solid var(--line-soft); transition: opacity 0.5s ease; }
-.site-footer span { color: var(--text-soft); font-weight: 600; }
-body.cinema-mode .bg-blobs, body.cinema-mode header, body.cinema-mode .hero, body.cinema-mode .site-footer { opacity: 0.1; }
-body.cinema-mode header { pointer-events: none; }
-#ambientGlow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80vw; height: 80vh; z-index: -2; background: transparent; filter: blur(150px); transition: background 1s ease; pointer-events: none; }
-.countdown-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 25; display: none; align-items: center; justify-content: center; }
-.countdown-overlay.active { display: flex; }
-.countdown-text { font-size: 12rem; font-weight: 900; color: #fff; text-shadow: 0 0 40px var(--accent); animation: count-pulse 1s ease; }
-@keyframes count-pulse { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
-
-/* QR Code Modal */
-.qr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10003; display: none; align-items: center; justify-content: center; padding: 2rem; opacity: 0; transition: opacity 0.3s var(--ease); }
-.qr-overlay.active { display: flex; opacity: 1; }
-.qr-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; }
-.qr-box h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--text); }
-.qr-box p { color: var(--text-soft); margin-bottom: 1.5rem; }
-.remote-code-display { font-size: 2.5rem; font-weight: 800; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 1.5rem; font-family: 'Courier New', monospace; text-shadow: 0 0 15px var(--accent-glow); }
-.qr-code-img { width: 250px; height: 250px; border-radius: 12px; margin: 0 auto 1.5rem; display: block; background: #fff; padding: 10px; }
-.qr-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.2s var(--ease); }
-.qr-close-btn:hover { border-color: var(--text-soft); color: var(--text); }
-
-@media print { @page { size: A4; margin: 0; } body * { visibility: hidden !important; } .poster-sheet, .poster-sheet * { visibility: visible !important; } .poster-sheet { position: absolute; left: 0; top: 0; box-shadow: none; transform: none !important; margin: 0 !important; border: none !important; } .poster-overlay { position: static !important; background: none !important; backdrop-filter: none !important; padding: 0 !important; } .poster-modal, .poster-editor, .poster-preview-wrap { display: contents !important; background: none !important; border: none !important; padding: 0 !important; text-align: left !important; } }
-@media (max-width: 900px) { .poster-modal { grid-template-columns: 1fr; height: 95vh; } .poster-editor { border-right: none; border-bottom: 1px solid var(--line); max-height: 40vh; } header { padding: 1rem 1.5rem; } .brand-text { font-size: 1.1rem; } .brand-logo svg { height: 32px; } main { padding: 0 1rem 2rem; } }
+.suite-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1100px; width: 100%; }
+.suite-card { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 20px; padding: 2.5rem 2rem; display: flex; flex-direction: column; align-items: center; text-align: center; text-decoration: none; color: inherit; transition: all 0.3s var(--ease); backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+.suite-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 15px 50px rgba(59, 130, 246, 0.2); }
+.suite-card:hover .card-btn { background: var(--accent); color: #fff; border-color: var(--accent); }
+.card-logo { width: 100px; height: 100px; margin-bottom: 1.5rem; }
+.card-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
+.card-desc { color: var(--text-soft); font-size: 0.95rem; margin-bottom: 2rem; flex: 1; }
+.card-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600; transition: all 0.2s var(--ease); }
+footer { text-align: center; padding: 2rem; color: var(--text-dim); font-size: 0.8rem; }
 </style>
 </head>
 <body>
 
 <div class="bg-blobs" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
-<div id="ambientGlow"></div>
 
-<!-- Main App UI -->
-<div id="mainApp" style="display:flex; flex-direction:column; min-height:100vh; width:100%;">
-  <header id="mainHeader">
-    <div class="brand"><div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="CineLoom Logo"><defs><linearGradient id="filmbgGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="var(--bg-elev-3)"/><stop offset="1" stop-color="var(--bg-elev-2)"/></linearGradient><radialGradient id="filmpinGrad" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="var(--accent-glow)"/><stop offset="1" stop-color="var(--accent)"/></radialGradient><filter id="filmshadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/></filter></defs><rect width="120" height="120" rx="28" fill="url(#filmbgGrad)"/><rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="var(--line-strong)" stroke-opacity="0.5"/><path d="M38 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><path d="M82 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="42" r="2.5" fill="var(--accent)"/><circle cx="82" cy="42" r="2.5" fill="var(--accent)"/><rect x="32" y="38" width="56" height="64" rx="10" fill="var(--text)" filter="url(#filmshadow)"/><circle cx="60" cy="62" r="16" fill="var(--accent-soft)"/><g fill="none" stroke="var(--text-dim)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="54" y="51" width="12" height="22" rx="2"/><rect x="56" y="53" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="56" y="58" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="56" y="63" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="56" y="68" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="62" y="53" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="62" y="58" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="62" y="63" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="62" y="68" width="2" height="2" rx="0.5" fill="var(--text-dim)" stroke="none"/><rect x="58.5" y="55" width="3" height="14" fill="var(--accent)" stroke="none"/></g><rect x="42" y="86" width="36" height="5" rx="2.5" fill="var(--bg-elev-3)"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="var(--accent)"/><circle cx="60" cy="20" r="7" fill="url(#filmpinGrad)" filter="url(#filmshadow)"/><circle cx="57.5" cy="17.5" r="1.8" fill="var(--text)" opacity="0.7"/></svg></div><span class="brand-text">CineLoom</span></div>
-  <div class="header-actions">
-    <button class="remote-btn" id="remoteToggle" aria-label="Open Remote Control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
-    <button class="voice-btn" id="voiceToggle" aria-label="Enable Voice Commands"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
-    <button class="settings-btn" id="settingsToggle" aria-label="Open Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
-    <div class="settings-dropdown" id="settingsPanel" role="region" aria-label="Site Settings">
-      <div class="panel-label">Base Theme</div>
-      <button class="theme-btn active" data-theme="cyber"><span class="theme-swatch" style="background: #3b82f6;"></span><span>Cyber Blue</span></button>
-      <button class="theme-btn" data-theme="light"><span class="theme-swatch" style="background: #2563eb;"></span><span>Light Mode</span></button>
-      <button class="theme-btn" data-theme="theater"><span class="theme-swatch" style="background: #f5a05f;"></span><span>Warm Theater</span></button>
-      <button class="theme-btn" data-theme="midnight"><span class="theme-swatch" style="background: #c98aff;"></span><span>Purple Night</span></button>
-      <button class="theme-btn" data-theme="mono"><span class="theme-swatch" style="background: #ffffff;"></span><span>Black and White</span></button>
-      <div class="panel-label">Seasonal Themes</div>
-      <button class="theme-btn" data-theme="spring"><span class="theme-swatch" style="background: #7dd87d;"></span><span>Spring</span></button>
-      <button class="theme-btn" data-theme="summer"><span class="theme-swatch" style="background: #ffb84d;"></span><span>Summer</span></button>
-      <button class="theme-btn" data-theme="autumn"><span class="theme-swatch" style="background: #e87a3e;"></span><span>Autumn</span></button>
-      <button class="theme-btn" data-theme="winter"><span class="theme-swatch" style="background: #5fb3d8;"></span><span>Winter</span></button>
-      <div class="panel-label">Custom UI Builder</div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px;">
-        <label style="font-size:0.7rem; color:var(--text-dim);">Accent: <input type="color" id="customUiAccent" class="color-input" value="#3b82f6"></label>
-        <label style="font-size:0.7rem; color:var(--text-dim);">Background: <input type="color" id="customUiBg" class="color-input" value="#08090b"></label>
-      </div>
-      <div class="panel-label">Advanced Subtitle Studio</div>
-      <select id="cueFontSelect" class="select-input">
-        <option value="Inter, sans-serif">Inter (Modern)</option>
-        <option value="Georgia, serif">Georgia (Serif)</option>
-        <option value="Courier Prime, monospace">Courier (Monospace)</option>
-        <option value="Impact, sans-serif">Impact (Bold)</option>
-      </select>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px;">
-        <label style="font-size:0.7rem; color:var(--text-dim);">Text Color: <input type="color" id="cueTextColor" class="color-input" value="#ffffff"></label>
-        <label style="font-size:0.7rem; color:var(--text-dim);">Outline: <input type="color" id="cueShadowColor" class="color-input" value="#000000"></label>
-      </div>
-      <div class="panel-label">Audio Mixer</div>
-      <div class="mixer-row"><label>Movie</label><input type="range" id="videoVolumeSlider" min="0" max="1" step="0.05" value="1"></div>
-      <div class="mixer-row"><label>Commentary</label><input type="range" id="comVolumeSlider" min="0" max="1" step="0.05" value="1"></div>
-      <div class="panel-label">OMDb API Key</div><input type="text" id="omdbKeyInput" class="api-key-input" placeholder="Enter OMDb API Key"><p style="font-size: 0.7rem; color: var(--text-dim); margin-bottom: 0.5rem; padding: 0 0.5rem;">Get a free key at omdbapi.com/apikey.aspx</p>
-    </div>
-  </div>
+<header>
+  <div class="brand-text">CineLoom Suite</div>
 </header>
+
 <main>
-  <section class="hero" aria-labelledby="hero-title"><h1 id="hero-title">CineLoom</h1><p>Drag & drop or click load to begin. Stream torrents, generate posters, or control playback via your phone.</p></section>
-  <section class="players" aria-label="Video Player">
-    <div class="player" data-screen="1" aria-label="Screen 1">
-      <div class="player-header">
-          <span class="screen-label">Now Showing</span>
-          <div class="header-actions-row">
-              <div class="load-dropdown">
-                  <button class="poster-mini-btn load-media-btn" id="loadMediaToggle" aria-label="Load Menu" aria-haspopup="true" aria-expanded="false">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Load
-                  </button>
-                  <div class="load-menu" id="loadMenu" role="menu">
-                      <button class="load-item" id="loadFilm1Item" role="menuitem">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                          <span class="load-item-content"><span class="load-item-label">Select Film 1</span><span class="load-item-filename" id="loadFilm1Name">No file chosen</span></span>
-                      </button>
-                      <button class="load-item" id="loadFilm2Item" role="menuitem">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                          <span class="load-item-content"><span class="load-item-label">Select Film 2</span><span class="load-item-filename" id="loadFilm2Name">No file chosen</span></span>
-                      </button>
-                      <div class="load-menu-divider"></div>
-                      <button class="load-item" id="loadSubsItem" role="menuitem">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                          <span class="load-item-content"><span class="load-item-label">Load Subtitles</span><span class="load-item-filename" id="loadSubsName">No file chosen</span></span>
-                      </button>
-                      <button class="load-item" id="loadCommentaryItem" role="menuitem">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-                          <span class="load-item-content"><span class="load-item-label">Load Commentary</span><span class="load-item-filename" id="loadComName">No file chosen</span></span>
-                      </button>
-                      <div class="load-menu-divider"></div>
-                      <button class="load-item" id="swapFilmsItem" role="menuitem">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/></svg>
-                          <span class="load-item-content"><span class="load-item-label">Swap Films 1 & 2</span></span>
-                      </button>
-                  </div>
-              </div>
-              <button class="snapshot-btn" id="snapshotBtn" aria-label="Capture Frame for Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Snapshot</button>
-              <button class="countdown-btn" id="countdownBtn" aria-label="Start Showtime Countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Start Showtime</button>
-              <button class="poster-mini-btn" data-screen-poster="1" aria-label="Create Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Create Poster</button>
-          </div>
-      </div>
-      <div class="actions-row">
-          <button class="load-btn load-video-btn active-film" data-film="1" type="button" aria-label="Load Film 1"><span class="label">Load Film 1</span><span class="filename">No file chosen</span></button>
-          <button class="load-btn load-video-btn" data-film="2" type="button" aria-label="Load Film 2"><span class="label">Load Film 2</span><span class="filename">No file chosen</span></button>
-          <button class="load-btn load-sub-btn" type="button" aria-label="Add Subtitles"><span class="label">Add Subtitles</span><span class="filename">No file chosen</span></button>
-      </div>
-      <div class="torrent-row">
-        <input type="text" id="torrentInput" class="torrent-input" placeholder="Search Movies (YTS) or paste Magnet Link...">
-        <button type="button" class="torrent-search-btn" id="torrentSearchBtn" aria-label="Search Torrents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
-        <button type="button" class="torrent-btn" id="torrentBtn">Stream</button>
-        <div class="torrent-results" id="torrentResults"></div>
-      </div>
-      <div class="torrent-warning">Note: Browser WebTorrent only connects to WebRTC peers. Standard torrents may hang if not seeded by WebRTC clients (like WebTorrent Desktop or Brave).</div>
-      <div class="video-stage">
-        <video id="player" playsinline></video>
-        <div class="idle-broadcast-state" id="idleState"><div class="broadcast-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>CineLoom Broadcast</div><div class="broadcast-marquee"><div class="marquee-content" id="marqueeContent"><span>Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. </span><span>Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. </span></div></div></div>
-        <div class="error-state hidden" role="alert"><div class="prompt">Cannot play this video</div><div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div></div>
-        <div class="buffering-overlay" id="bufferingOverlay"><div class="spinner"></div><span id="bufferingText">Buffering...</span></div>
-        <div class="sub-sync-controls" id="subSyncControls" style="display: none;"><button class="style-btn" id="subSyncBack" type="button">-0.5s</button><span id="subSyncVal">0.0s</span><button class="style-btn" id="subSyncFwd" type="button">+0.5s</button><button class="style-btn" id="subSyncReset" type="button" style="margin-left: 4px;">Reset</button></div>
-        <canvas id="audioVisualizer"></canvas>
-        <div class="credits-overlay" id="creditsOverlay"><div class="credits-text">Thank you for watching with CineLoom</div></div>
-        <div class="countdown-overlay" id="countdownOverlay"><div class="countdown-text" id="countdownText"></div></div>
-      </div>
-      <input type="file" class="file-input file-input-video-1" accept="*/*" aria-hidden="true" tabindex="-1">
-      <input type="file" class="file-input file-input-video-2" accept="*/*" aria-hidden="true" tabindex="-1">
-      <input type="file" class="file-input file-input-sub" accept=".vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream" aria-hidden="true" tabindex="-1">
-      <input type="file" class="file-input file-input-com" accept="audio/*" aria-hidden="true" tabindex="-1">
-    </div>
-  </section>
-</main>
-<footer class="site-footer">CineLoom by <span>Lee Williams</span></footer>
-
-<!-- QR Code Modal -->
-<div class="qr-overlay" id="qrOverlay" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
-  <div class="qr-box">
-    <h3 id="qrTitle">Remote Control</h3>
-    <div class="remote-code-display" id="remoteCodeDisplay">------</div>
-    <p id="qrInstructions">Enter this code in the mobile app, or scan the QR code.</p>
-    <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code for Remote Control">
-    <button class="qr-close-btn" id="qrCloseBtn">Close</button>
+  <div class="hero">
+    <h1>The Cinema Hub</h1>
+    <p>Select a tool to begin. Watch, create, or control your cinematic experience.</p>
   </div>
-</div>
-</div> <!-- End Main App -->
 
-<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-<script>
-// Normal Desktop Mode
-const header = document.getElementById('mainHeader');
-window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 10));
+  <div class="suite-grid">
+    <!-- CineLoom Player -->
+    <a href="player.html" class="suite-card">
+      <svg class="card-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="CineLoom Logo">
+        <defs>
+          <linearGradient id="filmbgGrad1" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="var(--bg-elev-3)"/><stop offset="1" stop-color="var(--bg-elev-2)"/></linearGradient>
+          <radialGradient id="filmpinGrad1" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="var(--accent-glow)"/><stop offset="1" stop-color="var(--accent)"/></radialGradient>
+          <filter id="filmshadow1" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/></filter>
+        </defs>
+        <rect width="120" height="120" rx="28" fill="url(#filmbgGrad1)"/>
+        <rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="var(--line-strong)" stroke-opacity="0.5"/>
+        <path d="M38 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M82 42 L60 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+        <rect x="32" y="38" width="56" height="64" rx="10" fill="var(--text)" filter="url(#filmshadow1)"/>
+        <circle cx="60" cy="62" r="16" fill="var(--accent-soft)"/>
+        <rect x="54" y="51" width="12" height="22" rx="2" fill="none" stroke="var(--text-dim)" stroke-width="2.5"/>
+        <rect x="58.5" y="55" width="3" height="14" fill="var(--accent)"/>
+        <rect x="48" y="94" width="24" height="5" rx="2.5" fill="var(--accent)"/>
+        <circle cx="60" cy="20" r="7" fill="url(#filmpinGrad1)" filter="url(#filmshadow1)"/>
+      </svg>
+      <div class="card-title">CineLoom Player</div>
+      <div class="card-desc">Stream torrents, load local files, sync subtitles, and watch films with ambient lighting and audio mixing.</div>
+      <div class="card-btn">Launch Player</div>
+    </a>
 
-// Accidental Reload Protection
-window.addEventListener('beforeunload', (event) => {
-    const video = document.getElementById('player');
-    const hasVideoSource = video && video.src && video.src !== window.location.href;
-    const hasTorrent = window.torrentClient && window.torrentClient.torrents && window.torrentClient.torrents.length > 0;
-    
-    if (hasVideoSource || hasTorrent) {
-        event.preventDefault();
-        event.returnValue = ''; // Required for Chrome/Firefox
-    }
-});
+    <!-- Poster Maker -->
+    <a href="poster.html" class="suite-card">
+      <svg class="card-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Poster Maker Logo">
+        <defs>
+          <linearGradient id="filmbgGrad2" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="var(--bg-elev-3)"/><stop offset="1" stop-color="var(--bg-elev-2)"/></linearGradient>
+          <radialGradient id="filmpinGrad2" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="var(--accent-glow)"/><stop offset="1" stop-color="var(--accent)"/></radialGradient>
+          <filter id="filmshadow2" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/></filter>
+        </defs>
+        <rect width="120" height="120" rx="28" fill="url(#filmbgGrad2)"/>
+        <rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="var(--line-strong)" stroke-opacity="0.5"/>
+        <!-- Easel/Frame -->
+        <rect x="30" y="30" width="60" height="70" rx="6" fill="var(--bg-elev-3)" stroke="var(--accent)" stroke-width="2" filter="url(#filmshadow2)"/>
+        <!-- Picture inside -->
+        <circle cx="45" cy="50" r="8" fill="var(--accent)"/>
+        <path d="M30 90 L55 60 L75 90 Z" fill="var(--accent)"/>
+        <path d="M60 90 L75 70 L90 90 Z" fill="var(--accent-2)"/>
+        <!-- Pin -->
+        <circle cx="60" cy="20" r="7" fill="url(#filmpinGrad2)" filter="url(#filmshadow2)"/>
+        <circle cx="57.5" cy="17.5" r="1.8" fill="var(--text)" opacity="0.7"/>
+      </svg>
+      <div class="card-title">Poster Maker</div>
+      <div class="card-desc">Generate beautiful, printable A4 posters for single features or double bills using OMDb data or custom uploads.</div>
+      <div class="card-btn">Launch Poster Maker</div>
+    </a>
 
-const settingsToggle = document.getElementById('settingsToggle'); const settingsPanel = document.getElementById('settingsPanel');
-settingsToggle.addEventListener('click', (e) => { e.stopPropagation(); const isOpen = settingsPanel.classList.toggle('open'); settingsToggle.classList.toggle('active', isOpen); });
-document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) { settingsPanel.classList.remove('open'); settingsToggle.classList.remove('active'); } });
+    <!-- Remote Control -->
+    <a href="remote.html" class="suite-card">
+      <svg class="card-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Remote Control Logo">
+        <defs>
+          <linearGradient id="filmbgGrad3" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="var(--bg-elev-3)"/><stop offset="1" stop-color="var(--bg-elev-2)"/></linearGradient>
+          <filter id="filmshadow3" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/></filter>
+        </defs>
+        <rect width="120" height="120" rx="28" fill="url(#filmbgGrad3)"/>
+        <rect x="1.5" y="1.5" width="117" height="117" rx="26.5" fill="none" stroke="var(--line-strong)" stroke-opacity="0.5"/>
+        <!-- Remote Body -->
+        <rect x="40" y="20" width="40" height="80" rx="12" fill="var(--bg-elev-3)" filter="url(#filmshadow3)"/>
+        <!-- Screen -->
+        <rect x="48" y="28" width="24" height="14" rx="3" fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>
+        <!-- Buttons -->
+        <circle cx="60" cy="58" r="6" fill="var(--accent)"/>
+        <circle cx="48" cy="75" r="4" fill="var(--text-soft)"/>
+        <circle cx="72" cy="75" r="4" fill="var(--text-soft)"/>
+        <rect x="54" y="84" width="12" height="4" rx="2" fill="var(--text-soft)"/>
+      </svg>
+      <div class="card-title">Remote Control</div>
+      <div class="card-desc">Connect to the CineLoom Player using a 6-digit code to control playback from your mobile device.</div>
+      <div class="card-btn">Launch Remote</div>
+    </a>
+  </div>
+</main>
 
-// MQTT Remote Host Logic
-const qrOverlay = document.getElementById('qrOverlay');
-const qrCloseBtn = document.getElementById('qrCloseBtn');
-const remoteCodeDisplay = document.getElementById('remoteCodeDisplay');
-let mqttClient = null;
-let timeUpdateInterval = null;
-
-document.getElementById('remoteToggle').addEventListener('click', () => {
-    const roomCode = Math.floor(100000 + Math.random() * 900000);
-    remoteCodeDisplay.textContent = roomCode;
-    
-    // Construct URL pointing to remote.html
-    const currentPath = window.location.href;
-    const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
-    const remoteUrl = `${baseUrl}remote.html?room=${roomCode}`;
-    
-    document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
-    qrOverlay.classList.add('active');
-    
-    mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
-    const cmdTopic = `cineloom/${roomCode}/cmd`;
-    const timeTopic = `cineloom/${roomCode}/time`;
-    
-    mqttClient.on('connect', () => {
-        console.log('MQTT Host Connected');
-        mqttClient.subscribe(cmdTopic);
-    });
-    
-    mqttClient.on('message', (topic, message) => {
-        if (topic === cmdTopic) {
-            const data = JSON.parse(message.toString());
-            if (!player) return;
-            if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); player.play(); }
-            if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); player.play(); }
-            if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
-            if (data.action === 'playPause') player.togglePlay();
-            if (data.action === 'fullscreen') player.fullscreen.enter();
-            if (data.action === 'seekBack') player.currentTime -= 10;
-            if (data.action === 'seekFwd') player.currentTime += 10;
-            if (data.action === 'showtime') document.getElementById('countdownBtn').click();
-        }
-    });
-    
-    timeUpdateInterval = setInterval(() => {
-        if (mqttClient && mqttClient.connected) {
-            const videoEl = document.getElementById('player');
-            if (videoEl && !videoEl.paused && videoEl.duration) {
-                let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
-                const hrs = Math.floor(remaining / 3600);
-                const mins = Math.floor((remaining % 3600) / 60);
-                const secs = Math.floor(remaining % 60);
-                let timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
-                if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
-                mqttClient.publish(timeTopic, JSON.stringify({timeStr: timeStr}));
-            }
-        }
-    }, 1000);
-});
-
-qrCloseBtn.addEventListener('click', () => {
-    qrOverlay.classList.remove('active');
-    if (mqttClient) {
-        mqttClient.end();
-        mqttClient = null;
-    }
-    if (timeUpdateInterval) {
-        clearInterval(timeUpdateInterval);
-        timeUpdateInterval = null;
-    }
-});
-
-// OMDb API Key Logic
-const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
-
-// Theme Logic
-document.querySelectorAll('.theme-btn').forEach(btn => btn.addEventListener('click', () => { const theme = btn.dataset.theme; document.documentElement.setAttribute('data-theme', theme); document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); localStorage.setItem('cl-theme', theme); localStorage.removeItem('cl-custom-ui'); }));
-const savedTheme = localStorage.getItem('cl-theme') || 'cyber'; document.documentElement.setAttribute('data-theme', savedTheme); document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === savedTheme));
-
-// Custom UI Builder Logic
-const customAccent = document.getElementById('customUiAccent');
-const customBg = document.getElementById('customUiBg');
-function applyCustomUI() {
-    document.documentElement.style.setProperty('--accent', customAccent.value);
-    document.documentElement.style.setProperty('--bg', customBg.value);
-    localStorage.setItem('cl-custom-ui', JSON.stringify({accent: customAccent.value, bg: customBg.value}));
-}
-customAccent.addEventListener('input', applyCustomUI);
-customBg.addEventListener('input', applyCustomUI);
-const savedCustomUI = JSON.parse(localStorage.getItem('cl-custom-ui') || 'null');
-if (savedCustomUI) { customAccent.value = savedCustomUI.accent; customBg.value = savedCustomUI.bg; applyCustomUI(); }
-
-// Subtitle Studio Logic
-const cueFont = document.getElementById('cueFontSelect');
-const cueText = document.getElementById('cueTextColor');
-const cueShadow = document.getElementById('cueShadowColor');
-function applyCueStyles() {
-    document.documentElement.style.setProperty('--cue-font', cueFont.value);
-    document.documentElement.style.setProperty('--cue-text', cueText.value);
-    document.documentElement.style.setProperty('--cue-shadow', cueShadow.value);
-    localStorage.setItem('cl-cue-styles', JSON.stringify({font: cueFont.value, text: cueText.value, shadow: cueShadow.value}));
-}
-cueFont.addEventListener('change', applyCueStyles);
-cueText.addEventListener('input', applyCueStyles);
-cueShadow.addEventListener('input', applyCueStyles);
-const savedCueStyles = JSON.parse(localStorage.getItem('cl-cue-styles') || 'null');
-if (savedCueStyles) { cueFont.value = savedCueStyles.font; cueText.value = savedCueStyles.text; cueShadow.value = savedCueStyles.shadow; applyCueStyles(); }
-
-// Poster Maker Block - Safely wrapped
-const posterOverlay = document.getElementById('posterOverlay');
-if (posterOverlay) {
-    const posterCloseBtn = document.getElementById('posterCloseBtn'); const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
-    const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
-    const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), film2Block: document.getElementById('psFilm2'), filmDivider: document.getElementById('psFilmDivider'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), event: document.getElementById('psEvent') };
-
-    function updateBroadcastMarquee() { const marqueeContent = document.getElementById('marqueeContent'); if (!marqueeContent) return; let feedText = "Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. "; if (posterFields.title1.value) { feedText += `TONIGHT: ${posterFields.title1.value}. `; if (posterFields.tagline1.value) feedText += `Genre/Rating: ${posterFields.tagline1.value}. `; if (posterFields.plot1.value) feedText += `Plot: ${posterFields.plot1.value} `; } if (posterFields.title2.value) { feedText += `ALSO SHOWING: ${posterFields.title2.value}. `; if (posterFields.plot2.value) feedText += `Plot: ${posterFields.plot2.value} `; } marqueeContent.innerHTML = `<span>${feedText}</span><span>${feedText}</span>`; }
-
-    function updatePosterPreview() {
-      posterPreview.title1.textContent = posterFields.title1.value || 'Film Title';
-      posterPreview.tagline1.textContent = posterFields.tagline1.value || '';
-      posterPreview.plot1.textContent = posterFields.plot1.value || '';
-      posterPreview.date.textContent = posterFields.date.value || '—';
-      posterPreview.time.textContent = posterFields.time.value || '—';
-      posterPreview.venue.textContent = posterFields.venue.value || '—';
-      posterPreview.notes.textContent = posterFields.notes.value || '';
-      posterPreview.blurb.textContent = posterFields.blurb.value || '';
-      posterPreview.blurb.classList.toggle('show', posterFields.blurb.value.trim() !== '');
-      
-      const footerText = posterFields.footer.value || '';
-      posterPreview.footer.textContent = footerText;
-      posterPreview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
-
-      if (posterFields.title2.value.trim() !== '') {
-        posterSheet.classList.add('double-feature');
-        posterPreview.film2Block.style.display = 'flex';
-        posterPreview.filmDivider.style.display = 'flex';
-        posterPreview.title2.textContent = posterFields.title2.value;
-        posterPreview.tagline2.textContent = posterFields.tagline2.value || '';
-        posterPreview.plot2.textContent = posterFields.plot2.value || '';
-      } else {
-        posterSheet.classList.remove('double-feature');
-        posterPreview.film2Block.style.display = 'none';
-        posterPreview.filmDivider.style.display = 'none';
-      }
-      updateBroadcastMarquee();
-      applyZoom();
-    }
-
-    Object.keys(posterFields).forEach(key => {
-      const input = posterFields[key];
-      const preview = posterPreview[key];
-      if (!preview) return;
-      
-      input.addEventListener('input', () => {
-        if (document.activeElement !== preview) {
-          preview.textContent = input.value;
-          if (key === 'blurb') preview.classList.toggle('show', input.value.trim() !== '');
-          if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
-        }
-        updatePosterPreview();
-      });
-      
-      if (preview.isContentEditable) {
-        preview.addEventListener('input', () => {
-          input.value = preview.textContent;
-          if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
-        });
-      }
-    });
-    posterPreview.event.addEventListener('input', () => updateBroadcastMarquee());
-
-    const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
-    const subtitleStyles = { 'theme-minimal': { color: '#fff', bg: 'rgba(0,0,0,0.85)', font: 'Inter' }, 'theme-neon': { color: '#00ffff', bg: 'rgba(11,14,23,0.9)', font: 'Inter' }, 'theme-noir': { color: '#fff', bg: 'rgba(0,0,0,0.9)', font: 'Courier New' }, 'theme-halloween': { color: '#41d636', bg: 'rgba(26,11,46,0.9)', font: 'Georgia' }, 'theme-christmas': { color: '#ffd700', bg: 'rgba(139,0,0,0.9)', font: 'Georgia' }, 'theme-valentine': { color: '#ff69b4', bg: 'rgba(255,240,245,0.9)', font: 'Georgia' }, 'theme-typewriter': { color: '#333', bg: 'rgba(240,240,240,0.9)', font: 'Courier New' }, 'theme-vhs': { color: '#ff00ff', bg: 'rgba(26,26,46,0.9)', font: 'Arial Black' }, 'theme-retro': { color: '#ffeb3b', bg: 'rgba(255,64,129,0.9)', font: 'Arial Black' } };
-    function updateSubtitleStyle(themeClass) { const style = subtitleStyles[themeClass] || subtitleStyles['theme-minimal']; document.documentElement.style.setProperty('--cue-text', style.color); document.documentElement.style.setProperty('--cue-bg', style.bg); document.documentElement.style.setProperty('--cue-font', style.font); }
-
-    function mapGenreToTheme(genreString) { if (!genreString) return null; const genres = genreString.toLowerCase(); if (genres.includes('horror')) return 'theme-halloween'; if (genres.includes('romance')) return 'theme-valentine'; if (genres.includes('sci-fi')) return 'theme-neon'; if (genres.includes('fantasy')) return 'theme-artdeco'; if (genres.includes('noir') || genres.includes('crime') || genres.includes('mystery') || genres.includes('thriller')) return 'theme-noir'; if (genres.includes('comedy')) return 'theme-orange'; if (genres.includes('western')) return 'theme-golden'; if (genres.includes('history') || genres.includes('war') || genres.includes('biography') || genres.includes('documentary')) return 'theme-typewriter'; if (genres.includes('family') || genres.includes('animation')) return 'theme-retro'; if (genres.includes('musical')) return 'theme-marquee'; if (genres.includes('action') || genres.includes('adventure')) return 'theme-midblue'; return null; }
-    function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } updateSubtitleStyle(themeClass); setTimeout(applyZoom, 10); }
-
-    const fontDropdown = document.getElementById('fontDropdown'); const fontToggle = document.getElementById('fontToggle'); const fontMenu = document.getElementById('fontMenu'); const fontLabel = document.getElementById('fontLabel');
-    fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontDropdown.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (!fontDropdown.contains(e.target)) fontDropdown.classList.remove('open'); });
-    document.querySelectorAll('.dropdown-item[data-font]').forEach(btn => btn.addEventListener('click', () => { const font = btn.dataset.font; const name = btn.textContent; document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); fontLabel.textContent = name; fontDropdown.classList.remove('open'); document.querySelectorAll('.ps-title').forEach(el => { if (font === 'default') el.style.fontFamily = ''; else el.style.fontFamily = font; }); }));
-
-    const grainToggle = document.getElementById('grainToggle'); const filmGrain = document.getElementById('filmGrain');
-    grainToggle.addEventListener('click', () => { grainToggle.classList.toggle('active'); filmGrain.classList.toggle('show'); });
-
-    const qrToggle = document.getElementById('qrToggle');
-    qrToggle.addEventListener('click', () => { qrToggle.classList.toggle('active'); const show = qrToggle.classList.contains('active'); posterPreview.qr.classList.toggle('show', show); if (show) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
-    posterFields.qrLink.addEventListener('input', () => { if (qrToggle.classList.contains('active')) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
-
-    document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if (btn.dataset.format === '916') posterSheet.classList.add('format-916'); else posterSheet.classList.remove('format-916'); applyZoom(); }));
-
-    function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
-    async function fetchSuggestions(query, target) { const apiKey = localStorage.getItem('cl-omdb-key'); if (!apiKey || query.trim().length < 3) { hideResults(target); return; } try { const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; if (data.Response === 'True' && data.Search) { data.Search.slice(0, 5).forEach(movie => { const item = document.createElement('div'); item.className = 'autocomplete-item'; item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); resultsContainer.appendChild(item); }); resultsContainer.classList.add('show'); } else { hideResults(target); } } catch (e) { hideResults(target); } }
-    function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
-    async function fetchMovieDetails(imdbID, target) {
-      const apiKey = localStorage.getItem('cl-omdb-key');
-      try {
-        const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`);
-        const data = await res.json();
-        if (data.Response === 'True') {
-          if (target === '1') {
-            posterFields.title1.value = data.Title || ''; posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot1.value = data.Plot || '';
-            if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster1'); img.src = data.Poster; img.classList.add('show'); }
-            posterPreview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-            posterPreview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
-          } else {
-            posterFields.title2.value = data.Title || ''; posterFields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot2.value = data.Plot || '';
-            if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster2'); img.src = data.Poster; img.classList.add('show'); }
-            posterPreview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
-            posterPreview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
-          }
-          const mappedTheme = mapGenreToTheme(data.Genre); if (mappedTheme) setPosterTheme(mappedTheme, themeDisplayNames[mappedTheme]);
-          updatePosterPreview();
-        }
-      } catch (e) { console.error('Error fetching details:', e); }
-      hideResults(target); const input = document.getElementById(`search${target}`); if (input) input.value = '';
-    }
-    document.getElementById('search1').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '1'), 300));
-    document.getElementById('search2').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '2'), 300));
-    document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
-    document.querySelectorAll('.clear-poster-btn').forEach(btn => btn.addEventListener('click', () => { const img = document.getElementById(`psPoster${btn.dataset.clearPoster}`); img.src = ''; img.classList.remove('show'); }));
-    let currentBackdropURL = null;
-    backdropInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = URL.createObjectURL(file); posterSheet.style.backgroundImage = `url(${currentBackdropURL})`; });
-    clearBackdropBtn.addEventListener('click', () => { if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = ''; });
-    const posterThemeDropdown = document.getElementById('posterThemeDropdown'); const posterThemeToggle = document.getElementById('posterThemeToggle'); const posterThemeMenu = document.getElementById('posterThemeMenu'); const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
-    posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeDropdown.classList.toggle('open'); });
-    document.addEventListener('click', (e) => { if (!posterThemeDropdown.contains(e.target)) posterThemeDropdown.classList.remove('open'); });
-    document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(btn => btn.addEventListener('click', () => { setPosterTheme(btn.dataset.posterTheme, btn.textContent); posterThemeDropdown.classList.remove('open'); }));
-    let posterZoom = 0.75;
-    function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
-    document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
-    document.getElementById('zoomOut').addEventListener('click', () => { posterZoom = Math.max(0.25, posterZoom - 0.1); applyZoom(); });
-    document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
-    function openPosterMaker() { const filenameEl = document.querySelector('.load-video-btn[data-film="1"] .filename'); const filename = filenameEl.textContent.trim(); const cleanName = (filename && filename !== 'No file chosen' && !filename.startsWith('Streaming')) ? filename.replace(/\.[^/.]+$/, "").replace(/[._]/g, " ") : ''; if (cleanName && !posterFields.title1.value) posterFields.title1.value = cleanName; updatePosterPreview(); posterOverlay.classList.add('active'); setTimeout(applyZoom, 50); }
-    document.querySelector('[data-screen-poster]').addEventListener('click', openPosterMaker);
-    posterCloseBtn.addEventListener('click', () => posterOverlay.classList.remove('active'));
-    posterOverlay.addEventListener('click', (e) => { if (e.target === posterOverlay) posterOverlay.classList.remove('active'); });
-    posterPrintBtn.addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
-    posterExportBtn.addEventListener('click', () => {
-      posterExportBtn.textContent = 'Rendering...';
-      const currentTransform = posterSheet.style.transform;
-      posterSheet.style.transform = 'none';
-      html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
-        const link = document.createElement('a'); link.download = 'cineloom-poster.png'; link.href = canvas.toDataURL('image/png'); link.click();
-        posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform;
-      }).catch(err => { console.error('Export failed', err); alert('Export failed due to CORS restrictions on the poster image. Try the Print option or use a custom backdrop upload.'); posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; });
-    });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && posterOverlay.classList.contains('active')) posterOverlay.classList.remove('active'); });
-} else {
-    document.querySelector('[data-screen-poster]').addEventListener('click', () => alert('Poster Maker HTML is missing in this snippet.'));
-}
-
-function parseSubtitles(filename, content) { const ext = filename.split('.').pop().toLowerCase(); if (ext === 'vtt') return content; if (ext === 'srt') return srtToVtt(content); if (ext === 'sbv') return sbvToVtt(content); if (ext === 'ass' || ext === 'ssa') return assToVtt(content); return srtToVtt(content); }
-function srtToVtt(srt) { let vtt = 'WEBVTT\n\n'; vtt += srt.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2'); vtt = vtt.replace(/(^|\n)(\d{2}:\d{2}),(\d{3})/g, '$1$2.$3'); return vtt; }
-function sbvToVtt(content) { let vtt = 'WEBVTT\n\n'; const blocks = content.trim().split(/\n\s*\n/); blocks.forEach(block => { const lines = block.split('\n'); if (lines.length < 2) return; const times = lines[0].split(','); if (times.length === 2) { const start = formatSbvTime(times[0].trim()); const end = formatSbvTime(times[1].trim()); vtt += `${start} --> ${end}\n${lines.slice(1).join('\n')}\n\n`; } }); return vtt; }
-function formatSbvTime(t) { let parts = t.replace(',', '.').split(':'); while(parts.length < 3) parts.unshift('00'); return parts.map(p => p.padStart(2, '0')).join(':'); }
-function assToVtt(content) { let vtt = 'WEBVTT\n\n'; const lines = content.split('\n'); let inEvents = false; let textIdx = -1, startIdx = -1, endIdx = -1; for (let line of lines) { if (line.trim().startsWith('[')) inEvents = line.trim().toLowerCase() === '[events]'; if (inEvents && line.startsWith('Format:')) { const fmt = line.split(':')[1].split(',').map(s => s.trim()); textIdx = fmt.indexOf('Text'); startIdx = fmt.indexOf('Start'); endIdx = fmt.indexOf('End'); continue; } if (inEvents && line.startsWith('Dialogue:') && textIdx !== -1) { const parts = line.substring(9).split(','); if (parts.length > textIdx) { const start = formatAssTime(parts[startIdx]?.trim()); const end = formatAssTime(parts[endIdx]?.trim()); let text = parts.slice(textIdx).join(',').trim(); text = text.replace(/\{[^}]+\}/g, ''); text = text.replace(/\\N/gi, '\n'); if (start && end) vtt += `${start} --> ${end}\n${text}\n\n`; } } } return vtt; }
-function formatAssTime(t) { if (!t) return ''; let parts = t.split(':'); while(parts.length < 3) parts.unshift('00'); let secParts = parts[2].split('.'); let sec = secParts[0].padStart(2, '0'); let ms = (secParts[1] || '0').padEnd(3, '0'); return `${parts[0].padStart(2,'0')}:${parts[1].padStart(2,'0')}:${sec}.${ms}`; }
-
-const playerContainer = document.querySelector('.player'); const idleState = document.getElementById('idleState'); const subSyncControls = document.getElementById('subSyncControls'); const ambientGlow = document.getElementById('ambientGlow'); const audioVisualizer = document.getElementById('audioVisualizer'); const creditsOverlay = document.getElementById('creditsOverlay'); const ambientCanvas = document.createElement('canvas'); ambientCanvas.width = 50; ambientCanvas.height = 50; const ambientCtx = ambientCanvas.getContext('2d', { willReadFrequently: true }); let ambientInterval;
-function updateAmbientLight() { const video = document.getElementById('player'); if (video.paused || video.ended || !video.videoWidth) return; try { ambientCtx.drawImage(video, 0, 0, 50, 50); const data = ambientCtx.getImageData(0, 0, 50, 50).data; let r = 0, g = 0, b = 0; for (let i = 0; i < data.length; i += 4) { r += data[i]; g += data[i+1]; b += data[i+2]; } const count = data.length / 4; r = Math.floor(r/count); g = Math.floor(g/count); b = Math.floor(b/count); ambientGlow.style.background = `rgba(${r}, ${g}, ${b}, 0.35)`; } catch (e) { ambientGlow.style.background = 'transparent'; } }
-let audioAnalyser; function setupVisualizer() { if (!audioAnalyser || !audioContext) return; const ctx = audioVisualizer.getContext('2d'); const bufferLength = audioAnalyser.frequencyBinCount; const dataArray = new Uint8Array(bufferLength); function draw() { requestAnimationFrame(draw); if (document.getElementById('player').paused) return; audioAnalyser.getByteFrequencyData(dataArray); const width = audioVisualizer.width; const height = audioVisualizer.height; ctx.clearRect(0, 0, width, height); const barWidth = (width / bufferLength) * 2.5; let x = 0; const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(); ctx.fillStyle = accentColor; for (let i = 0; i < bufferLength; i++) { const barHeight = (dataArray[i] / 255) * height; ctx.fillRect(x, height - barHeight, barWidth - 1, barHeight); x += barWidth; } } draw(); }
-
-// Audio Mixer Elements
-const videoVolumeSlider = document.getElementById('videoVolumeSlider');
-const comVolumeSlider = document.getElementById('comVolumeSlider');
-const comAudio = new Audio();
-let comGainNode;
-let comSyncInterval;
-
-function setupPlayer() {
-  if (window.audioContext) {
-    try { window.audioContext.close(); } catch(e){}
-    window.audioContext = null;
-  }
-  
-  const video = document.getElementById('player'); const errorState = playerContainer.querySelector('.error-state'); 
-  const fileVideo1 = playerContainer.querySelector('.file-input-video-1');
-  const fileVideo2 = playerContainer.querySelector('.file-input-video-2');
-  const fileSub = playerContainer.querySelector('.file-input-sub'); const fileCom = playerContainer.querySelector('.file-input-com');
-  const loadVideoBtn1 = playerContainer.querySelector('.load-video-btn[data-film="1"]');
-  const loadVideoBtn2 = playerContainer.querySelector('.load-video-btn[data-film="2"]');
-  const loadSubBtn = playerContainer.querySelector('.load-sub-btn'); 
-  
-  // Load Menu Elements
-  const loadFilm1Name = document.getElementById('loadFilm1Name');
-  const loadFilm2Name = document.getElementById('loadFilm2Name');
-  const loadSubsName = document.getElementById('loadSubsName');
-  const loadComName = document.getElementById('loadComName');
-  
-  let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
-  let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
-  let currentFilm = 1;
-  let currentVideoMime = 'video/mp4'; 
-  let currentSubURL = null; 
-  let subDelay = 0; let originalCues = [];
-  let gainNode, audioInitialized = false;
-  
-  function initAudioBoost() { 
-    if (audioInitialized) return; 
-    try { 
-      window.audioContext = new (window.AudioContext || window.webkitAudioContext)(); 
-      const source = window.audioContext.createMediaElementSource(video); 
-      gainNode = window.audioContext.createGain(); 
-      audioAnalyser = window.audioContext.createGain(); 
-      audioAnalyser.fftSize = 128; 
-      source.connect(gainNode); 
-      gainNode.connect(audioAnalyser); 
-      audioAnalyser.connect(window.audioContext.destination); 
-      
-      // Commentary Audio Graph
-      comGainNode = window.audioContext.createMediaElementSource(comAudio);
-      comGainNode.connect(window.audioContext.destination);
-      
-      // Set initial volumes from sliders
-      gainNode.gain.value = videoVolumeSlider.value;
-      comGainNode.gain.value = comVolumeSlider.value;
-      
-      audioInitialized = true; 
-      setupVisualizer(); 
-    } catch (e) { console.warn("Audio boost unavailable:", e); } 
-  }
-  
-  const player = new Plyr(video, { 
-      controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], 
-      settings: ['captions', 'speed', 'quality'], 
-      ratio: '16:9', 
-      volume: 1, 
-      muted: false, 
-      invertTime: true, 
-      toggleInvertTime: true 
-  });
-  
-  video.addEventListener('play', () => { if (!audioInitialized) initAudioBoost(); if (window.audioContext && window.audioContext.state === 'suspended') window.audioContext.resume(); document.body.classList.add('cinema-mode'); audioVisualizer.classList.add('active'); ambientInterval = setInterval(updateAmbientLight, 500); comAudio.play().catch(e=>{}); });
-  video.addEventListener('pause', () => { document.body.classList.remove('cinema-mode'); audioVisualizer.classList.remove('active'); clearInterval(ambientInterval); ambientGlow.style.background = 'transparent'; comAudio.pause(); });
-  video.addEventListener('ended', () => { 
-      document.body.classList.remove('cinema-mode'); 
-      audioVisualizer.classList.remove('active'); 
-      clearInterval(ambientInterval); 
-      ambientGlow.style.background = 'transparent'; 
-      comAudio.pause();
-      
-      // Double Feature Auto-advance
-      if (currentFilm === 1 && film2.url) {
-          setTimeout(() => {
-              switchFilm(2);
-              player.play();
-          }, 2000);
-      }
-  });
-  video.addEventListener('timeupdate', () => { if (video.duration > 0 && video.duration - video.currentTime < 10) creditsOverlay.classList.add('show'); else creditsOverlay.classList.remove('show'); });
-  
-  // Sync Commentary Audio
-  comSyncInterval = setInterval(() => {
-      if (!video.paused && !comAudio.paused) {
-          if (Math.abs(video.currentTime - comAudio.currentTime) > 0.3) {
-              comAudio.currentTime = video.currentTime;
-          }
-      }
-  }, 1000);
-
-  window.addEventListener('resize', () => { audioVisualizer.width = playerContainer.offsetWidth; audioVisualizer.height = 60; }); audioVisualizer.width = playerContainer.offsetWidth; audioVisualizer.height = 60;
-  player.on('loadedmetadata', () => { errorState.classList.add('hidden'); idleState.classList.add('hidden'); });
-  player.on('error', () => { idleState.classList.add('hidden'); errorState.classList.remove('hidden'); });
-  
-  loadVideoBtn1.addEventListener('click', () => fileVideo1.click());
-  loadVideoBtn2.addEventListener('click', () => fileVideo2.click());
-  
-  // Audio Mixer Listeners
-  videoVolumeSlider.addEventListener('input', () => { if (gainNode) gainNode.gain.value = videoVolumeSlider.value; });
-  comVolumeSlider.addEventListener('input', () => { if (comGainNode) comGainNode.gain.value = comVolumeSlider.value; });
-
-  fileCom.addEventListener('change', (e) => { 
-      const file = e.target.files[0]; if (!file) return; 
-      comAudio.src = URL.createObjectURL(file); 
-      loadComName.textContent = file.name;
-  });
-
-  function switchFilm(filmNum) {
-      currentFilm = filmNum;
-      const f = filmNum === 1 ? film1 : film2;
-      if (!f.url) return;
-
-      const tracks = [];
-      if (currentSubURL) {
-          tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true });
-      }
-      
-      player.source = {
-          type: 'video',
-          title: f.name,
-          sources: [{ src: f.url, type: f.mime }],
-          tracks: tracks
-      };
-      
-      loadVideoBtn1.classList.toggle('active-film', filmNum === 1);
-      loadVideoBtn2.classList.toggle('active-film', filmNum === 2);
-  }
-  window.switchFilm = switchFilm; 
-
-  function handleVideoFileLoad(e, filmNum) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const filmObj = filmNum === 1 ? film1 : film2;
-      if (filmObj.url) URL.revokeObjectURL(filmObj.url);
-
-      let mimeType = file.type;
-      const name = file.name.toLowerCase();
-      if (!mimeType || mimeType === '') {
-          if (name.endsWith('.mkv')) mimeType = 'video/x-matroska';
-          else if (name.endsWith('.mp4')) mimeType = 'video/mp4';
-          else if (name.endsWith('.webm')) mimeType = 'video/webm';
-          else if (name.endsWith('.avi')) mimeType = 'video/x-msvideo';
-          else if (name.endsWith('.mov')) mimeType = 'video/quicktime';
-          else mimeType = 'video/mp4';
-      }
-      filmObj.mime = mimeType;
-      filmObj.url = URL.createObjectURL(new Blob([file], { type: mimeType }));
-      filmObj.name = file.name;
-
-      const loadBtn = filmNum === 1 ? loadVideoBtn1 : loadVideoBtn2;
-      loadBtn.classList.add('has-file');
-      loadBtn.querySelector('.filename').textContent = file.name;
-      
-      if (filmNum === 1) loadFilm1Name.textContent = file.name;
-      else loadFilm2Name.textContent = file.name;
-
-      switchFilm(filmNum);
-  }
-
-  fileVideo1.addEventListener('change', (e) => handleVideoFileLoad(e, 1));
-  fileVideo2.addEventListener('change', (e) => handleVideoFileLoad(e, 2));
-
-  loadSubBtn.addEventListener('click', () => fileSub.click());
-  function applySubDelay() { const track = video.textTracks[0]; if (!track || track.cues.length === 0 || originalCues.length === 0) return; for (let i = 0; i < track.cues.length; i++) { const cue = track.cues[i]; cue.startTime = Math.max(0, originalCues[i].start + subDelay); cue.endTime = Math.max(0, originalCues[i].end + subDelay); } document.getElementById('subSyncVal').textContent = (subDelay > 0 ? '+' : '') + subDelay.toFixed(1) + 's'; }
-  document.getElementById('subSyncBack').addEventListener('click', () => { subDelay -= 0.5; applySubDelay(); });
-  document.getElementById('subSyncFwd').addEventListener('click', () => { subDelay += 0.5; applySubDelay(); });
-  document.getElementById('subSyncReset').addEventListener('click', () => { subDelay = 0; applySubDelay(); });
-  fileSub.addEventListener('change', async (e) => { const file = e.target.files[0]; if (!file) return; let vttContent; try { const rawText = await file.text(); vttContent = parseSubtitles(file.name, rawText); } catch (err) { console.error('Failed to read subtitle file:', err); return; } const blob = new Blob([vttContent], { type: 'text/vtt' }); if (currentSubURL) URL.revokeObjectURL(currentSubURL); currentSubURL = URL.createObjectURL(blob); video.querySelectorAll('track').forEach(t => t.remove()); const track = document.createElement('track'); track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; video.appendChild(track); track.addEventListener('load', () => { const activeTrack = track.track; originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = 'showing'; player.toggleCaptions(true); }); const currentTime = player.currentTime; const isPlaying = !video.paused; player.source = { type: 'video', title: loadVideoBtn1.querySelector('.filename').textContent || 'CineLoom', sources: [{ src: (currentFilm === 1 ? film1.url : film2.url), type: (currentFilm === 1 ? film1.mime : film2.mime) }], tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] }; const onLoaded = () => { player.currentTime = currentTime; if (isPlaying) player.play().catch(()=>{}); player.toggleCaptions(true); const activeTrack = video.textTracks[0]; if (activeTrack) { originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; } video.removeEventListener('loadedmetadata', onLoaded); }; video.addEventListener('loadedmetadata', onLoaded); loadSubBtn.classList.add('has-file'); loadSubBtn.querySelector('.filename').textContent = file.name; loadSubsName.textContent = file.name; });
-  document.querySelectorAll('.style-btn[data-boost]').forEach(btn => btn.addEventListener('click', () => { const boost = parseFloat(btn.dataset.boost); if (gainNode) gainNode.gain.value = boost; localStorage.setItem('cl-boost', boost); document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }));
-  const savedBoost = localStorage.getItem('cl-boost') || '3.0'; document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.toggle('active', b.dataset.boost === savedBoost));
-  
-  // Swap Films Logic
-  window.swapFilms = () => {
-      const temp = film1;
-      film1 = film2;
-      film2 = temp;
-      
-      loadVideoBtn1.querySelector('.filename').textContent = film1.name;
-      loadVideoBtn2.querySelector('.filename').textContent = film2.name;
-      loadVideoBtn1.classList.toggle('has-file', !!film1.url);
-      loadVideoBtn2.classList.toggle('has-file', !!film2.url);
-      
-      loadFilm1Name.textContent = film1.name;
-      loadFilm2Name.textContent = film2.name;
-      
-      switchFilm(1);
-  };
-
-  // Drag & Drop Logic
-  const videoStage = document.querySelector('.video-stage');
-  videoStage.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      videoStage.classList.add('drag-over');
-  });
-  videoStage.addEventListener('dragleave', () => {
-      videoStage.classList.remove('drag-over');
-  });
-  videoStage.addEventListener('drop', (e) => {
-      e.preventDefault();
-      videoStage.classList.remove('drag-over');
-      if (e.dataTransfer.files.length > 0) {
-          let videoCount = 0;
-          let subFound = false;
-          let comFound = false;
-          
-          Array.from(e.dataTransfer.files).forEach(file => {
-              const name = file.name.toLowerCase();
-              const isVideo = file.type.startsWith('video/') || name.endsWith('.mkv') || name.endsWith('.mp4') || name.endsWith('.webm') || name.endsWith('.avi') || name.endsWith('.mov');
-              const isSub = name.endsWith('.vtt') || name.endsWith('.srt') || name.endsWith('.sbv') || name.endsWith('.ass') || name.endsWith('.sub') || name.endsWith('.txt') || file.type === 'text/vtt';
-              const isAudio = file.type.startsWith('audio/');
-              
-              if (isVideo && videoCount === 0) {
-                  const dt = new DataTransfer();
-                  dt.items.add(file);
-                  fileVideo1.files = dt.files;
-                  fileVideo1.dispatchEvent(new Event('change'));
-                  videoCount++;
-              } else if (isVideo && videoCount === 1) {
-                  const dt = new DataTransfer();
-                  dt.items.add(file);
-                  fileVideo2.files = dt.files;
-                  fileVideo2.dispatchEvent(new Event('change'));
-                  videoCount++;
-              } else if (isSub && !subFound) {
-                  const dt = new DataTransfer();
-                  dt.items.add(file);
-                  fileSub.files = dt.files;
-                  fileSub.dispatchEvent(new Event('change'));
-                  subFound = true;
-              } else if (isAudio && !comFound) {
-                  const dt = new DataTransfer();
-                  dt.items.add(file);
-                  fileCom.files = dt.files;
-                  fileCom.dispatchEvent(new Event('change'));
-                  comFound = true;
-              }
-          });
-      }
-  });
-}
-setupPlayer(); 
-
-// Load Dropdown Menu Logic
-const loadMediaToggle = document.getElementById('loadMediaToggle');
-const loadMenu = document.getElementById('loadMenu');
-const fileVideo1 = document.querySelector('.file-input-video-1');
-const fileVideo2 = document.querySelector('.file-input-video-2');
-const fileSub = document.querySelector('.file-input-sub');
-const fileCom = document.querySelector('.file-input-com');
-
-loadMediaToggle.addEventListener('click', (e) => { 
-    e.stopPropagation(); 
-    const isOpen = loadMenu.classList.toggle('open'); 
-    loadMediaToggle.setAttribute('aria-expanded', isOpen);
-});
-document.addEventListener('click', (e) => { 
-    if (!loadMenu.contains(e.target) && !loadMediaToggle.contains(e.target)) { 
-        loadMenu.classList.remove('open'); 
-        loadMediaToggle.setAttribute('aria-expanded', 'false');
-    } 
-});
-document.getElementById('loadFilm1Item').addEventListener('click', () => { fileVideo1.click(); loadMenu.classList.remove('open'); });
-document.getElementById('loadFilm2Item').addEventListener('click', () => { fileVideo2.click(); loadMenu.classList.remove('open'); });
-document.getElementById('loadSubsItem').addEventListener('click', () => { fileSub.click(); loadMenu.classList.remove('open'); });
-document.getElementById('loadCommentaryItem').addEventListener('click', () => { fileCom.click(); loadMenu.classList.remove('open'); });
-document.getElementById('swapFilmsItem').addEventListener('click', () => { if (window.swapFilms) window.swapFilms(); loadMenu.classList.remove('open'); });
-
-const torrentBtn = document.getElementById('torrentBtn'); const torrentInput = document.getElementById('torrentInput'); const loadVideoBtn1 = document.querySelector('.load-video-btn[data-film="1"]'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText'); const torrentSearchBtn = document.getElementById('torrentSearchBtn'); const torrentResults = document.getElementById('torrentResults');
-
-async function searchTorrents(query) {
-    if (!query || query.trim().length < 3) return;
-    torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><div class="torrent-info"><span class="torrent-title">Searching YTS...</span></div></div>';
-    torrentResults.classList.add('show');
-    const apiUrl = `https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=10`;
-    const proxies = [ url => url, url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`, url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, url => `https://thingproxy.freeboard.io/fetch/${url}` ];
-    let data = null; let success = false; let lastError = null;
-    for (const proxy of proxies) {
-        try {
-            const res = await fetch(proxy(apiUrl));
-            if (!res.ok) throw new Error(`Proxy failed: ${res.statusText}`);
-            data = await res.json();
-            if (data && data.status === 'ok') { success = true; break; }
-        } catch (e) { console.warn("Fetch failed:", e.message); lastError = e; }
-    }
-    torrentResults.innerHTML = '';
-    if (success && data.data.movies && data.data.movies.length > 0) {
-        data.data.movies.forEach(movie => {
-            const torrent = movie.torrents.find(t => t.quality === '1080p' && t.type === 'web') || movie.torrents.find(t => t.quality === '1080p') || movie.torrents.find(t => t.quality === '720p');
-            if (!torrent) return;
-            const item = document.createElement('div');
-            item.className = 'torrent-item';
-            item.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg><div class="torrent-info"><span class="torrent-title">${movie.title_long} (${torrent.quality})</span><span class="torrent-meta">${torrent.type} • ${torrent.size} ${torrent.size_unit} • S:${torrent.seeds} L:${torrent.peers}</span></div>`;
-            item.addEventListener('click', () => {
-                const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.openbittorrent.com:80&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.openwebtorrent.com`;
-                torrentInput.value = magnet;
-                torrentResults.classList.remove('show');
-                startTorrentStream(magnet);
-            });
-            torrentResults.appendChild(item);
-        });
-    } else if (success && (!data.data.movies || data.data.movies.length === 0)) {
-        const item = document.createElement('div'); item.className = 'torrent-item'; item.style.cursor = 'default';
-        item.innerHTML = `<div class="torrent-info"><span class="torrent-title">No torrents found.</span></div>`;
-        torrentResults.appendChild(item);
-    } else {
-        const item = document.createElement('div'); item.className = 'torrent-item'; item.style.cursor = 'default';
-        item.innerHTML = `<div class="torrent-info"><span class="torrent-title">Search failed. Please paste a Magnet Link directly.</span></div>`;
-        torrentResults.appendChild(item);
-    }
-}
-torrentSearchBtn.addEventListener('click', () => { const query = torrentInput.value.trim(); if (!query) return; if (query.startsWith('magnet:')) startTorrentStream(query); else searchTorrents(query); });
-torrentInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); torrentSearchBtn.click(); } });
-document.addEventListener('click', (e) => { if (!e.target.closest('.torrent-row')) { torrentResults.classList.remove('show'); } });
-
-function startTorrentStream(magnet) {
-    if (typeof WebTorrent === 'undefined') { alert('WebTorrent library failed to load.'); return; }
-    if (window.torrentClient) { window.torrentClient.destroy(); }
-    window.torrentClient = new WebTorrent();
-    loadVideoBtn1.querySelector('.filename').textContent = "Connecting to peers...";
-    bufferingText.textContent = 'Connecting...'; bufferingOverlay.classList.add('show');
-    window.torrentClient.on('error', (err) => { console.error('WebTorrent Client Error:', err); alert('Torrent Error: ' + err.message); bufferingOverlay.classList.remove('show'); });
-    window.torrentClient.add(magnet, (torrent) => {
-        const file = torrent.files.find(f => f.name.endsWith('.mp4') || f.name.endsWith('.webm') || f.name.endsWith('.m4v') || f.name.endsWith('.mkv'));
-        if (!file) { alert("No playable video file found in this torrent."); loadVideoBtn1.querySelector('.filename').textContent = "No file chosen"; bufferingOverlay.classList.remove('show'); return; }
-        const videoStage = document.querySelector('.video-stage');
-        const oldVideo = document.getElementById('player'); if (oldVideo) oldVideo.remove();
-        const tempContainer = document.createElement('div'); videoStage.insertBefore(tempContainer, videoStage.firstChild);
-        file.appendTo(tempContainer, { autoplay: false, controls: false }, (err, elem) => {
-            if (err) { console.error('Streaming error:', err); alert('Error streaming torrent.'); bufferingOverlay.classList.remove('show'); return; }
-            elem.id = 'player'; elem.setAttribute('playsinline', '');
-            videoStage.insertBefore(elem, tempContainer); tempContainer.remove();
-            loadVideoBtn1.querySelector('.filename').textContent = `Streaming: ${file.name}`;
-            elem.addEventListener('waiting', () => { bufferingText.textContent = 'Buffering...'; bufferingOverlay.classList.add('show'); });
-            elem.addEventListener('playing', () => { bufferingOverlay.classList.remove('show'); });
-            elem.addEventListener('canplay', () => { bufferingOverlay.classList.remove('show'); });
-            elem.addEventListener('stalled', () => { bufferingText.textContent = 'Network Stalled...'; bufferingOverlay.classList.add('show'); });
-            setupPlayer(); idleState.classList.add('hidden'); errorState.classList.add('hidden');
-        });
-        torrent.on('warning', (err) => console.warn('Torrent warning:', err));
-        torrent.on('error', (err) => { console.error('Torrent file error:', err); alert('Torrent File Error: ' + err.message); bufferingOverlay.classList.remove('show'); });
-    });
-}
-torrentBtn.addEventListener('click', () => { const magnet = torrentInput.value.trim(); if (magnet) startTorrentStream(magnet); });
-window.addEventListener('offline', () => { bufferingText.textContent = 'Network Disconnected...'; bufferingOverlay.classList.add('show'); });
-window.addEventListener('online', () => { bufferingText.textContent = 'Reconnecting...'; setTimeout(() => { const video = document.getElementById('player'); if (video && !video.paused) { bufferingOverlay.classList.remove('show'); } else { bufferingText.textContent = 'Buffering...'; } }, 2000); });
-
-const countdownBtn = document.getElementById('countdownBtn'); const countdownOverlay = document.getElementById('countdownOverlay'); const countdownText = document.getElementById('countdownText');
-countdownBtn.addEventListener('click', () => { let count = 5; countdownOverlay.classList.add('active'); countdownText.textContent = count; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); const interval = setInterval(() => { count--; if (count > 0) { countdownText.textContent = count; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); } else { clearInterval(interval); countdownText.textContent = 'PLAY'; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); setTimeout(() => { countdownOverlay.classList.remove('active'); const player = document.getElementById('player').plyr; if (player) player.play(); }, 800); } }, 1000); });
-
-const voiceToggle = document.getElementById('voiceToggle'); const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; let recognition; let isListening = false;
-if (SpeechRecognition) { recognition = new SpeechRecognition(); recognition.continuous = true; recognition.interimResults = false; recognition.lang = 'en-US'; recognition.onresult = (event) => { const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase(); console.log('Voice heard:', transcript); const player = document.getElementById('player').plyr; if (!player) return; if (transcript.includes('cineloom')) { if (transcript.includes('play')) player.play(); if (transcript.includes('pause')) player.pause(); if (transcript.includes('subtitles') || transcript.includes('captions')) player.toggleCaptions(); if (transcript.includes('mute')) player.muted = true; if (transcript.includes('unmute')) player.muted = false; if (transcript.includes('fullscreen')) player.fullscreen.enter(); if (transcript.includes('lights out') || transcript.includes('dim')) document.body.classList.add('cinema-mode'); if (transcript.includes('lights on')) document.body.classList.remove('cinema-mode'); } }; recognition.onend = () => { if (isListening) { try { recognition.start(); } catch(e) {} } }; recognition.onerror = (event) => { console.error('Speech recognition error:', event.error); }; }
-voiceToggle.addEventListener('click', () => { if (!SpeechRecognition) { alert('Voice commands are not supported in this browser. Please try Chrome or Edge.'); return; } isListening = !isListening; voiceToggle.classList.toggle('listening', isListening); if (isListening) { try { recognition.start(); } catch(e) {} } else { try { recognition.stop(); } catch(e) {} } });
-
-const snapshotBtn = document.getElementById('snapshotBtn');
-snapshotBtn.addEventListener('click', () => {
-  const video = document.getElementById('player');
-  if (!video.src || video.error) { alert('Please load a video first.'); return; }
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-  const dataUrl = canvas.toDataURL('image/png');
-  
-  const posterOverlay = document.getElementById('posterOverlay');
-  if (posterOverlay && typeof openPosterMaker === 'function') {
-      openPosterMaker();
-      if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL);
-      currentBackdropURL = null;
-      backdropInput.value = '';
-      posterSheet.style.backgroundImage = `url(${dataUrl})`;
-  } else {
-      // Fallback if poster maker is missing
-      const link = document.createElement('a');
-      link.download = 'cineloom-snapshot.png';
-      link.href = dataUrl;
-      link.click();
-  }
-});
-</script>
+<footer>CineLoom Suite by Lee Williams</footer>
 </body>
 </html>
