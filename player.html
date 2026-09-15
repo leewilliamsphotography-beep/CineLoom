@@ -134,7 +134,7 @@ function setupPlayer() {
   
   video.addEventListener('ended', () => { 
     if (currentFilm === 1 && film2.url) {
-      setTimeout(() => { switchFilm(2); player.play(); }, 2000);
+      setTimeout(() => { switchFilm(2); video.play(); }, 2000);
     }
   });
 
@@ -230,34 +230,47 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
   qrOverlay.classList.add('active');
   
   console.log('Connecting to MQTT...');
-  mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+  // Bulletproof connection with fallback options
+  mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+    connectTimeout: 5000,
+    reconnectPeriod: 1000,
+    clean: true
+  });
+  
   const cmdTopic = `cineloom/${roomCode}/cmd`; const timeTopic = `cineloom/${roomCode}/time`;
   
   mqttClient.on('connect', () => { 
     console.log('MQTT Host Connected'); 
-    mqttClient.subscribe(cmdTopic); 
+    mqttClient.subscribe(cmdTopic, (err) => {
+      if (err) console.error('Subscription error:', err);
+    }); 
   });
   
   mqttClient.on('message', (topic, message) => {
     if (topic === cmdTopic) {
       const data = JSON.parse(message.toString());
       console.log('Received command:', data);
+      
+      // Directly target the raw video element for bulletproof execution
+      const videoEl = document.getElementById('player');
+      if (!videoEl) return;
+      
       try {
-        if (!window.player) return;
-        if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); window.player.play(); }
-        if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); window.player.play(); }
+        if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); videoEl.play(); }
+        if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); videoEl.play(); }
         if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
         if (data.action === 'playPause') { 
-          if (window.player.paused) window.player.play(); else window.player.pause(); 
+          if (videoEl.paused) videoEl.play(); else videoEl.pause(); 
         }
         if (data.action === 'fullscreen') { 
-          if (window.player.fullscreen.active) window.player.fullscreen.exit(); else window.player.fullscreen.enter(); 
+          if (videoEl.requestFullscreen) videoEl.requestFullscreen(); 
+          else if (videoEl.webkitRequestFullscreen) videoEl.webkitRequestFullscreen();
         }
         if (data.action === 'seekBack') { 
-          window.player.currentTime = Math.max(0, window.player.currentTime - 10); 
+          videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); 
         }
         if (data.action === 'seekFwd') { 
-          window.player.currentTime = window.player.currentTime + 10; 
+          videoEl.currentTime = videoEl.currentTime + 10; 
         }
         if (data.action === 'showtime') { document.getElementById('countdownBtn').click(); }
       } catch (e) {
@@ -333,7 +346,7 @@ function startTorrentStream(magnet) {
 
 // Countdown
 const countdownBtn = document.getElementById('countdownBtn'); const countdownOverlay = document.getElementById('countdownOverlay'); const countdownText = document.getElementById('countdownText');
-countdownBtn.addEventListener('click', () => { let count = 5; countdownOverlay.classList.add('active'); countdownText.textContent = count; const interval = setInterval(() => { count--; if (count > 0) { countdownText.textContent = count; } else { clearInterval(interval); countdownText.textContent = 'PLAY'; setTimeout(() => { countdownOverlay.classList.remove('active'); if (window.player) window.player.play(); }, 800); } }, 1000); });
+countdownBtn.addEventListener('click', () => { let count = 5; countdownOverlay.classList.add('active'); countdownText.textContent = count; const interval = setInterval(() => { count--; if (count > 0) { countdownText.textContent = count; } else { clearInterval(interval); countdownText.textContent = 'PLAY'; setTimeout(() => { countdownOverlay.classList.remove('active'); const vid = document.getElementById('player'); if (vid) vid.play(); }, 800); } }, 1000); });
 
 // Reload Protection
 window.addEventListener('beforeunload', (event) => {
@@ -342,4 +355,4 @@ window.addEventListener('beforeunload', (event) => {
 });
 </script>
 </body>
-</html>
+</html> 

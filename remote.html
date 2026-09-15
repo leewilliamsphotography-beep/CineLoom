@@ -127,7 +127,14 @@
     entryStatus.style.color = "#a0a4a8";
     
     console.log('Connecting to MQTT...');
-    client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+    
+    // Bulletproof connection with fallback options
+    client = mqtt.connect('wss://broker.emqx.io:8084/mqtt', {
+      connectTimeout: 5000,
+      reconnectPeriod: 1000,
+      clean: true
+    });
+    
     cmdTopic = `cineloom/${roomCode}/cmd`;
     const timeTopic = `cineloom/${roomCode}/time`;
     
@@ -153,7 +160,7 @@
     
     client.on('error', (err) => { 
       console.error('MQTT Error:', err);
-      remoteStatus.textContent = "Connection lost."; 
+      remoteStatus.textContent = "Connection lost. Retrying..."; 
       remoteStatus.style.color = "#ef4444"; 
     });
   }
