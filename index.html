@@ -80,21 +80,32 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); }
 .screen-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
 .header-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-.poster-mini-btn, .countdown-btn, .snapshot-btn, .host-cam-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; }
-.poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .host-cam-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .host-cam-btn svg { width: 14px; height: 14px; }
-.host-cam-btn.active { background: var(--error); border-color: var(--error); color: #fff; }
+.poster-mini-btn, .countdown-btn, .snapshot-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; }
+.poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg { width: 14px; height: 14px; }
 .actions-row { display: flex; gap: 1rem; padding: 1.25rem; border-bottom: 1px solid var(--line); }
 .load-btn { flex: 1; background: rgba(255,255,255,0.02); border: 1px dashed var(--line-strong); color: var(--text); padding: 1.25rem 1rem; font-family: inherit; font-size: 0.9rem; font-weight: 500; cursor: pointer; border-radius: 10px; transition: all 0.2s var(--ease); text-align: center; display: flex; flex-direction: column; gap: 0.25rem; min-height: 80px; justify-content: center; }
 .load-btn:hover { border-color: var(--accent); border-style: solid; background: var(--accent-soft); transform: translateY(-1px); }
 .load-btn .label { font-size: 0.9rem; font-weight: 600; color: var(--text); }
 .load-btn .filename { font-size: 0.85rem; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
 
-.torrent-row { display: flex; gap: 0.5rem; padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--line); }
+.torrent-row { position: relative; display: flex; gap: 0.5rem; padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--line); }
 .torrent-input { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; }
 .torrent-input:focus { outline: none; border-color: var(--accent); }
-.torrent-btn { background: var(--accent); border: none; color: #fff; padding: 0 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: background 0.15s var(--ease); display: flex; align-items: center; justify-content: center; }
+.torrent-btn, .torrent-search-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; justify-content: center; }
+.torrent-btn { background: var(--accent); border-color: var(--accent); color: #fff; }
 .torrent-btn:hover { background: var(--accent-2); }
+.torrent-search-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.torrent-search-btn svg { width: 16px; height: 16px; }
+.torrent-warning { font-size: 0.7rem; color: var(--text-dim); padding: 0.5rem 1.25rem 1rem; border-bottom: 1px solid var(--line); text-align: center; }
+.torrent-results { position: absolute; top: 55px; left: 1.25rem; right: 1.25rem; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; max-height: 300px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; }
+.torrent-results.show { display: flex; }
+.torrent-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem; border-radius: 4px; cursor: pointer; transition: background 0.15s var(--ease); }
+.torrent-item:hover { background: var(--bg-elev-2); }
+.torrent-item svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
+.torrent-info { display: flex; flex-direction: column; }
+.torrent-title { font-size: 0.85rem; color: var(--text); font-weight: 500; }
+.torrent-meta { font-size: 0.75rem; color: var(--text-dim); }
 
 .video-stage { position: relative; aspect-ratio: 16/9; background: #000; overflow: hidden; }
 .video-stage .plyr { height: 100%; width: 100%; }
@@ -125,15 +136,19 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .credits-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 60%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 80px; opacity: 0; pointer-events: none; transition: opacity 1s ease; z-index: 15; }
 .credits-overlay.show { opacity: 1; }
 .credits-text { color: #fff; font-size: 1.5rem; font-weight: 600; letter-spacing: 0.05em; text-shadow: 0 2px 10px rgba(0,0,0,0.8); text-align: center; }
-.host-cam-overlay { position: absolute; bottom: 80px; right: 20px; width: 150px; height: 150px; border-radius: 50%; border: 3px solid var(--accent); box-shadow: 0 0 15px var(--accent-glow); z-index: 16; object-fit: cover; background: #000; display: none; }
-.host-cam-overlay.active { display: block; }
+
+.buffering-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 20; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #fff; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.1rem; }
+.buffering-overlay.show { display: flex; }
+.spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 .file-input { position: absolute; width: 0; height: 0; opacity: 0; }
 .site-footer { text-align: center; padding: 2rem 1rem; color: var(--text-dim); font-size: 0.75rem; opacity: 0.7; position: relative; z-index: 5; margin-top: auto; border-top: 1px solid var(--line-soft); transition: opacity 0.5s ease; }
 .site-footer span { color: var(--text-soft); font-weight: 600; }
 body.cinema-mode .bg-blobs, body.cinema-mode header, body.cinema-mode .hero, body.cinema-mode .site-footer { opacity: 0.1; }
 body.cinema-mode header { pointer-events: none; }
 #ambientGlow { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80vw; height: 80vh; z-index: -2; background: transparent; filter: blur(150px); transition: background 1s ease; pointer-events: none; }
-.countdown-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 20; display: none; align-items: center; justify-content: center; }
+.countdown-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 25; display: none; align-items: center; justify-content: center; }
 .countdown-overlay.active { display: flex; }
 .countdown-text { font-size: 12rem; font-weight: 900; color: #fff; text-shadow: 0 0 40px var(--accent); animation: count-pulse 1s ease; }
 @keyframes count-pulse { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
@@ -300,13 +315,25 @@ body.cinema-mode header { pointer-events: none; }
   <section class="hero" aria-labelledby="hero-title"><h1 id="hero-title">CineLoom</h1><p>Load a film below to begin. You can also generate a printable A4 poster for a single feature or a double bill.</p></section>
   <section class="players" aria-label="Video Player">
     <div class="player" data-screen="1" aria-label="Screen 1">
-      <div class="player-header"><span class="screen-label">Now Showing</span><div class="header-actions-row"><button class="host-cam-btn" id="hostCamBtn" aria-label="Toggle Host Camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>Host Cam</button><button class="snapshot-btn" id="snapshotBtn" aria-label="Capture Frame for Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Snapshot</button><button class="countdown-btn" id="countdownBtn" aria-label="Start Showtime Countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Start Showtime</button><button class="poster-mini-btn" data-screen-poster="1" aria-label="Create Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Create Poster</button></div></div>
+      <div class="player-header"><span class="screen-label">Now Showing</span><div class="header-actions-row"><button class="snapshot-btn" id="snapshotBtn" aria-label="Capture Frame for Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Snapshot</button><button class="countdown-btn" id="countdownBtn" aria-label="Start Showtime Countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Start Showtime</button><button class="poster-mini-btn" data-screen-poster="1" aria-label="Create Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Create Poster</button></div></div>
       <div class="actions-row"><button class="load-btn load-video-btn" type="button" aria-label="Load Film"><span class="label">Load Film</span><span class="filename">No file chosen</span></button><button class="load-btn load-sub-btn" type="button" aria-label="Add Subtitles"><span class="label">Add Subtitles</span><span class="filename">No file chosen</span></button></div>
       <div class="torrent-row">
-        <input type="text" id="torrentInput" class="torrent-input" placeholder="Or paste a Magnet Link to stream...">
+        <input type="text" id="torrentInput" class="torrent-input" placeholder="Search or paste Magnet Link...">
+        <button type="button" class="torrent-search-btn" id="torrentSearchBtn" aria-label="Search Torrents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
         <button type="button" class="torrent-btn" id="torrentBtn">Stream</button>
+        <div class="torrent-results" id="torrentResults"></div>
       </div>
-      <div class="video-stage"><video id="player" playsinline></video><div class="idle-broadcast-state" id="idleState"><div class="broadcast-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>CineLoom Broadcast</div><div class="broadcast-marquee"><div class="marquee-content" id="marqueeContent"><span>Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. </span><span>Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. </span></div></div></div><div class="error-state hidden" role="alert"><div class="prompt">Cannot play this video</div><div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div></div><div class="sub-sync-controls" id="subSyncControls" style="display: none;"><button class="style-btn" id="subSyncBack" type="button">-0.5s</button><span id="subSyncVal">0.0s</span><button class="style-btn" id="subSyncFwd" type="button">+0.5s</button><button class="style-btn" id="subSyncReset" type="button" style="margin-left: 4px;">Reset</button></div><canvas id="audioVisualizer"></canvas><video class="host-cam-overlay" id="hostCamVideo" autoplay muted playsinline></video><div class="credits-overlay" id="creditsOverlay"><div class="credits-text">Thank you for watching with CineLoom</div></div><div class="countdown-overlay" id="countdownOverlay"><div class="countdown-text" id="countdownText"></div></div></div>
+      <div class="torrent-warning">Note: Browser WebTorrent only connects to WebRTC peers. Standard torrents may hang if not seeded by WebRTC clients (like WebTorrent Desktop or Brave).</div>
+      <div class="video-stage">
+        <video id="player" playsinline></video>
+        <div class="idle-broadcast-state" id="idleState"><div class="broadcast-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>CineLoom Broadcast</div><div class="broadcast-marquee"><div class="marquee-content" id="marqueeContent"><span>Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. </span><span>Welcome to CineLoom Broadcasting. Awaiting feature presentation. Please stand by. </span></div></div></div>
+        <div class="error-state hidden" role="alert"><div class="prompt">Cannot play this video</div><div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div></div>
+        <div class="buffering-overlay" id="bufferingOverlay"><div class="spinner"></div><span id="bufferingText">Buffering...</span></div>
+        <div class="sub-sync-controls" id="subSyncControls" style="display: none;"><button class="style-btn" id="subSyncBack" type="button">-0.5s</button><span id="subSyncVal">0.0s</span><button class="style-btn" id="subSyncFwd" type="button">+0.5s</button><button class="style-btn" id="subSyncReset" type="button" style="margin-left: 4px;">Reset</button></div>
+        <canvas id="audioVisualizer"></canvas>
+        <div class="credits-overlay" id="creditsOverlay"><div class="credits-text">Thank you for watching with CineLoom</div></div>
+        <div class="countdown-overlay" id="countdownOverlay"><div class="countdown-text" id="countdownText"></div></div>
+      </div>
       <input type="file" class="file-input file-input-video" accept="*/*" aria-hidden="true" tabindex="-1"><input type="file" class="file-input file-input-sub" accept=".vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream" aria-hidden="true" tabindex="-1">
     </div>
   </section>
@@ -506,7 +533,7 @@ function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const em
 document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
 document.getElementById('zoomOut').addEventListener('click', () => { posterZoom = Math.max(0.25, posterZoom - 0.1); applyZoom(); });
 document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
-function openPosterMaker() { const filenameEl = document.querySelector('.load-video-btn .filename'); const filename = filenameEl.textContent.trim(); const cleanName = (filename && filename !== 'No file chosen') ? filename.replace(/\.[^/.]+$/, "").replace(/[._]/g, " ") : ''; if (cleanName && !posterFields.title1.value) posterFields.title1.value = cleanName; updatePosterPreview(); posterOverlay.classList.add('active'); setTimeout(applyZoom, 50); }
+function openPosterMaker() { const filenameEl = document.querySelector('.load-video-btn .filename'); const filename = filenameEl.textContent.trim(); const cleanName = (filename && filename !== 'No file chosen' && !filename.startsWith('Streaming')) ? filename.replace(/\.[^/.]+$/, "").replace(/[._]/g, " ") : ''; if (cleanName && !posterFields.title1.value) posterFields.title1.value = cleanName; updatePosterPreview(); posterOverlay.classList.add('active'); setTimeout(applyZoom, 50); }
 document.querySelector('[data-screen-poster]').addEventListener('click', openPosterMaker);
 posterCloseBtn.addEventListener('click', () => posterOverlay.classList.remove('active'));
 posterOverlay.addEventListener('click', (e) => { if (e.target === posterOverlay) posterOverlay.classList.remove('active'); });
@@ -534,12 +561,36 @@ function updateAmbientLight() { const video = document.getElementById('player');
 let audioAnalyser; function setupVisualizer() { if (!audioAnalyser || !audioContext) return; const ctx = audioVisualizer.getContext('2d'); const bufferLength = audioAnalyser.frequencyBinCount; const dataArray = new Uint8Array(bufferLength); function draw() { requestAnimationFrame(draw); if (document.getElementById('player').paused) return; audioAnalyser.getByteFrequencyData(dataArray); const width = audioVisualizer.width; const height = audioVisualizer.height; ctx.clearRect(0, 0, width, height); const barWidth = (width / bufferLength) * 2.5; let x = 0; const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(); ctx.fillStyle = accentColor; for (let i = 0; i < bufferLength; i++) { const barHeight = (dataArray[i] / 255) * height; ctx.fillRect(x, height - barHeight, barWidth - 1, barHeight); x += barWidth; } } draw(); }
 
 function setupPlayer() {
+  // Clean up old Audio Context to prevent memory leaks when loading new videos
+  if (window.audioContext) {
+    try { window.audioContext.close(); } catch(e){}
+    window.audioContext = null;
+  }
+  
   const video = document.getElementById('player'); const errorState = playerContainer.querySelector('.error-state'); const fileVideo = playerContainer.querySelector('.file-input-video'); const fileSub = playerContainer.querySelector('.file-input-sub'); const loadVideoBtn = playerContainer.querySelector('.load-video-btn'); const loadSubBtn = playerContainer.querySelector('.load-sub-btn');
   let currentVideoURL = null; let currentSubURL = null; let currentVideoMime = 'video/mp4'; let subDelay = 0; let originalCues = [];
-  window.audioContext = null; let gainNode, audioInitialized = false;
-  function initAudioBoost() { if (audioInitialized) return; try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); const source = audioContext.createMediaElementSource(video); gainNode = audioContext.createGain(); audioAnalyser = audioContext.createAnalyser(); audioAnalyser.fftSize = 128; source.connect(gainNode); gainNode.connect(audioAnalyser); audioAnalyser.connect(audioContext.destination); const savedBoost = localStorage.getItem('cl-boost') || '3.0'; gainNode.gain.value = parseFloat(savedBoost); audioInitialized = true; setupVisualizer(); } catch (e) { console.warn("Audio boost unavailable:", e); } }
+  let gainNode, audioInitialized = false;
+  
+  function initAudioBoost() { 
+    if (audioInitialized) return; 
+    try { 
+      window.audioContext = new (window.AudioContext || window.webkitAudioContext)(); 
+      const source = window.audioContext.createMediaElementSource(video); 
+      gainNode = window.audioContext.createGain(); 
+      audioAnalyser = window.audioContext.createAnalyser(); 
+      audioAnalyser.fftSize = 128; 
+      source.connect(gainNode); 
+      gainNode.connect(audioAnalyser); 
+      audioAnalyser.connect(window.audioContext.destination); 
+      const savedBoost = localStorage.getItem('cl-boost') || '3.0'; 
+      gainNode.gain.value = parseFloat(savedBoost); 
+      audioInitialized = true; 
+      setupVisualizer(); 
+    } catch (e) { console.warn("Audio boost unavailable:", e); } 
+  }
+  
   const player = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], settings: ['captions', 'speed', 'quality'], ratio: '16:9', volume: 1, muted: false, invertTime: false, toggleInvertTime: false });
-  video.addEventListener('play', () => { if (!audioInitialized) initAudioBoost(); if (audioContext && audioContext.state === 'suspended') audioContext.resume(); document.body.classList.add('cinema-mode'); audioVisualizer.classList.add('active'); ambientInterval = setInterval(updateAmbientLight, 500); });
+  video.addEventListener('play', () => { if (!audioInitialized) initAudioBoost(); if (window.audioContext && window.audioContext.state === 'suspended') window.audioContext.resume(); document.body.classList.add('cinema-mode'); audioVisualizer.classList.add('active'); ambientInterval = setInterval(updateAmbientLight, 500); });
   video.addEventListener('pause', () => { document.body.classList.remove('cinema-mode'); audioVisualizer.classList.remove('active'); clearInterval(ambientInterval); ambientGlow.style.background = 'transparent'; });
   video.addEventListener('ended', () => { document.body.classList.remove('cinema-mode'); audioVisualizer.classList.remove('active'); clearInterval(ambientInterval); ambientGlow.style.background = 'transparent'; });
   video.addEventListener('timeupdate', () => { if (video.duration > 0 && video.duration - video.currentTime < 10) creditsOverlay.classList.add('show'); else creditsOverlay.classList.remove('show'); });
@@ -559,54 +610,184 @@ function setupPlayer() {
 }
 setupPlayer(); updateBroadcastMarquee();
 
-// Torrent Streaming Logic
+// Rock Solid Torrent Streaming Logic
 const torrentBtn = document.getElementById('torrentBtn');
 const torrentInput = document.getElementById('torrentInput');
 const loadVideoBtn = document.querySelector('.load-video-btn');
+const bufferingOverlay = document.getElementById('bufferingOverlay');
+const bufferingText = document.getElementById('bufferingText');
 
-if (typeof WebTorrent !== 'undefined') {
-    torrentBtn.addEventListener('click', () => {
-        const magnet = torrentInput.value.trim();
-        if (!magnet) return;
+// Torrent Search Logic
+const torrentSearchBtn = document.getElementById('torrentSearchBtn');
+const torrentResults = document.getElementById('torrentResults');
+
+async function searchTorrents(query) {
+    if (!query || query.trim().length < 3) return;
+    try {
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://yts.mx/api/v2/list_movies.json?query_term=' + encodeURIComponent(query))}`;
+        const res = await fetch(proxyUrl);
+        const data = await res.json();
         
-        const client = new WebTorrent();
-        loadVideoBtn.querySelector('.filename').textContent = "Connecting to peers...";
-        
-        client.add(magnet, function (torrent) {
-            const file = torrent.files.find(f => f.name.endsWith('.mp4') || f.name.endsWith('.webm') || f.name.endsWith('.mkv'));
-            if (!file) {
-                alert("No playable video file found in this torrent.");
-                loadVideoBtn.querySelector('.filename').textContent = "No file chosen";
+        torrentResults.innerHTML = '';
+        if (data.data && data.data.movies) {
+            data.data.movies.slice(0, 6).forEach(movie => {
+                const torrent = movie.torrents.find(t => t.quality === '1080p') || movie.torrents.find(t => t.quality === '720p');
+                if (!torrent) return;
+                
+                const item = document.createElement('div');
+                item.className = 'torrent-item';
+                item.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    <div class="torrent-info">
+                        <span class="torrent-title">${movie.title} (${movie.year}) - ${torrent.quality}</span>
+                        <span class="torrent-meta">${torrent.type} • ${Math.round(torrent.size / 1048576)} MB</span>
+                    </div>
+                `;
+                item.addEventListener('click', () => {
+                    const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.openbittorrent.com:80&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.openwebtorrent.com`;
+                    torrentInput.value = magnet;
+                    torrentResults.classList.remove('show');
+                    startTorrentStream(magnet);
+                });
+                torrentResults.appendChild(item);
+            });
+            torrentResults.classList.add('show');
+        } else {
+            const item = document.createElement('div');
+            item.className = 'torrent-item';
+            item.style.cursor = 'default';
+            item.innerHTML = `<div class="torrent-info"><span class="torrent-title">No torrents found.</span></div>`;
+            torrentResults.appendChild(item);
+            torrentResults.classList.add('show');
+        }
+    } catch (e) {
+        console.error("Torrent search failed:", e);
+    }
+}
+
+torrentSearchBtn.addEventListener('click', () => {
+    const query = torrentInput.value.trim();
+    if (!query) return;
+    if (query.startsWith('magnet:')) startTorrentStream(query);
+    else searchTorrents(query);
+});
+
+torrentInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        torrentSearchBtn.click();
+    }
+});
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.torrent-row')) {
+        torrentResults.classList.remove('show');
+    }
+});
+
+function startTorrentStream(magnet) {
+    if (typeof WebTorrent === 'undefined') {
+        alert('WebTorrent library failed to load.');
+        return;
+    }
+
+    if (window.torrentClient) {
+        window.torrentClient.destroy();
+    }
+
+    window.torrentClient = new WebTorrent();
+    loadVideoBtn.querySelector('.filename').textContent = "Connecting to peers...";
+    bufferingText.textContent = 'Connecting...';
+    bufferingOverlay.classList.add('show');
+
+    window.torrentClient.on('error', (err) => {
+        console.error('WebTorrent Client Error:', err);
+        alert('Torrent Error: ' + err.message);
+        bufferingOverlay.classList.remove('show');
+    });
+
+    window.torrentClient.add(magnet, (torrent) => {
+        const file = torrent.files.find(f => f.name.endsWith('.mp4') || f.name.endsWith('.webm') || f.name.endsWith('.m4v') || f.name.endsWith('.mkv'));
+        if (!file) {
+            alert("No playable video file found in this torrent.");
+            loadVideoBtn.querySelector('.filename').textContent = "No file chosen";
+            bufferingOverlay.classList.remove('show');
+            return;
+        }
+
+        const videoStage = document.querySelector('.video-stage');
+        const oldVideo = document.getElementById('player');
+        if (oldVideo) oldVideo.remove();
+
+        const tempContainer = document.createElement('div');
+        videoStage.insertBefore(tempContainer, videoStage.firstChild);
+
+        file.appendTo(tempContainer, { autoplay: false, controls: false }, (err, elem) => {
+            if (err) {
+                console.error('Streaming error:', err);
+                alert('Error streaming torrent. Note: Browser WebTorrent only connects to WebRTC peers.');
+                bufferingOverlay.classList.remove('show');
                 return;
             }
             
+            elem.id = 'player';
+            elem.setAttribute('playsinline', '');
+            
+            videoStage.insertBefore(elem, tempContainer);
+            tempContainer.remove();
+
             loadVideoBtn.querySelector('.filename').textContent = `Streaming: ${file.name}`;
             
-            const videoStage = document.querySelector('.video-stage');
-            const oldVideo = document.getElementById('player');
-            if (oldVideo) oldVideo.remove();
-            
-            const newVideo = document.createElement('video');
-            newVideo.id = 'player';
-            newVideo.setAttribute('playsinline', '');
-            videoStage.insertBefore(newVideo, videoStage.firstChild);
-            
-            file.appendTo(newVideo, {autoplay: false, controls: false}, function(err) {
-                if (err) {
-                    console.error(err);
-                    alert("Error streaming torrent. Note: Browser WebTorrent only connects to WebRTC peers.");
-                    return;
-                }
-                
-                setupPlayer(); // Re-initialize Plyr on the new video element
-                idleState.classList.add('hidden');
-                errorState.classList.add('hidden');
+            elem.addEventListener('waiting', () => {
+                bufferingText.textContent = 'Buffering...';
+                bufferingOverlay.classList.add('show');
             });
+            elem.addEventListener('playing', () => {
+                bufferingOverlay.classList.remove('show');
+            });
+            elem.addEventListener('canplay', () => {
+                bufferingOverlay.classList.remove('show');
+            });
+            elem.addEventListener('stalled', () => {
+                bufferingText.textContent = 'Network Stalled...';
+                bufferingOverlay.classList.add('show');
+            });
+
+            setupPlayer();
+            idleState.classList.add('hidden');
+            errorState.classList.add('hidden');
+        });
+
+        torrent.on('warning', (err) => console.warn('Torrent warning:', err));
+        torrent.on('error', (err) => {
+            console.error('Torrent file error:', err);
+            alert('Torrent File Error: ' + err.message);
+            bufferingOverlay.classList.remove('show');
         });
     });
-} else {
-    torrentBtn.addEventListener('click', () => alert('WebTorrent library failed to load.'));
 }
+
+torrentBtn.addEventListener('click', () => {
+    const magnet = torrentInput.value.trim();
+    if (magnet) startTorrentStream(magnet);
+});
+
+window.addEventListener('offline', () => {
+  bufferingText.textContent = 'Network Disconnected...';
+  bufferingOverlay.classList.add('show');
+});
+
+window.addEventListener('online', () => {
+  bufferingText.textContent = 'Reconnecting...';
+  setTimeout(() => {
+    const video = document.getElementById('player');
+    if (video && !video.paused) {
+      bufferingOverlay.classList.remove('show');
+    } else {
+      bufferingText.textContent = 'Buffering...';
+    }
+  }, 2000);
+});
 
 const countdownBtn = document.getElementById('countdownBtn'); const countdownOverlay = document.getElementById('countdownOverlay'); const countdownText = document.getElementById('countdownText');
 countdownBtn.addEventListener('click', () => { let count = 5; countdownOverlay.classList.add('active'); countdownText.textContent = count; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); const interval = setInterval(() => { count--; if (count > 0) { countdownText.textContent = count; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); } else { clearInterval(interval); countdownText.textContent = 'PLAY'; countdownText.style.animation = 'none'; setTimeout(() => countdownText.style.animation = 'count-pulse 1s ease', 10); setTimeout(() => { countdownOverlay.classList.remove('active'); const player = document.getElementById('player').plyr; if (player) player.play(); }, 800); } }, 1000); });
@@ -635,28 +816,6 @@ snapshotBtn.addEventListener('click', () => {
   currentBackdropURL = null;
   backdropInput.value = '';
   posterSheet.style.backgroundImage = `url(${dataUrl})`;
-});
-
-const hostCamBtn = document.getElementById('hostCamBtn');
-const hostCamVideo = document.getElementById('hostCamVideo');
-let camStream = null;
-hostCamBtn.addEventListener('click', async () => {
-  if (camStream) {
-    camStream.getTracks().forEach(t => t.stop());
-    camStream = null;
-    hostCamVideo.srcObject = null;
-    hostCamVideo.classList.remove('active');
-    hostCamBtn.classList.remove('active');
-    return;
-  }
-  try {
-    camStream = await navigator.mediaDevices.getUserMedia({ video: true });
-    hostCamVideo.srcObject = camStream;
-    hostCamVideo.classList.add('active');
-    hostCamBtn.classList.add('active');
-  } catch (e) {
-    alert('Camera access denied or unavailable.');
-  }
 });
 </script>
 </body>
