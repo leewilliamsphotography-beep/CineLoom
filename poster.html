@@ -4,27 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CineLoom Poster Maker</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Georgia&family=Impact&family=Arial+Black&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-:root { --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95); --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6; --accent-soft: rgba(59, 130, 246, 0.1); --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15); --ease: cubic-bezier(0.4, 0, 0.2, 1); }
+:root { --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95); --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6; --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4); --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15); --ease: cubic-bezier(0.4, 0, 0.2, 1); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { color: var(--text); font-family: 'Inter', sans-serif; font-weight: 400; min-height: 100vh; font-size: 16px; background: var(--bg); display: flex; flex-direction: column; }
+html, body { color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 16px; background: var(--bg); display: flex; flex-direction: column; }
 header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; align-items: center; border-bottom: 1px solid var(--line); background: var(--bg-elev); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(16px); }
-.brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; }
-.brand svg { width: 36px; height: 36px; }
-.brand-text { font-size: 1.25rem; font-weight: 700; }
-.main-container { display: grid; grid-template-columns: 400px 1fr; height: calc(100vh - 73px); }
+.brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; } .brand svg { width: 36px; height: 36px; } .brand-text { font-size: 1.25rem; font-weight: 700; }
+.header-actions { display: flex; gap: 0.5rem; align-items: center; }
+.btn { background: var(--accent); color: #fff; border: none; padding: 0.6rem 1.2rem; font-family: inherit; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; text-decoration: none; font-size: 0.9rem; } .btn:hover { background: var(--accent-2); } .btn-secondary { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); } .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.main-container { display: grid; grid-template-columns: 380px 1fr; height: calc(100vh - 73px); }
 .editor-panel { border-right: 1px solid var(--line); overflow-y: auto; padding: 1.5rem; background: var(--bg-elev); display: flex; flex-direction: column; gap: 1.5rem; }
 .preview-panel { overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; align-items: center; background: rgba(8,9,11,0.5); }
-.input-group { display: flex; flex-direction: column; gap: 0.5rem; }
-.input-group label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
-.input-group input, .input-group textarea { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; outline: none; transition: border 0.2s; }
-.input-group input:focus, .input-group textarea:focus { border-color: var(--accent); }
-.poster-sheet { width: 595px; min-height: 842px; background-color: #1a1a1a; background-size: cover; background-position: center; transform: scale(0.75); transform-origin: top center; margin-bottom: -210px; display: flex; flex-direction: column; color: #fff; position: relative; }
-.btn { background: var(--accent); color: #fff; border: none; padding: 0.75rem 1.5rem; font-family: inherit; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
-.btn:hover { background: var(--accent-2); }
-.btn-secondary { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); }
+.input-group { display: flex; flex-direction: column; gap: 0.4rem; position: relative; } .input-group label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; } .input-group input, .input-group textarea { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; outline: none; transition: border 0.2s; width: 100%; } .input-group input:focus, .input-group textarea:focus { border-color: var(--accent); }
+.autocomplete-container { position: relative; } .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 10; max-height: 200px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; margin-top: 4px; } .autocomplete-results.show { display: flex; } .autocomplete-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 4px; cursor: pointer; } .autocomplete-item:hover { background: var(--accent-soft); } .autocomplete-item img { width: 30px; height: 45px; object-fit: cover; border-radius: 2px; } .auto-info { display: flex; flex-direction: column; } .auto-title { font-size: 0.85rem; color: var(--text); } .auto-year { font-size: 0.75rem; color: var(--text-dim); }
+.poster-sheet { width: 595px; min-height: 842px; background-color: #1a1a1a; background-size: cover; background-position: center; transform: scale(0.75); transform-origin: top center; margin-bottom: -210px; display: flex; flex-direction: column; color: #fff; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.ps-content { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 60%); }
+.ps-title { font-size: 3rem; margin-bottom: 1rem; font-weight: 800; line-height: 1.1; }
+.ps-tagline { font-size: 1.2rem; margin-bottom: 1rem; color: #ccc; }
+.ps-plot { font-size: 1rem; opacity: 0.8; max-width: 80%; margin-bottom: 2rem; }
+.ps-meta { display: flex; gap: 20px; font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
+.ps-venue { font-size: 1rem; opacity: 0.7; }
+.ps-rating { font-size: 1rem; color: #ffd700; margin-top: 10px; display: none; }
+.ps-rating.show { display: block; }
+.ps-footer-wrap { padding: 20px 40px; border-top: 1px solid rgba(255,255,255,0.2); display: none; }
+.ps-footer { font-size: 0.8rem; text-align: center; opacity: 0.5; }
+.zoom-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 0.5rem; background: var(--bg-elev-3); padding: 0.5rem; border-radius: 12px; border: 1px solid var(--line-strong); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.zoom-btn { background: var(--bg-elev-2); border: none; color: var(--text); width: 36px; height: 36px; border-radius: 6px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; } .zoom-btn:hover { background: var(--accent-soft); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -34,67 +42,75 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="rgba(34, 37, 43, 0.95)"/><path d="M38 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><path d="M82 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><rect x="32" y="38" width="56" height="64" rx="10" fill="#fff"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="#3b82f6"/><circle cx="60" cy="20" r="7" fill="#3b82f6"/></svg>
     <span class="brand-text">Poster Maker</span>
   </a>
-  <div style="display:flex; gap:0.5rem;">
+  <div class="header-actions">
     <button class="btn btn-secondary" id="exportBtn">Export PNG</button>
-    <button class="btn" id="printBtn">Print</button>
+    <button class="btn" id="printBtn">Print A4</button>
   </div>
 </header>
 
 <div class="main-container">
   <div class="editor-panel">
-    <!-- Simpified inputs for Poster Maker -->
-    <div class="input-group"><label>Film 1 Title</label><input type="text" id="title1" placeholder="Enter title..."></div>
-    <div class="input-group"><label>Film 1 Plot</label><textarea id="plot1" rows="3" placeholder="Enter plot..."></textarea></div>
-    <div class="input-group"><label>Film 2 Title (Optional)</label><input type="text" id="title2" placeholder="Enter title..."></div>
-    <div class="input-group"><label>Film 2 Plot (Optional)</label><textarea id="plot2" rows="3" placeholder="Enter plot..."></textarea></div>
+    <div class="input-group autocomplete-container">
+      <label>Film 1 Search</label>
+      <input type="text" id="search1" placeholder="Search OMDb...">
+      <div class="autocomplete-results" id="search1Results"></div>
+    </div>
+    <div class="input-group"><label>Film 1 Title</label><input type="text" id="title1"></div>
+    <div class="input-group"><label>Film 1 Tagline</label><input type="text" id="tagline1"></div>
+    <div class="input-group"><label>Film 1 Plot</label><textarea id="plot1" rows="3"></textarea></div>
+    
+    <div class="input-group autocomplete-container">
+      <label>Film 2 Search (Optional)</label>
+      <input type="text" id="search2" placeholder="Search OMDb...">
+      <div class="autocomplete-results" id="search2Results"></div>
+    </div>
+    <div class="input-group"><label>Film 2 Title</label><input type="text" id="title2"></div>
+    <div class="input-group"><label>Film 2 Plot</label><textarea id="plot2" rows="3"></textarea></div>
+
     <div class="input-group"><label>Date</label><input type="text" id="date" placeholder="e.g., 25th Dec"></div>
     <div class="input-group"><label>Time</label><input type="text" id="time" placeholder="e.g., 20:00"></div>
     <div class="input-group"><label>Venue</label><input type="text" id="venue" placeholder="e.g., The Living Room"></div>
+    
     <div class="input-group"><label>Custom Backdrop Upload</label><input type="file" id="backdrop" accept="image/*"></div>
+    
     <div class="input-group"><label>Footer Text</label><input type="text" id="footer" placeholder="e.g., Presented by..."></div>
   </div>
   
   <div class="preview-panel">
     <div class="poster-sheet" id="posterSheet" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('');">
-      <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; padding: 40px;">
-        <h1 id="psTitle1" style="font-size: 3rem; margin-bottom: 1rem;">Film Title</h1>
-        <p id="psPlot1" style="font-size: 1rem; opacity: 0.8; max-width: 80%; margin-bottom: 2rem;"></p>
-        <div style="display:flex; gap:20px; font-size: 1.2rem; font-weight:bold; margin-bottom: 10px;">
-          <span id="psDate">—</span> <span>•</span> <span id="psTime">—</span>
-        </div>
-        <div id="psVenue" style="font-size: 1rem; opacity: 0.7;">—</div>
+      <div class="ps-content">
+        <h1 class="ps-title" id="psTitle1">Film Title</h1>
+        <p class="ps-tagline" id="psTagline1"></p>
+        <p class="ps-plot" id="psPlot1"></p>
+        <div class="ps-rating" id="psRating1"></div>
+        <div class="ps-meta"><span id="psDate">—</span> <span>•</span> <span id="psTime">—</span></div>
+        <div class="ps-venue" id="psVenue">—</div>
       </div>
-      <div id="psFooterWrap" style="padding: 20px 40px; border-top: 1px solid rgba(255,255,255,0.2); display: none;">
-        <p id="psFooter" style="font-size: 0.8rem; text-align:center; opacity: 0.5;"></p>
+      <div class="ps-footer-wrap" id="psFooterWrap">
+        <p class="ps-footer" id="psFooter"></p>
       </div>
     </div>
   </div>
 </div>
 
+<div class="zoom-controls">
+  <button class="zoom-btn" id="zoomOut">-</button>
+  <button class="zoom-btn" id="zoomReset" style="width: auto; padding: 0 10px; font-size: 0.9rem;">75%</button>
+  <button class="zoom-btn" id="zoomIn">+</button>
+</div>
+
 <script>
 const posterSheet = document.getElementById('posterSheet');
-const fields = {
-  title1: document.getElementById('title1'), plot1: document.getElementById('plot1'),
-  title2: document.getElementById('title2'), plot2: document.getElementById('plot2'),
-  date: document.getElementById('date'), time: document.getElementById('time'), venue: document.getElementById('venue'),
-  footer: document.getElementById('footer'), backdrop: document.getElementById('backdrop')
-};
-const preview = {
-  title1: document.getElementById('psTitle1'), plot1: document.getElementById('psPlot1'),
-  date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'),
-  footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap')
-};
+const fields = { title1: document.getElementById('title1'), tagline1: document.getElementById('tagline1'), plot1: document.getElementById('plot1'), title2: document.getElementById('title2'), plot2: document.getElementById('plot2'), date: document.getElementById('date'), time: document.getElementById('time'), venue: document.getElementById('venue'), footer: document.getElementById('footer'), backdrop: document.getElementById('backdrop') };
+const preview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), rating1: document.getElementById('psRating1') };
 
 // Check for snapshot from Player
 const snapshot = sessionStorage.getItem('cineloom-snapshot');
-if (snapshot) {
-  posterSheet.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('${snapshot}')`;
-  sessionStorage.removeItem('cineloom-snapshot'); // Clear after use
-}
+if (snapshot) { posterSheet.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('${snapshot}')`; sessionStorage.removeItem('cineloom-snapshot'); }
 
-// Update logic
 function updatePreview() {
   preview.title1.textContent = fields.title1.value || 'Film Title';
+  preview.tagline1.textContent = fields.tagline1.value || '';
   preview.plot1.textContent = fields.plot1.value || '';
   preview.date.textContent = fields.date.value || '—';
   preview.time.textContent = fields.time.value || '—';
@@ -102,23 +118,67 @@ function updatePreview() {
   preview.footer.textContent = fields.footer.value || '';
   preview.footerWrap.style.display = fields.footer.value.trim() !== '' ? 'block' : 'none';
 }
-
-Object.values(fields).forEach(input => {
-  input.addEventListener('input', updatePreview);
-});
+Object.values(fields).forEach(input => input.addEventListener('input', updatePreview));
 
 fields.backdrop.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const url = URL.createObjectURL(file);
   posterSheet.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('${url}')`;
 });
 
+// OMDb Autofill
+function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
+async function fetchSuggestions(query, target) {
+  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
+  if (!apiKey || query.trim().length < 3) { hideResults(target); return; }
+  try {
+    const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`);
+    const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = '';
+    if (data.Response === 'True' && data.Search) {
+      data.Search.slice(0, 5).forEach(movie => {
+        const item = document.createElement('div'); item.className = 'autocomplete-item';
+        item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`;
+        item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target));
+        resultsContainer.appendChild(item);
+      }); resultsContainer.classList.add('show');
+    } else { hideResults(target); }
+  } catch (e) { hideResults(target); }
+}
+function hideResults(target) { const resultsContainer = document.getElementById(`search${target}Results`); if (resultsContainer) resultsContainer.classList.remove('show'); }
+async function fetchMovieDetails(imdbID, target) {
+  const apiKey = localStorage.getItem('cl-omdb-key');
+  try {
+    const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`); const data = await res.json();
+    if (data.Response === 'True') {
+      if (target === '1') {
+        fields.title1.value = data.Title || ''; fields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot1.value = data.Plot || '';
+        if (data.Poster && data.Poster !== 'N/A') { posterSheet.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('${data.Poster}')`; }
+        preview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : ''; preview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+      }
+      updatePreview();
+    }
+  } catch (e) { console.error('Error fetching details:', e); }
+  hideResults(target); document.getElementById(`search${target}`).value = '';
+}
+document.getElementById('search1').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '1'), 300));
+document.getElementById('search2').addEventListener('input', debounce((e) => fetchSuggestions(e.target.value, '2'), 300));
+document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
+
+// Zoom Logic
+let posterZoom = 0.75;
+function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
+document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
+document.getElementById('zoomOut').addEventListener('click', () => { posterZoom = Math.max(0.25, posterZoom - 0.1); applyZoom(); });
+document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
+
+// Print & Export
 document.getElementById('printBtn').addEventListener('click', () => window.print());
 document.getElementById('exportBtn').addEventListener('click', () => {
+  const currentTransform = posterSheet.style.transform; posterSheet.style.transform = 'none'; posterSheet.style.marginBottom = '0';
   html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
     const link = document.createElement('a'); link.download = 'cineloom-poster.png'; link.href = canvas.toDataURL('image/png'); link.click();
-  });
+    posterSheet.style.transform = currentTransform; applyZoom();
+  }).catch(err => { alert('Export failed. Try the Print option or use a custom backdrop upload.'); posterSheet.style.transform = currentTransform; applyZoom(); });
 });
 </script>
 </body>

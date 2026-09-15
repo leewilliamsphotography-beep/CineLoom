@@ -5,77 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CineLoom Player</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Georgia&family=Courier+Prime&family=Impact&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
 <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
 <style>
-/* [CSS CONTENT UNCHANGED FROM PREVIOUS index.html - Skipped here for brevity, keep your existing CSS] */
-:root { --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95); --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6; --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4); --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15); --ease: cubic-bezier(0.4, 0, 0.2, 1); --cue-size: 1.8em; --cue-bg: rgba(0,0,0,0.85); --cue-text: #fff; --cue-font: 'Inter', sans-serif; --cue-shadow: #000; --blob-opacity: 0.15; --shadow-card: 0 10px 40px rgba(0,0,0,0.4); --plyr-color-main: var(--accent); --plyr-video-background: rgba(0,0,0,0.9); --plyr-menu-background: var(--bg-elev-3); --plyr-menu-color: var(--text); --plyr-menu-border-color: var(--line); --plyr-control-icon-size: 18px; --plyr-control-spacing: 12px; --plyr-control-radius: 6px; --plyr-font-family: 'Inter', sans-serif; --plyr-font-size-small: 13px; --plyr-font-size-base: 14px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95); --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6; --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4); --line: rgba(255,255,255,0.08); --line-soft: rgba(255,255,255,0.04); --line-strong: rgba(255,255,255,0.15); --error: #ef4444; --ease: cubic-bezier(0.4, 0, 0.2, 1); --cue-size: 1.8em; --cue-bg: rgba(0,0,0,0.85); --cue-text: #ffffff; --cue-font: 'Inter', sans-serif; --cue-shadow: #000000; --blob-opacity: 0.15; --shadow-card: 0 10px 40px rgba(0,0,0,0.4); --plyr-color-main: var(--accent); --plyr-video-background: rgba(0,0,0,0.9); --plyr-menu-background: var(--bg-elev-3); --plyr-menu-color: var(--text); --plyr-menu-border-color: var(--line); --plyr-control-icon-size: 18px; --plyr-control-spacing: 12px; --plyr-control-radius: 6px; --plyr-font-family: 'Inter', sans-serif; --plyr-font-size-small: 13px; --plyr-font-size-base: 14px; }
 html, body { color: var(--text); font-family: 'Inter', sans-serif; font-weight: 400; min-height: 100vh; line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; transition: background 0.4s var(--ease), color 0.4s var(--ease); background: var(--bg); overflow-x: hidden; display: flex; flex-direction: column; }
 .bg-blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg); transition: opacity 0.5s ease; } .blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: var(--blob-opacity); animation: float 30s ease-in-out infinite; } .blob-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -100px; } .blob-2 { width: 400px; height: 400px; background: var(--accent-2); bottom: -100px; right: -100px; animation-delay: -5s; animation-duration: 35s; } .blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: 50%; animation-delay: -10s; animation-duration: 40s; opacity: calc(var(--blob-opacity) * 0.5); } @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -20px) scale(1.1); } 66% { transform: translate(-20px, 30px) scale(0.9); } }
 *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 video::cue { font-family: var(--cue-font); color: var(--cue-text); background: var(--cue-bg); font-size: var(--cue-size); text-shadow: 0 0 3px var(--cue-shadow), 0 0 5px var(--cue-shadow); line-height: 1.4; padding: 0.1em 0.3em; border-radius: 4px; }
-header { display: flex; justify-content: flex-start; align-items: center; padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 1000; background: transparent; border-bottom: 1px solid transparent; transition: background 0.3s var(--ease), border-color 0.3s var(--ease), backdrop-filter 0.3s var(--ease), opacity 0.5s ease; } header.scrolled { background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: var(--line); }
-.brand { display: flex; align-items: center; gap: 0.75rem; } .brand-logo svg { height: 36px; width: auto; display: block; } .brand-text { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 1000; background: transparent; border-bottom: 1px solid transparent; transition: background 0.3s var(--ease), border-color 0.3s var(--ease), backdrop-filter 0.3s var(--ease), opacity 0.5s ease; } header.scrolled { background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: var(--line); }
+.brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit; } .brand-logo svg { height: 36px; width: auto; display: block; } .brand-text { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
 .header-actions { margin-left: auto; position: relative; display: flex; gap: 0.5rem; align-items: center; }
-.settings-btn, .shortcut-btn, .voice-btn, .remote-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s var(--ease); flex-shrink: 0; } .settings-btn:hover, .shortcut-btn:hover, .voice-btn:hover, .remote-btn:hover, .settings-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .settings-btn svg, .shortcut-btn svg, .voice-btn svg, .remote-btn svg { width: 18px; height: 18px; }
+.settings-btn, .shortcut-btn, .voice-btn, .remote-btn, .nav-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s var(--ease); flex-shrink: 0; text-decoration: none; } .settings-btn:hover, .shortcut-btn:hover, .voice-btn:hover, .remote-btn:hover, .nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .settings-btn svg, .shortcut-btn svg, .voice-btn svg, .remote-btn svg, .nav-btn svg { width: 18px; height: 18px; }
+.settings-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 300px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 12px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); backdrop-filter: blur(24px); opacity: 0; transform: translateY(-10px) scale(0.95); pointer-events: none; transition: all 0.2s var(--ease); z-index: 1000; max-height: 85vh; overflow-y: auto; } .settings-dropdown.open { opacity: 1; transform: none; pointer-events: auto; } .panel-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; padding: 8px 8px 8px; letter-spacing: 0.05em; margin-top: 12px; } .panel-label:first-child { margin-top: 0; } .theme-btn { display: flex; align-items: center; gap: 10px; padding: 8px; background: transparent; border: 1px solid transparent; color: var(--text-soft); border-radius: 6px; cursor: pointer; transition: all 0.15s var(--ease); font-family: inherit; font-size: 0.85rem; text-align: left; font-weight: 500; width: 100%; } .theme-btn:hover { background: var(--bg-elev-2); color: var(--text); } .theme-btn.active { border-color: var(--line-strong); color: var(--text); background: var(--accent-soft); } .theme-swatch { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
 .hero { padding: 4rem 2rem 2rem; max-width: 800px; margin: 0 auto; text-align: center; position: relative; z-index: 5; transition: opacity 0.5s ease; } .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.1; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 0.75rem; text-shadow: 0 4px 20px rgba(0,0,0,0.6); } .hero p { color: var(--text-soft); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
 main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relative; z-index: 10; flex: 1; width: 100%; }
 .player { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; backdrop-filter: blur(16px); box-shadow: var(--shadow-card); position: relative; transition: border-color 0.2s var(--ease); }
-.player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); gap: 0.75rem; flex-wrap: wrap; }
-.header-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-.poster-mini-btn, .countdown-btn, .snapshot-btn, .load-media-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; text-decoration: none; } .poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .load-media-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .load-media-btn svg { width: 14px; height: 14px; }
+.player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); gap: 0.75rem; flex-wrap: wrap; } .screen-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.header-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; } .poster-mini-btn, .countdown-btn, .snapshot-btn, .load-media-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; text-decoration: none; } .poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .load-media-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .load-media-btn svg { width: 14px; height: 14px; }
 .load-dropdown { position: relative; display: flex; } .load-menu { position: absolute; top: calc(100% + 8px); right: 0; width: 240px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 8px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; display: none; flex-direction: column; gap: 2px; } .load-menu.open { display: flex; } .load-item { background: transparent; border: 1px solid transparent; color: var(--text-soft); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; border-radius: 6px; text-align: left; display: flex; align-items: center; gap: 0.6rem; transition: all 0.15s var(--ease); width: 100%; } .load-item:hover { background: var(--accent-soft); color: var(--accent); } .load-item svg { width: 16px; height: 16px; flex-shrink: 0; } .load-item-content { display: flex; flex-direction: column; gap: 2px; overflow: hidden; } .load-item-label { font-size: 0.85rem; font-weight: 600; color: var(--text); } .load-item:hover .load-item-label { color: var(--accent); } .load-item-filename { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .load-menu-divider { height: 1px; background: var(--line); margin: 4px 0; }
-.torrent-row { position: relative; display: flex; gap: 0.5rem; padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--line); } .torrent-input { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; } .torrent-input:focus { outline: none; border-color: var(--accent); } .torrent-btn, .torrent-search-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; justify-content: center; } .torrent-btn { background: var(--accent); border-color: var(--accent); color: #fff; } .torrent-btn:hover { background: var(--accent-2); } .torrent-search-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); } .torrent-search-btn svg { width: 16px; height: 16px; }
-.torrent-results { position: absolute; top: 55px; left: 1.25rem; right: 1.25rem; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; max-height: 300px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; } .torrent-results.show { display: flex; } .torrent-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem; border-radius: 4px; cursor: pointer; transition: background 0.15s var(--ease); } .torrent-item:hover { background: var(--bg-elev-2); } .torrent-item svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; } .torrent-info { display: flex; flex-direction: column; }
+.torrent-row { position: relative; display: flex; gap: 0.5rem; padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--line); } .torrent-input { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; } .torrent-input:focus { outline: none; border-color: var(--accent); } .torrent-btn, .torrent-search-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; justify-content: center; } .torrent-btn { background: var(--accent); border-color: var(--accent); color: #fff; } .torrent-btn:hover { background: var(--accent-2); } .torrent-search-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.torrent-results { position: absolute; top: 55px; left: 1.25rem; right: 1.25rem; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; max-height: 300px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; } .torrent-results.show { display: flex; } .torrent-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem; border-radius: 4px; cursor: pointer; transition: background 0.15s var(--ease); } .torrent-item:hover { background: var(--bg-elev-2); }
 .video-stage { position: relative; aspect-ratio: 16/9; background: #000; overflow: hidden; transition: outline 0.2s ease; } .video-stage.drag-over { outline: 2px dashed var(--accent); outline-offset: -10px; } .video-stage video { width: 100%; height: 100%; display: block; background: #000; cursor: pointer; }
 .plyr--video .plyr__controls { background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); padding: 20px 10px 10px; backdrop-filter: blur(8px); } .plyr--video .plyr__control--overlaid { background: var(--accent); color: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent-glow); }
-.idle-broadcast-state { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; overflow: hidden; } .idle-broadcast-state.hidden { display: none; } .idle-broadcast-state::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2) 1px, transparent 1px, transparent 3px); pointer-events: none; z-index: 2; animation: flicker 0.1s infinite; } @keyframes flicker { 0% { opacity: 0.9; } 50% { opacity: 1; } 100% { opacity: 0.95; } } .broadcast-logo { color: #e0e0e0; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.5; animation: pulse-broadcast 2s infinite ease-in-out; display: flex; align-items: center; gap: 1rem; z-index: 3; } .broadcast-logo svg { width: 28px; height: 28px; }
-.sub-sync-controls { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 15; display: flex; gap: 4px; align-items: center; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 4px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(8px); } .sub-sync-controls span { font-size: 0.75rem; color: #fff; min-width: 35px; text-align: center; font-weight: 600; } .sub-sync-controls button { padding: 4px 8px; font-size: 0.7rem; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 999px; cursor: pointer; } .sub-sync-controls button:hover { background: rgba(255,255,255,0.1); }
-#audioVisualizer { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 14; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; } #audioVisualizer.active { opacity: 0.8; }
-.credits-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 60%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 80px; opacity: 0; pointer-events: none; transition: opacity 1s ease; z-index: 15; } .credits-overlay.show { opacity: 1; } .credits-text { color: #fff; font-size: 1.5rem; font-weight: 600; text-shadow: 0 2px 10px rgba(0,0,0,0.8); text-align: center; }
+.idle-broadcast-state { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; overflow: hidden; } .idle-broadcast-state.hidden { display: none; }
 .buffering-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 20; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #fff; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 1.1rem; } .buffering-overlay.show { display: flex; } .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
 .file-input { position: absolute; width: 0; height: 0; opacity: 0; }
 .site-footer { text-align: center; padding: 2rem 1rem; color: var(--text-dim); font-size: 0.75rem; opacity: 0.7; position: relative; z-index: 5; margin-top: auto; border-top: 1px solid var(--line-soft); }
 .countdown-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 25; display: none; align-items: center; justify-content: center; } .countdown-overlay.active { display: flex; } .countdown-text { font-size: 12rem; font-weight: 900; color: #fff; text-shadow: 0 0 40px var(--accent); animation: count-pulse 1s ease; } @keyframes count-pulse { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
 .qr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10003; display: none; align-items: center; justify-content: center; padding: 2rem; opacity: 0; transition: opacity 0.3s var(--ease); } .qr-overlay.active { display: flex; opacity: 1; } .qr-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; } .qr-box h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--text); } .qr-box p { color: var(--text-soft); margin-bottom: 1.5rem; } .remote-code-display { font-size: 2.5rem; font-weight: 800; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 1.5rem; font-family: 'Courier New', monospace; text-shadow: 0 0 15px var(--accent-glow); } .qr-code-img { width: 250px; height: 250px; border-radius: 12px; margin: 0 auto 1.5rem; display: block; background: #fff; padding: 10px; } .qr-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.2s var(--ease); }
+@media (max-width: 900px) { header { padding: 1rem 1.5rem; } .brand-text { font-size: 1.1rem; } main { padding: 0 1rem 2rem; } }
 </style>
 </head>
 <body>
 
 <div class="bg-blobs" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 
-<header id="mainHeader" style="display:flex; justify-content: space-between; padding: 1.25rem 2rem; align-items: center;">
-  <a href="index.html" style="display:flex; align-items:center; gap:0.75rem; text-decoration:none; color:inherit;">
-    <div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="rgba(34, 37, 43, 0.95)"/><path d="M38 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><path d="M82 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><rect x="32" y="38" width="56" height="64" rx="10" fill="#fff"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="#3b82f6"/><circle cx="60" cy="20" r="7" fill="#3b82f6"/></svg></div>
-    <span class="brand-text">CineLoom</span>
-  </a>
-  <a href="poster.html" class="poster-mini-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Open Poster Maker</a>
+<header id="mainHeader">
+  <a href="index.html" class="brand"><div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="rgba(34, 37, 43, 0.95)"/><path d="M38 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><path d="M82 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><rect x="32" y="38" width="56" height="64" rx="10" fill="#fff"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="#3b82f6"/><circle cx="60" cy="20" r="7" fill="#3b82f6"/></svg></div><span class="brand-text">CineLoom</span></a>
+  <div class="header-actions">
+    <a href="poster.html" class="nav-btn" aria-label="Open Poster Maker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></a>
+    <button class="remote-btn" id="remoteToggle" aria-label="Open Remote Control"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></button>
+    <button class="settings-btn" id="settingsToggle" aria-label="Open Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+    <div class="settings-dropdown" id="settingsPanel">
+      <div class="panel-label">Base Theme</div>
+      <button class="theme-btn active" data-theme="cyber"><span class="theme-swatch" style="background: #3b82f6;"></span>Cyber Blue</button>
+      <button class="theme-btn" data-theme="light"><span class="theme-swatch" style="background: #2563eb;"></span>Light Mode</button>
+      <button class="theme-btn" data-theme="theater"><span class="theme-swatch" style="background: #f5a05f;"></span>Warm Theater</button>
+      <button class="theme-btn" data-theme="mono"><span class="theme-swatch" style="background: #ffffff;"></span>Black & White</button>
+      <div class="panel-label">OMDb API Key</div><input type="text" id="omdbKeyInput" style="width:100%; background:var(--bg); border:1px solid var(--line); color:var(--text); padding:0.5rem; border-radius:6px; margin-bottom:0.5rem;" placeholder="Enter OMDb API Key">
+    </div>
+  </div>
 </header>
 
 <main>
-  <section class="players" aria-label="Video Player">
-    <div class="player" data-screen="1" aria-label="Screen 1">
+  <section class="hero"><h1>CineLoom</h1><p>Drag & drop or click load to begin. Stream torrents or control playback via your phone.</p></section>
+  <section class="players">
+    <div class="player" data-screen="1">
       <div class="player-header">
-          <span class="screen-label">Now Showing</span>
-          <div class="header-actions-row">
-              <div class="load-dropdown">
-                  <button class="poster-mini-btn load-media-btn" id="loadMediaToggle"> Load</button>
-                  <div class="load-menu" id="loadMenu">
-                      <button class="load-item" id="loadFilm1Item">Select Film 1 <span id="loadFilm1Name"></span></button>
-                      <button class="load-item" id="loadFilm2Item">Select Film 2 <span id="loadFilm2Name"></span></button>
-                      <div class="load-menu-divider"></div>
-                      <button class="load-item" id="loadSubsItem">Load Subtitles <span id="loadSubsName"></span></button>
-                      <button class="load-item" id="loadCommentaryItem">Load Commentary <span id="loadComName"></span></button>
-                      <div class="load-menu-divider"></div>
-                      <button class="load-item" id="swapFilmsItem">Swap Films 1 & 2</button>
-                  </div>
-              </div>
-              <button class="snapshot-btn" id="snapshotBtn">Snapshot</button>
-              <button class="countdown-btn" id="countdownBtn">Start Showtime</button>
+        <span class="screen-label">Now Showing</span>
+        <div class="header-actions-row">
+          <div class="load-dropdown">
+            <button class="poster-mini-btn load-media-btn" id="loadMediaToggle">Load</button>
+            <div class="load-menu" id="loadMenu">
+              <button class="load-item" id="loadFilm1Item"><span class="load-item-content"><span class="load-item-label">Select Film 1</span><span class="load-item-filename" id="loadFilm1Name">No file chosen</span></span></button>
+              <button class="load-item" id="loadFilm2Item"><span class="load-item-content"><span class="load-item-label">Select Film 2</span><span class="load-item-filename" id="loadFilm2Name">No file chosen</span></span></button>
+              <div class="load-menu-divider"></div>
+              <button class="load-item" id="loadSubsItem"><span class="load-item-content"><span class="load-item-label">Load Subtitles</span><span class="load-item-filename" id="loadSubsName">No file chosen</span></span></button>
+              <div class="load-menu-divider"></div>
+              <button class="load-item" id="swapFilmsItem"><span class="load-item-content"><span class="load-item-label">Swap Films 1 & 2</span></span></button>
+            </div>
           </div>
+          <button class="snapshot-btn" id="snapshotBtn">Snapshot</button>
+          <button class="countdown-btn" id="countdownBtn">Start Showtime</button>
+        </div>
       </div>
       <div class="torrent-row">
         <input type="text" id="torrentInput" class="torrent-input" placeholder="Search Movies (YTS) or paste Magnet Link...">
@@ -85,25 +93,19 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
       </div>
       <div class="video-stage">
         <video id="player" playsinline></video>
-        <div class="idle-broadcast-state" id="idleState"><div class="broadcast-logo">CineLoom Broadcast</div></div>
-        <div class="error-state hidden" role="alert"><div class="prompt">Cannot play this video</div><div class="hint">This file type might not work in your web browser. Please try an MP4 file instead.</div></div>
+        <div class="idle-broadcast-state" id="idleState"><div style="color:#e0e0e0; font-size:1.5rem; font-weight:700; letter-spacing:0.1em;">CineLoom Broadcast</div></div>
         <div class="buffering-overlay" id="bufferingOverlay"><div class="spinner"></div><span id="bufferingText">Buffering...</span></div>
-        <div class="sub-sync-controls" id="subSyncControls" style="display: none;"><button id="subSyncBack">-0.5s</button><span id="subSyncVal">0.0s</span><button id="subSyncFwd">+0.5s</button><button id="subSyncReset">Reset</button></div>
-        <canvas id="audioVisualizer"></canvas>
-        <div class="credits-overlay" id="creditsOverlay"><div class="credits-text">Thank you for watching with CineLoom</div></div>
         <div class="countdown-overlay" id="countdownOverlay"><div class="countdown-text" id="countdownText"></div></div>
       </div>
       <input type="file" class="file-input file-input-video-1" accept="*/*" aria-hidden="true" tabindex="-1">
       <input type="file" class="file-input file-input-video-2" accept="*/*" aria-hidden="true" tabindex="-1">
       <input type="file" class="file-input file-input-sub" accept=".vtt,.srt,.sbv,.ass,.sub,.txt" aria-hidden="true" tabindex="-1">
-      <input type="file" class="file-input file-input-com" accept="audio/*" aria-hidden="true" tabindex="-1">
     </div>
   </section>
 </main>
 
 <footer class="site-footer">CineLoom Suite by <span>Lee Williams</span></footer>
 
-<!-- QR Code Modal -->
 <div class="qr-overlay" id="qrOverlay">
   <div class="qr-box">
     <h3>Remote Control</h3>
@@ -116,13 +118,211 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-// [JS CONTENT UNCHANGED FROM PREVIOUS player logic - abbreviated here for response limits, 
-//  ensure you keep your full working player JS from the previous iteration]
-// Key changes in the JS:
-// 1. Expose player: window.player = player; inside setupPlayer()
-// 2. MQTT Remote URL: const remoteUrl = `${baseUrl}remote.html?room=${roomCode}`;
-// 3. Snapshot Button: sessionStorage.setItem('cineloom-snapshot', dataUrl); window.location.href = 'poster.html';
-// 4. Remove all posterOverlay and openPosterMaker logic.
+// Player Setup & Logic
+const playerContainer = document.querySelector('.player'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
+let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
+let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
+let currentFilm = 1;
+
+function setupPlayer() {
+  const video = document.getElementById('player'); 
+  const fileVideo1 = playerContainer.querySelector('.file-input-video-1');
+  const fileVideo2 = playerContainer.querySelector('.file-input-video-2');
+  const fileSub = playerContainer.querySelector('.file-input-sub');
+  
+  const player = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], invertTime: true, toggleInvertTime: true });
+  window.player = player;
+
+  player.on('loadedmetadata', () => { idleState.classList.add('hidden'); });
+  player.on('error', () => { idleState.classList.add('hidden'); });
+  
+  video.addEventListener('ended', () => { 
+    if (currentFilm === 1 && film2.url) {
+      setTimeout(() => { switchFilm(2); player.play(); }, 2000);
+    }
+  });
+
+  function switchFilm(filmNum) {
+    currentFilm = filmNum;
+    const f = filmNum === 1 ? film1 : film2;
+    if (!f.url) return;
+    player.source = { type: 'video', title: f.name, sources: [{ src: f.url, type: f.mime }] };
+  }
+  window.switchFilm = switchFilm;
+
+  function handleVideoFileLoad(e, filmNum) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const filmObj = filmNum === 1 ? film1 : film2;
+    if (filmObj.url) URL.revokeObjectURL(filmObj.url);
+    let mimeType = file.type || 'video/mp4';
+    filmObj.mime = mimeType;
+    filmObj.url = URL.createObjectURL(new Blob([file], { type: mimeType }));
+    filmObj.name = file.name;
+    document.getElementById(`loadFilm${filmNum}Name`).textContent = file.name;
+    switchFilm(filmNum);
+  }
+
+  fileVideo1.addEventListener('change', (e) => handleVideoFileLoad(e, 1));
+  fileVideo2.addEventListener('change', (e) => handleVideoFileLoad(e, 2));
+
+  window.swapFilms = () => {
+    const temp = film1; film1 = film2; film2 = temp;
+    document.getElementById('loadFilm1Name').textContent = film1.name;
+    document.getElementById('loadFilm2Name').textContent = film2.name;
+    switchFilm(1);
+  };
+
+  // Drag & Drop
+  const videoStage = document.querySelector('.video-stage');
+  videoStage.addEventListener('dragover', (e) => { e.preventDefault(); videoStage.classList.add('drag-over'); });
+  videoStage.addEventListener('dragleave', () => videoStage.classList.remove('drag-over'));
+  videoStage.addEventListener('drop', (e) => {
+    e.preventDefault(); videoStage.classList.remove('drag-over');
+    if (e.dataTransfer.files.length > 0) {
+      let videoCount = 0;
+      Array.from(e.dataTransfer.files).forEach(file => {
+        const isVideo = file.type.startsWith('video/');
+        const isSub = file.name.match(/\.(vtt|srt|sbv|ass|sub|txt)$/i);
+        if (isVideo && videoCount === 0) { fileVideo1.files = e.dataTransfer.files; fileVideo1.dispatchEvent(new Event('change')); videoCount++; }
+        else if (isVideo && videoCount === 1) { fileVideo2.files = e.dataTransfer.files; fileVideo2.dispatchEvent(new Event('change')); videoCount++; }
+        else if (isSub) { fileSub.files = e.dataTransfer.files; fileSub.dispatchEvent(new Event('change')); }
+      });
+    }
+  });
+}
+setupPlayer();
+
+// Load Dropdown Menu Logic
+const loadMediaToggle = document.getElementById('loadMediaToggle');
+const loadMenu = document.getElementById('loadMenu');
+loadMediaToggle.addEventListener('click', (e) => { e.stopPropagation(); loadMenu.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!loadMenu.contains(e.target) && !loadMediaToggle.contains(e.target)) loadMenu.classList.remove('open'); });
+document.getElementById('loadFilm1Item').addEventListener('click', () => { document.querySelector('.file-input-video-1').click(); loadMenu.classList.remove('open'); });
+document.getElementById('loadFilm2Item').addEventListener('click', () => { document.querySelector('.file-input-video-2').click(); loadMenu.classList.remove('open'); });
+document.getElementById('loadSubsItem').addEventListener('click', () => { document.querySelector('.file-input-sub').click(); loadMenu.classList.remove('open'); });
+document.getElementById('swapFilmsItem').addEventListener('click', () => { if (window.swapFilms) window.swapFilms(); loadMenu.classList.remove('open'); });
+
+// Snapshot to Poster Maker
+document.getElementById('snapshotBtn').addEventListener('click', () => {
+  const video = document.getElementById('player');
+  if (!video.src || video.error) { alert('Please load a video first.'); return; }
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  const dataUrl = canvas.toDataURL('image/png');
+  try { sessionStorage.setItem('cineloom-snapshot', dataUrl); window.location.href = 'poster.html'; } 
+  catch (e) { alert('Snapshot too large to store. Try downloading it manually.'); }
+});
+
+// Settings Dropdown
+const settingsToggle = document.getElementById('settingsToggle'); const settingsPanel = document.getElementById('settingsPanel');
+settingsToggle.addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('open'); settingsToggle.classList.toggle('active'); });
+document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) { settingsPanel.classList.remove('open'); settingsToggle.classList.remove('active'); } });
+
+// OMDb API Key
+const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
+
+// Theme Logic
+document.querySelectorAll('.theme-btn').forEach(btn => btn.addEventListener('click', () => { const theme = btn.dataset.theme; document.documentElement.setAttribute('data-theme', theme); document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); localStorage.setItem('cl-theme', theme); }));
+
+// MQTT Remote Host
+const qrOverlay = document.getElementById('qrOverlay'); const qrCloseBtn = document.getElementById('qrCloseBtn'); const remoteCodeDisplay = document.getElementById('remoteCodeDisplay'); let mqttClient = null; let timeUpdateInterval = null;
+document.getElementById('remoteToggle').addEventListener('click', () => {
+  const roomCode = Math.floor(100000 + Math.random() * 900000); remoteCodeDisplay.textContent = roomCode;
+  const currentPath = window.location.href; const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+  const remoteUrl = `${baseUrl}remote.html?room=${roomCode}`;
+  document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
+  qrOverlay.classList.add('active');
+  mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+  const cmdTopic = `cineloom/${roomCode}/cmd`; const timeTopic = `cineloom/${roomCode}/time`;
+  mqttClient.on('connect', () => { mqttClient.subscribe(cmdTopic); });
+  mqttClient.on('message', (topic, message) => {
+    if (topic === cmdTopic) {
+      const data = JSON.parse(message.toString());
+      if (!window.player) return;
+      if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); window.player.play(); }
+      if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); window.player.play(); }
+      if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
+      if (data.action === 'playPause') window.player.togglePlay();
+      if (data.action === 'fullscreen') window.player.fullscreen.enter();
+      if (data.action === 'seekBack') window.player.currentTime -= 10;
+      if (data.action === 'seekFwd') window.player.currentTime += 10;
+      if (data.action === 'showtime') document.getElementById('countdownBtn').click();
+    }
+  });
+  timeUpdateInterval = setInterval(() => {
+    if (mqttClient && mqttClient.connected) {
+      const videoEl = document.getElementById('player');
+      if (videoEl && !videoEl.paused && videoEl.duration) {
+        let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
+        const hrs = Math.floor(remaining / 3600); const mins = Math.floor((remaining % 3600) / 60); const secs = Math.floor(remaining % 60);
+        let timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
+        mqttClient.publish(timeTopic, JSON.stringify({timeStr: timeStr}));
+      }
+    }
+  }, 1000);
+});
+qrCloseBtn.addEventListener('click', () => { qrOverlay.classList.remove('active'); if (mqttClient) { mqttClient.end(); mqttClient = null; } if (timeUpdateInterval) { clearInterval(timeUpdateInterval); timeUpdateInterval = null; } });
+
+// Torrent Search
+async function searchTorrents(query) {
+  if (!query || query.trim().length < 3) return;
+  const torrentResults = document.getElementById('torrentResults');
+  torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Searching YTS...</span></div>'; torrentResults.classList.add('show');
+  const apiUrl = `https://yts.mx/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=10`;
+  try {
+    const res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(apiUrl)}`);
+    const data = await res.json(); torrentResults.innerHTML = '';
+    if (data.status === 'ok' && data.data.movies) {
+      data.data.movies.forEach(movie => {
+        const torrent = movie.torrents.find(t => t.quality === '1080p') || movie.torrents.find(t => t.quality === '720p');
+        if (!torrent) return;
+        const item = document.createElement('div'); item.className = 'torrent-item';
+        item.innerHTML = `<span>${movie.title_long} (${torrent.quality})</span>`;
+        item.addEventListener('click', () => { document.getElementById('torrentInput').value = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodeURIComponent(movie.title)}&tr=udp://tracker.opentrackr.org:1337/announce`; torrentResults.classList.remove('show'); startTorrentStream(document.getElementById('torrentInput').value); });
+        torrentResults.appendChild(item);
+      });
+    } else { torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>No torrents found.</span></div>'; }
+  } catch (e) { torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Search failed. Paste a Magnet Link directly.</span></div>'; }
+}
+document.getElementById('torrentSearchBtn').addEventListener('click', () => { const query = document.getElementById('torrentInput').value.trim(); if (query.startsWith('magnet:')) startTorrentStream(query); else searchTorrents(query); });
+
+function startTorrentStream(magnet) {
+  if (window.torrentClient) window.torrentClient.destroy();
+  window.torrentClient = new WebTorrent();
+  document.getElementById('loadFilm1Name').textContent = "Connecting to peers...";
+  bufferingText.textContent = 'Connecting...'; bufferingOverlay.classList.add('show');
+  window.torrentClient.add(magnet, (torrent) => {
+    const file = torrent.files.find(f => f.name.endsWith('.mp4') || f.name.endsWith('.webm') || f.name.endsWith('.m4v') || f.name.endsWith('.mkv'));
+    if (!file) { alert("No playable video file found in this torrent."); bufferingOverlay.classList.remove('show'); return; }
+    const videoStage = document.querySelector('.video-stage');
+    const oldVideo = document.getElementById('player'); if (oldVideo) oldVideo.remove();
+    const tempContainer = document.createElement('div'); videoStage.insertBefore(tempContainer, videoStage.firstChild);
+    file.appendTo(tempContainer, { autoplay: false, controls: false }, (err, elem) => {
+      if (err) { alert('Error streaming torrent.'); bufferingOverlay.classList.remove('show'); return; }
+      elem.id = 'player'; elem.setAttribute('playsinline', '');
+      videoStage.insertBefore(elem, tempContainer); tempContainer.remove();
+      document.getElementById('loadFilm1Name').textContent = `Streaming: ${file.name}`;
+      elem.addEventListener('waiting', () => { bufferingText.textContent = 'Buffering...'; bufferingOverlay.classList.add('show'); });
+      elem.addEventListener('playing', () => bufferingOverlay.classList.remove('show'));
+      elem.addEventListener('canplay', () => bufferingOverlay.classList.remove('show'));
+      setupPlayer(); idleState.classList.add('hidden');
+    });
+  });
+}
+
+// Countdown
+const countdownBtn = document.getElementById('countdownBtn'); const countdownOverlay = document.getElementById('countdownOverlay'); const countdownText = document.getElementById('countdownText');
+countdownBtn.addEventListener('click', () => { let count = 5; countdownOverlay.classList.add('active'); countdownText.textContent = count; const interval = setInterval(() => { count--; if (count > 0) { countdownText.textContent = count; } else { clearInterval(interval); countdownText.textContent = 'PLAY'; setTimeout(() => { countdownOverlay.classList.remove('active'); if (window.player) window.player.play(); }, 800); } }, 1000); });
+
+// Accidental Reload Protection
+window.addEventListener('beforeunload', (event) => {
+  const video = document.getElementById('player');
+  const hasVideoSource = video && video.src && video.src !== window.location.href;
+  const hasTorrent = window.torrentClient && window.torrentClient.torrents && window.torrentClient.torrents.length > 0;
+  if (hasVideoSource || hasTorrent) { event.preventDefault(); event.returnValue = ''; }
+});
 </script>
 </body>
 </html>
