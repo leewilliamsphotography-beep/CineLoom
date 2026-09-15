@@ -91,21 +91,30 @@
   let client = null;
   let cmdTopic = '';
 
-  function sendCmd(action) {
+  function sendCmd(action, e) {
     if (client && client.connected) {
       client.publish(cmdTopic, JSON.stringify({action: action}));
+      if (e && e.currentTarget) {
+        e.currentTarget.style.boxShadow = '0 0 15px #3b82f6';
+        setTimeout(() => { e.currentTarget.style.boxShadow = ''; }, 300);
+      }
+    } else {
+      if (e && e.currentTarget) {
+        e.currentTarget.style.boxShadow = '0 0 15px #ef4444';
+        setTimeout(() => { e.currentTarget.style.boxShadow = ''; }, 300);
+      }
     }
   }
 
   // Attach listeners once
-  document.getElementById('rPlay1').addEventListener('click', () => sendCmd('play1'));
-  document.getElementById('rPlay2').addEventListener('click', () => sendCmd('play2'));
-  document.getElementById('rSwapFilms').addEventListener('click', () => sendCmd('swapFilms'));
-  document.getElementById('rPlayPause').addEventListener('click', () => sendCmd('playPause'));
-  document.getElementById('rFullscreen').addEventListener('click', () => sendCmd('fullscreen'));
-  document.getElementById('rSeekBack').addEventListener('click', () => sendCmd('seekBack'));
-  document.getElementById('rSeekFwd').addEventListener('click', () => sendCmd('seekFwd'));
-  document.getElementById('rShowtime').addEventListener('click', () => sendCmd('showtime'));
+  document.getElementById('rPlay1').addEventListener('click', (e) => sendCmd('play1', e));
+  document.getElementById('rPlay2').addEventListener('click', (e) => sendCmd('play2', e));
+  document.getElementById('rSwapFilms').addEventListener('click', (e) => sendCmd('swapFilms', e));
+  document.getElementById('rPlayPause').addEventListener('click', (e) => sendCmd('playPause', e));
+  document.getElementById('rFullscreen').addEventListener('click', (e) => sendCmd('fullscreen', e));
+  document.getElementById('rSeekBack').addEventListener('click', (e) => sendCmd('seekBack', e));
+  document.getElementById('rSeekFwd').addEventListener('click', (e) => sendCmd('seekFwd', e));
+  document.getElementById('rShowtime').addEventListener('click', (e) => sendCmd('showtime', e));
 
   function connectToHost(code) {
     if (!code || code.length !== 6) {
@@ -117,15 +126,17 @@
     entryStatus.textContent = "Connecting...";
     entryStatus.style.color = "#a0a4a8";
     
+    console.log('Connecting to MQTT...');
     client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
     cmdTopic = `cineloom/${roomCode}/cmd`;
     const timeTopic = `cineloom/${roomCode}/time`;
     
     client.on('connect', () => {
+      console.log('Remote MQTT Connected');
       remoteStatus.textContent = "Connected!";
       remoteStatus.style.color = "#41d636";
       
-      // FIX: Switch UI immediately upon connection
+      // Switch UI immediately upon connection
       entryScreen.style.display = 'none';
       remoteApp.style.display = 'flex';
       
@@ -140,8 +151,9 @@
       }
     });
     
-    client.on('error', () => { 
-      remoteStatus.textContent = "Connection lost. Retrying..."; 
+    client.on('error', (err) => { 
+      console.error('MQTT Error:', err);
+      remoteStatus.textContent = "Connection lost."; 
       remoteStatus.style.color = "#ef4444"; 
     });
   }
