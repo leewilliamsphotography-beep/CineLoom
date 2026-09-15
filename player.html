@@ -120,7 +120,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v1.1.0 loaded");
+console.log("CineLoom Player v1.1.1 loaded");
 
 // Player Setup
 const playerContainer = document.querySelector('.player'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
@@ -314,34 +314,37 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
     const cmdTopic = `cineloom/${currentRoomCode}/cmd`; 
     const timeTopic = `cineloom/${currentRoomCode}/time`;
     
-    // ATTACH MESSAGE LISTENER BEFORE SUBSCRIBING (Prevents race conditions)
     mqttClient.on('message', (topic, message) => {
       if (topic === cmdTopic) {
         const data = JSON.parse(message.toString());
         console.log('Received command:', data);
         
-        // Visual feedback: flash the green dot red to prove command was received
         remoteActiveDot.style.background = '#ff0000';
         setTimeout(() => remoteActiveDot.style.background = '#41d636', 200);
         
-        // Use querySelector to find the video element robustly, even if Plyr changes the DOM
         const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
-        if (!videoEl) {
-            console.error('No video element found!');
-            return;
-        }
+        if (!videoEl) return;
         
         try {
-          if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); videoEl.play(); }
-          if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); videoEl.play(); }
+          if (data.action === 'play1') { 
+            // Only switch if film1 is explicitly loaded as a file. If streaming torrent, just play.
+            if (film1.url) window.switchFilm(1); 
+            videoEl.play().catch(e => console.error("Play failed:", e)); 
+          }
+          if (data.action === 'play2') { 
+            if (film2.url) window.switchFilm(2); 
+            videoEl.play().catch(e => console.error("Play failed:", e)); 
+          }
           if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
           if (data.action === 'playPause') { 
-            if (videoEl.paused) videoEl.play(); else videoEl.pause(); 
+            if (videoEl.paused) videoEl.play().catch(e => console.error("Play failed:", e)); 
+            else videoEl.pause(); 
           }
           if (data.action === 'fullscreen') { 
-            if (window.player && window.player.fullscreen) window.player.fullscreen.enter();
+            // Try native video fullscreen first (best for programmatic requests), then Plyr
+            if (videoEl.webkitEnterFullscreen) videoEl.webkitEnterFullscreen();
+            else if (window.player && window.player.fullscreen) window.player.fullscreen.enter();
             else if (videoEl.requestFullscreen) videoEl.requestFullscreen(); 
-            else if (videoEl.webkitRequestFullscreen) videoEl.webkitRequestFullscreen();
           }
           if (data.action === 'seekBack') { 
             videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); 
@@ -356,33 +359,39 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
       }
     });
     
-    // SUBSCRIBE WITH QOS 1 (Guarantees delivery)
     mqttClient.subscribe(cmdTopic, { qos: 1 }, (err) => {
       if (err) console.error('Subscription error:', err);
-      else console.log('Subscribed to:', cmdTopic);
     });
     
-    // Start broadcasting heartbeat in the background (persists after closing modal)
+    // Broadcast heartbeat in background
     timeUpdateInterval = setInterval(() => {
       if (mqttClient && mqttClient.connected) {
         const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
         let timeStr = "Paused";
-        if (videoEl && !videoEl.paused && videoEl.duration) {
+        
+        // Check if duration is valid (not NaN or Infinity, which happens on live streams)
+        if (videoEl && !isNaN(videoEl.duration) && isFinite(videoEl.duration)) {
           let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
-          const hrs = Math.floor(remaining / 3600); const mins = Math.floor((remaining % 3600) / 60); const secs = Math.floor(remaining % 60);
-          timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
-        } else if (videoEl && videoEl.duration && videoEl.paused) {
-          let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
-          const mins = Math.floor((remaining % 3600) / 60); const secs = Math.floor(remaining % 60);
-          timeStr = `Paused (${mins}m ${secs}s left)`;
+          const hrs = Math.floor(remaining / 3600); 
+          const mins = Math.floor((remaining % 3600) / 60); 
+          const secs = Math.floor(remaining % 60);
+          
+          if (!videoEl.paused) {
+            timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; 
+            if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
+          } else {
+            timeStr = `Paused (${mins}m ${secs}s left)`;
+          }
+        } else if (videoEl && !videoEl.paused) {
+          timeStr = "Live Stream";
         }
+        
         mqttClient.publish(timeTopic, JSON.stringify({timeStr: timeStr}));
       }
     }, 1000);
   });
 });
 
-// Close modal but KEEP connection alive
 qrCloseBtn.addEventListener('click', () => { 
   qrOverlay.classList.remove('active'); 
 });
