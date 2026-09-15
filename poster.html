@@ -44,8 +44,6 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .poster-sheet.double-feature .ps-film1 { border-bottom: 1px dashed rgba(255,255,255,0.3); padding-bottom: 30px; margin-bottom: 30px; }
 .ps-film2 { display: none; }
 .poster-sheet.double-feature .ps-film2 { display: flex; }
-.ps-film-divider { display: none; }
-.poster-sheet.double-feature .ps-film-divider { display: flex; align-items: center; justify-content: center; margin: -15px 0; background: rgba(0,0,0,0.8); width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); font-weight: bold; z-index: 1; }
 
 .ps-content { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6) 40%, transparent 80%); }
 
@@ -88,20 +86,25 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 
 .ps-qr { display: none; width: 100px; height: 100px; margin-top: 20px; border-radius: 8px; background: #fff; padding: 5px; } .ps-qr.show { display: block; }
 
-/* Print Rules - Hides everything except the poster */
+/* Bulletproof Print Rules */
 @media print {
-    body { background: white !important; }
+    @page { size: A4; margin: 0; }
+    body { background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     header, .editor-panel, .zoom-controls { display: none !important; }
     .main-container { display: block !important; height: auto !important; overflow: visible !important; }
-    .poster-preview-wrap { position: static !important; overflow: visible !important; padding: 0 !important; height: auto !important; background: none !important; }
+    .poster-preview-wrap { position: static !important; overflow: visible !important; padding: 0 !important; height: auto !important; background: none !important; display: block !important; }
     .poster-sheet { 
         transform: none !important; 
-        margin: 0 !important; 
+        margin: 0 auto !important; 
         box-shadow: none !important; 
         page-break-after: avoid;
-        width: 100% !important;
-        min-height: 297mm !important; /* A4 height */
+        width: 210mm !important;
+        min-height: 297mm !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
+    .ps-content { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .ps-poster-img, .film-grain, .ps-qr { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 </style>
 </head>
@@ -191,7 +194,6 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
         <p class="ps-plot" id="psPlot1"></p>
         <div class="ps-rating" id="psRating1"></div>
       </div>
-      <div class="ps-film-divider">VS</div>
       <div class="ps-content ps-film2">
         <img id="psPoster2" class="ps-poster-img" src="" alt="">
         <h1 class="ps-title" id="psTitle2" contenteditable="true"></h1>
@@ -235,7 +237,7 @@ const preview = {
   date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'),
   rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'),
   qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'),
-  footerWrap: document.getElementById('psFooterWrap'), film2Block: document.querySelector('.ps-film2'), filmDivider: document.querySelector('.ps-film-divider')
+  footerWrap: document.getElementById('psFooterWrap'), film2Block: document.querySelector('.ps-film2')
 };
 
 // Check for snapshot
@@ -261,14 +263,12 @@ function updatePosterPreview() {
   if (fields.title2.value.trim() !== '') {
     posterSheet.classList.add('double-feature');
     preview.film2Block.style.display = 'flex';
-    preview.filmDivider.style.display = 'flex';
     preview.title2.textContent = fields.title2.value;
     preview.tagline2.textContent = fields.tagline2.value || '';
     preview.plot2.textContent = fields.plot2.value || '';
   } else {
     posterSheet.classList.remove('double-feature');
     preview.film2Block.style.display = 'none';
-    preview.filmDivider.style.display = 'none';
   }
   applyZoom();
 }
@@ -397,7 +397,6 @@ async function fetchMovieDetails(imdbID, target) {
     if (data.Response === 'True') {
       if (target === '1') {
         fields.title1.value = data.Title || ''; fields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot1.value = data.Plot || '';
-        // Set ONLY the small cover art image, NOT the background
         if (data.Poster && data.Poster !== 'N/A') { 
           const img = document.getElementById('psPoster1');
           img.src = data.Poster; img.classList.add('show');
@@ -406,7 +405,6 @@ async function fetchMovieDetails(imdbID, target) {
         preview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
       } else {
         fields.title2.value = data.Title || ''; fields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); fields.plot2.value = data.Plot || '';
-        // Set ONLY the small cover art image, NOT the background
         if (data.Poster && data.Poster !== 'N/A') {
           const img = document.getElementById('psPoster2');
           img.src = data.Poster; img.classList.add('show');
