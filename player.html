@@ -120,7 +120,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v1.0.9 loaded");
+console.log("CineLoom Player v1.1.0 loaded");
 
 // Player Setup
 const playerContainer = document.querySelector('.player'); const idleState = document.getElementById('idleState'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText');
@@ -294,7 +294,6 @@ function connectToBroker(statusEl, onConnect) {
 }
 
 document.getElementById('remoteToggle').addEventListener('click', () => {
-  // If already connected, just show the popup again with the existing code
   if (mqttClient && mqttClient.connected) {
     qrOverlay.classList.add('active');
     hostStatus.textContent = "Host Active! You can close this window.";
@@ -302,7 +301,6 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
     return;
   }
 
-  // Generate new code and start connection
   currentRoomCode = Math.floor(100000 + Math.random() * 900000); 
   remoteCodeDisplay.textContent = currentRoomCode;
   
@@ -316,17 +314,22 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
     const cmdTopic = `cineloom/${currentRoomCode}/cmd`; 
     const timeTopic = `cineloom/${currentRoomCode}/time`;
     
-    mqttClient.subscribe(cmdTopic, (err) => {
-      if (err) console.error('Subscription error:', err);
-    });
-    
+    // ATTACH MESSAGE LISTENER BEFORE SUBSCRIBING (Prevents race conditions)
     mqttClient.on('message', (topic, message) => {
       if (topic === cmdTopic) {
         const data = JSON.parse(message.toString());
         console.log('Received command:', data);
         
-        const videoEl = document.getElementById('player');
-        if (!videoEl) return;
+        // Visual feedback: flash the green dot red to prove command was received
+        remoteActiveDot.style.background = '#ff0000';
+        setTimeout(() => remoteActiveDot.style.background = '#41d636', 200);
+        
+        // Use querySelector to find the video element robustly, even if Plyr changes the DOM
+        const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
+        if (!videoEl) {
+            console.error('No video element found!');
+            return;
+        }
         
         try {
           if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); videoEl.play(); }
@@ -336,7 +339,8 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
             if (videoEl.paused) videoEl.play(); else videoEl.pause(); 
           }
           if (data.action === 'fullscreen') { 
-            if (videoEl.requestFullscreen) videoEl.requestFullscreen(); 
+            if (window.player && window.player.fullscreen) window.player.fullscreen.enter();
+            else if (videoEl.requestFullscreen) videoEl.requestFullscreen(); 
             else if (videoEl.webkitRequestFullscreen) videoEl.webkitRequestFullscreen();
           }
           if (data.action === 'seekBack') { 
@@ -352,10 +356,16 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
       }
     });
     
+    // SUBSCRIBE WITH QOS 1 (Guarantees delivery)
+    mqttClient.subscribe(cmdTopic, { qos: 1 }, (err) => {
+      if (err) console.error('Subscription error:', err);
+      else console.log('Subscribed to:', cmdTopic);
+    });
+    
     // Start broadcasting heartbeat in the background (persists after closing modal)
     timeUpdateInterval = setInterval(() => {
       if (mqttClient && mqttClient.connected) {
-        const videoEl = document.getElementById('player');
+        const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
         let timeStr = "Paused";
         if (videoEl && !videoEl.paused && videoEl.duration) {
           let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);

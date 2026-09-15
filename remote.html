@@ -83,7 +83,7 @@
 </div>
 
 <script>
-console.log("CineLoom Remote v1.0.9 loaded");
+console.log("CineLoom Remote v1.1.0 loaded");
 
 const urlParams = new URLSearchParams(window.location.search);
 let roomCode = urlParams.get('room');
@@ -98,12 +98,15 @@ let cmdTopic = '';
 
 function sendCmd(action, e) {
     if (client && client.connected) {
-      client.publish(cmdTopic, JSON.stringify({action: action}));
+      // PUBLISH WITH QOS 1 (Guarantees delivery)
+      client.publish(cmdTopic, JSON.stringify({action: action}), { qos: 1 });
+      console.log(`Sent command: ${action} to ${cmdTopic}`);
       if (e && e.currentTarget) {
         e.currentTarget.style.boxShadow = '0 0 15px #3b82f6';
         setTimeout(() => { e.currentTarget.style.boxShadow = ''; }, 300);
       }
     } else {
+      console.log(`Failed to send: ${action}. Client not connected.`);
       if (e && e.currentTarget) {
         e.currentTarget.style.boxShadow = '0 0 15px #ef4444';
         setTimeout(() => { e.currentTarget.style.boxShadow = ''; }, 300);
@@ -193,7 +196,6 @@ function connectToHost(code) {
       let hostFound = false;
       let lastUpdateTime = Date.now();
 
-      // Wait for host heartbeat to confirm the code is active
       const hostTimeout = setTimeout(() => {
         if (!hostFound) {
           entryStatus.textContent = "No active host found. Check code and try again.";
@@ -202,7 +204,6 @@ function connectToHost(code) {
         }
       }, 5000);
 
-      // Monitor for host disconnection
       const disconnectInterval = setInterval(() => {
         if (hostFound && Date.now() - lastUpdateTime > 5000) {
           remoteStatus.textContent = "Host Disconnected";
@@ -228,7 +229,7 @@ function connectToHost(code) {
       });
       
       client.subscribe(timeTopic);
-      client.publish(cmdTopic, JSON.stringify({action: 'hello'}));
+      client.publish(cmdTopic, JSON.stringify({action: 'hello'}), { qos: 1 });
     });
 }
 
