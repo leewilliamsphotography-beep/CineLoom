@@ -12,7 +12,8 @@
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<!-- MQTT library for reliable, simple remote connections -->
+<script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
 
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -85,11 +86,23 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .player:hover { border-color: var(--line-strong); }
 .player-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); gap: 0.75rem; flex-wrap: wrap; }
 .screen-label { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
-.header-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-.poster-mini-btn, .countdown-btn, .snapshot-btn, .commentary-btn, .load-media-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; }
-.poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .commentary-btn:hover, .load-media-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-.poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .commentary-btn svg, .load-media-btn svg { width: 14px; height: 14px; }
+.header-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.poster-mini-btn, .countdown-btn, .snapshot-btn, .load-media-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.4rem 0.8rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); display: flex; align-items: center; gap: 0.4rem; }
+.poster-mini-btn:hover, .countdown-btn:hover, .snapshot-btn:hover, .load-media-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.poster-mini-btn svg, .countdown-btn svg, .snapshot-btn svg, .load-media-btn svg { width: 14px; height: 14px; }
 .actions-row { display: none; } /* Hidden to declutter UI, replaced by Load button & Drag/Drop */
+
+.load-dropdown { position: relative; display: flex; }
+.load-menu { position: absolute; top: calc(100% + 8px); right: 0; width: 240px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 8px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; display: none; flex-direction: column; gap: 2px; }
+.load-menu.open { display: flex; }
+.load-item { background: transparent; border: 1px solid transparent; color: var(--text-soft); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; border-radius: 6px; text-align: left; display: flex; align-items: center; gap: 0.6rem; transition: all 0.15s var(--ease); width: 100%; }
+.load-item:hover { background: var(--accent-soft); color: var(--accent); }
+.load-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.load-item-content { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+.load-item-label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+.load-item:hover .load-item-label { color: var(--accent); }
+.load-item-filename { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.load-menu-divider { height: 1px; background: var(--line); margin: 4px 0; }
 
 .torrent-row { position: relative; display: flex; gap: 0.5rem; padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--line); }
 .torrent-input { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; }
@@ -159,9 +172,10 @@ body.cinema-mode header { pointer-events: none; }
 /* Remote Control QR Modal */
 .qr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10003; display: none; align-items: center; justify-content: center; padding: 2rem; opacity: 0; transition: opacity 0.3s var(--ease); }
 .qr-overlay.active { display: flex; opacity: 1; }
-.qr-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.qr-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; }
 .qr-box h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--text); }
 .qr-box p { color: var(--text-soft); margin-bottom: 1.5rem; }
+.remote-code-display { font-size: 2.5rem; font-weight: 800; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 1.5rem; font-family: 'Courier New', monospace; text-shadow: 0 0 15px var(--accent-glow); }
 .qr-code-img { width: 250px; height: 250px; border-radius: 12px; margin: 0 auto 1.5rem; display: block; background: #fff; padding: 10px; }
 .qr-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.2s var(--ease); }
 .qr-close-btn:hover { border-color: var(--text-soft); color: var(--text); }
@@ -213,6 +227,7 @@ body.cinema-mode header { pointer-events: none; }
       <div class="remote-row">
         <button class="remote-btn-action" id="rPlay1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Film 1</button>
         <button class="remote-btn-action" id="rPlay2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Film 2</button>
+        <button class="remote-btn-action" id="rSwapFilms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/></svg> Swap</button>
       </div>
 
       <div class="remote-divider"></div>
@@ -285,8 +300,35 @@ body.cinema-mode header { pointer-events: none; }
       <div class="player-header">
           <span class="screen-label">Now Showing</span>
           <div class="header-actions-row">
-              <button class="load-media-btn" id="loadMediaBtn" aria-label="Load Media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Load</button>
-              <button class="commentary-btn" id="commentaryBtn" aria-label="Load Commentary Track"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> Commentary</button>
+              <div class="load-dropdown">
+                  <button class="poster-mini-btn load-media-btn" id="loadMediaToggle" aria-label="Load Menu" aria-haspopup="true" aria-expanded="false">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Load
+                  </button>
+                  <div class="load-menu" id="loadMenu" role="menu">
+                      <button class="load-item" id="loadFilm1Item" role="menuitem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          <span class="load-item-content"><span class="load-item-label">Select Film 1</span><span class="load-item-filename" id="loadFilm1Name">No file chosen</span></span>
+                      </button>
+                      <button class="load-item" id="loadFilm2Item" role="menuitem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          <span class="load-item-content"><span class="load-item-label">Select Film 2</span><span class="load-item-filename" id="loadFilm2Name">No file chosen</span></span>
+                      </button>
+                      <div class="load-menu-divider"></div>
+                      <button class="load-item" id="loadSubsItem" role="menuitem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          <span class="load-item-content"><span class="load-item-label">Load Subtitles</span><span class="load-item-filename" id="loadSubsName">No file chosen</span></span>
+                      </button>
+                      <button class="load-item" id="loadCommentaryItem" role="menuitem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+                          <span class="load-item-content"><span class="load-item-label">Load Commentary</span><span class="load-item-filename" id="loadComName">No file chosen</span></span>
+                      </button>
+                      <div class="load-menu-divider"></div>
+                      <button class="load-item" id="swapFilmsItem" role="menuitem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/></svg>
+                          <span class="load-item-content"><span class="load-item-label">Swap Films 1 & 2</span></span>
+                      </button>
+                  </div>
+              </div>
               <button class="snapshot-btn" id="snapshotBtn" aria-label="Capture Frame for Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Snapshot</button>
               <button class="countdown-btn" id="countdownBtn" aria-label="Start Showtime Countdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Start Showtime</button>
               <button class="poster-mini-btn" data-screen-poster="1" aria-label="Create Poster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Create Poster</button>
@@ -318,7 +360,6 @@ body.cinema-mode header { pointer-events: none; }
       <input type="file" class="file-input file-input-video-2" accept="*/*" aria-hidden="true" tabindex="-1">
       <input type="file" class="file-input file-input-sub" accept=".vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream" aria-hidden="true" tabindex="-1">
       <input type="file" class="file-input file-input-com" accept="audio/*" aria-hidden="true" tabindex="-1">
-      <input type="file" class="file-input" id="unifiedFileInput" accept="video/*,.vtt,.srt,.sbv,.ass,.sub,.txt,text/vtt,application/octet-stream,audio/*" multiple aria-hidden="true" tabindex="-1">
     </div>
   </section>
 </main>
@@ -328,7 +369,8 @@ body.cinema-mode header { pointer-events: none; }
 <div class="qr-overlay" id="qrOverlay" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
   <div class="qr-box">
     <h3 id="qrTitle">Remote Control</h3>
-    <p>Scan this code with your phone to control CineLoom remotely.</p>
+    <div class="remote-code-display" id="remoteCodeDisplay">------</div>
+    <p id="qrInstructions">Enter this code in the mobile app, or scan the QR code.</p>
     <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code for Remote Control">
     <button class="qr-close-btn" id="qrCloseBtn">Close</button>
   </div>
@@ -339,42 +381,52 @@ body.cinema-mode header { pointer-events: none; }
 <script>
 // ===== Remote Control URL Check =====
 const urlParams = new URLSearchParams(window.location.search);
-const remoteId = urlParams.get('remote');
+const roomCode = urlParams.get('room');
 
-if (remoteId) {
+if (roomCode) {
     // Mobile Remote Mode
     document.getElementById('mainApp').style.display = 'none';
     document.getElementById('mobileRemoteApp').style.display = 'flex';
     document.title = "CineLoom Remote";
     
     const remoteStatus = document.getElementById('remoteStatus');
-    const remotePeer = new Peer();
     
-    remotePeer.on('open', () => {
-        remoteStatus.textContent = "Connecting to Host...";
-        const conn = remotePeer.connect(remoteId);
-        
-        conn.on('open', () => {
-            remoteStatus.textContent = "Connected!";
-            remoteStatus.style.color = "#41d636";
-            
-            document.getElementById('rPlay1').addEventListener('click', () => conn.send({action: 'play1'}));
-            document.getElementById('rPlay2').addEventListener('click', () => conn.send({action: 'play2'}));
-            document.getElementById('rPlayPause').addEventListener('click', () => conn.send({action: 'playPause'}));
-            document.getElementById('rFullscreen').addEventListener('click', () => conn.send({action: 'fullscreen'}));
-            document.getElementById('rSeekBack').addEventListener('click', () => conn.send({action: 'seekBack'}));
-            document.getElementById('rSeekFwd').addEventListener('click', () => conn.send({action: 'seekFwd'}));
-            document.getElementById('rShowtime').addEventListener('click', () => conn.send({action: 'showtime'}));
-        });
-
-        conn.on('data', (data) => {
-            if (data.action === 'timeUpdate') {
-                document.getElementById('timeRemainingDisplay').textContent = data.timeStr;
-            }
-        });
-        
-        conn.on('error', () => { remoteStatus.textContent = "Connection lost."; remoteStatus.style.color = "#ef4444"; });
+    // Connect to MQTT Broker
+    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+    const cmdTopic = `cineloom/${roomCode}/cmd`;
+    const timeTopic = `cineloom/${roomCode}/time`;
+    
+    client.on('connect', () => {
+        remoteStatus.textContent = "Waiting for Host...";
+        client.subscribe(timeTopic);
+        client.publish(cmdTopic, JSON.stringify({action: 'hello'}));
     });
+    
+    client.on('message', (topic, message) => {
+        if (topic === timeTopic) {
+            const data = JSON.parse(message.toString());
+            document.getElementById('timeRemainingDisplay').textContent = `Time Remaining: ${data.timeStr}`;
+            if (remoteStatus.textContent !== "Connected!") {
+                remoteStatus.textContent = "Connected!";
+                remoteStatus.style.color = "#41d636";
+            }
+        }
+    });
+    
+    function sendCmd(action) {
+        client.publish(cmdTopic, JSON.stringify({action: action}));
+    }
+    
+    document.getElementById('rPlay1').addEventListener('click', () => sendCmd('play1'));
+    document.getElementById('rPlay2').addEventListener('click', () => sendCmd('play2'));
+    document.getElementById('rSwapFilms').addEventListener('click', () => sendCmd('swapFilms'));
+    document.getElementById('rPlayPause').addEventListener('click', () => sendCmd('playPause'));
+    document.getElementById('rFullscreen').addEventListener('click', () => sendCmd('fullscreen'));
+    document.getElementById('rSeekBack').addEventListener('click', () => sendCmd('seekBack'));
+    document.getElementById('rSeekFwd').addEventListener('click', () => sendCmd('seekFwd'));
+    document.getElementById('rShowtime').addEventListener('click', () => sendCmd('showtime'));
+    
+    client.on('error', () => { remoteStatus.textContent = "Connection lost."; remoteStatus.style.color = "#ef4444"; });
 } else {
     // Normal Desktop Mode
     const header = document.getElementById('mainHeader');
@@ -384,51 +436,72 @@ if (remoteId) {
     settingsToggle.addEventListener('click', (e) => { e.stopPropagation(); const isOpen = settingsPanel.classList.toggle('open'); settingsToggle.classList.toggle('active', isOpen); });
     document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) { settingsPanel.classList.remove('open'); settingsToggle.classList.remove('active'); } });
 
-    // QR Remote Logic
+    // MQTT Remote Host Logic
     const qrOverlay = document.getElementById('qrOverlay');
     const qrCloseBtn = document.getElementById('qrCloseBtn');
+    const remoteCodeDisplay = document.getElementById('remoteCodeDisplay');
+    let mqttClient = null;
+    let timeUpdateInterval = null;
+    
     document.getElementById('remoteToggle').addEventListener('click', () => {
-        const peer = new Peer();
-        peer.on('open', (id) => {
-            const remoteUrl = `${window.location.origin}${window.location.pathname}?remote=${id}`;
-            document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
-            qrOverlay.classList.add('active');
-            
-            let remoteConn = null;
-            peer.on('connection', (conn) => {
-                remoteConn = conn;
-                conn.on('open', () => {
-                    const timeUpdateInterval = setInterval(() => {
-                        if (remoteConn && remoteConn.open) {
-                            const videoEl = document.getElementById('player');
-                            if (videoEl && !videoEl.paused && videoEl.duration) {
-                                let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
-                                const hrs = Math.floor(remaining / 3600);
-                                const mins = Math.floor((remaining % 3600) / 60);
-                                const secs = Math.floor(remaining % 60);
-                                let timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
-                                if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
-                                remoteConn.send({ action: 'timeUpdate', timeStr: timeStr });
-                            }
-                        } else {
-                            clearInterval(timeUpdateInterval);
-                        }
-                    }, 1000);
-                });
-                conn.on('data', (data) => {
-                    if (!player) return;
-                    if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); player.play(); }
-                    if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); player.play(); }
-                    if (data.action === 'playPause') player.togglePlay();
-                    if (data.action === 'fullscreen') player.fullscreen.enter();
-                    if (data.action === 'seekBack') player.currentTime -= 10;
-                    if (data.action === 'seekFwd') player.currentTime += 10;
-                    if (data.action === 'showtime') document.getElementById('countdownBtn').click();
-                });
-            });
+        const roomCode = Math.floor(100000 + Math.random() * 900000);
+        remoteCodeDisplay.textContent = roomCode;
+        
+        const remoteUrl = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
+        document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
+        qrOverlay.classList.add('active');
+        
+        mqttClient = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+        const cmdTopic = `cineloom/${roomCode}/cmd`;
+        const timeTopic = `cineloom/${roomCode}/time`;
+        
+        mqttClient.on('connect', () => {
+            console.log('MQTT Host Connected');
+            mqttClient.subscribe(cmdTopic);
         });
+        
+        mqttClient.on('message', (topic, message) => {
+            if (topic === cmdTopic) {
+                const data = JSON.parse(message.toString());
+                if (!player) return;
+                if (data.action === 'play1') { if (window.switchFilm) window.switchFilm(1); player.play(); }
+                if (data.action === 'play2') { if (window.switchFilm) window.switchFilm(2); player.play(); }
+                if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
+                if (data.action === 'playPause') player.togglePlay();
+                if (data.action === 'fullscreen') player.fullscreen.enter();
+                if (data.action === 'seekBack') player.currentTime -= 10;
+                if (data.action === 'seekFwd') player.currentTime += 10;
+                if (data.action === 'showtime') document.getElementById('countdownBtn').click();
+            }
+        });
+        
+        timeUpdateInterval = setInterval(() => {
+            if (mqttClient && mqttClient.connected) {
+                const videoEl = document.getElementById('player');
+                if (videoEl && !videoEl.paused && videoEl.duration) {
+                    let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
+                    const hrs = Math.floor(remaining / 3600);
+                    const mins = Math.floor((remaining % 3600) / 60);
+                    const secs = Math.floor(remaining % 60);
+                    let timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`;
+                    if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
+                    mqttClient.publish(timeTopic, JSON.stringify({timeStr: timeStr}));
+                }
+            }
+        }, 1000);
     });
-    qrCloseBtn.addEventListener('click', () => qrOverlay.classList.remove('active'));
+    
+    qrCloseBtn.addEventListener('click', () => {
+        qrOverlay.classList.remove('active');
+        if (mqttClient) {
+            mqttClient.end();
+            mqttClient = null;
+        }
+        if (timeUpdateInterval) {
+            clearInterval(timeUpdateInterval);
+            timeUpdateInterval = null;
+        }
+    });
 
     // OMDb API Key Logic
     const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
@@ -643,7 +716,12 @@ if (remoteId) {
       const loadVideoBtn1 = playerContainer.querySelector('.load-video-btn[data-film="1"]');
       const loadVideoBtn2 = playerContainer.querySelector('.load-video-btn[data-film="2"]');
       const loadSubBtn = playerContainer.querySelector('.load-sub-btn'); 
-      const commentaryBtn = document.getElementById('commentaryBtn');
+      
+      // Load Menu Elements
+      const loadFilm1Name = document.getElementById('loadFilm1Name');
+      const loadFilm2Name = document.getElementById('loadFilm2Name');
+      const loadSubsName = document.getElementById('loadSubsName');
+      const loadComName = document.getElementById('loadComName');
       
       let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
       let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
@@ -722,7 +800,6 @@ if (remoteId) {
       
       loadVideoBtn1.addEventListener('click', () => fileVideo1.click());
       loadVideoBtn2.addEventListener('click', () => fileVideo2.click());
-      commentaryBtn.addEventListener('click', () => fileCom.click());
       
       // Audio Mixer Listeners
       videoVolumeSlider.addEventListener('input', () => { if (gainNode) gainNode.gain.value = videoVolumeSlider.value; });
@@ -731,9 +808,7 @@ if (remoteId) {
       fileCom.addEventListener('change', (e) => { 
           const file = e.target.files[0]; if (!file) return; 
           comAudio.src = URL.createObjectURL(file); 
-          commentaryBtn.style.borderColor = 'var(--accent)'; 
-          commentaryBtn.style.color = 'var(--accent)'; 
-          commentaryBtn.style.background = 'var(--accent-soft)';
+          loadComName.textContent = file.name;
       });
 
       function switchFilm(filmNum) {
@@ -782,6 +857,9 @@ if (remoteId) {
           const loadBtn = filmNum === 1 ? loadVideoBtn1 : loadVideoBtn2;
           loadBtn.classList.add('has-file');
           loadBtn.querySelector('.filename').textContent = file.name;
+          
+          if (filmNum === 1) loadFilm1Name.textContent = file.name;
+          else loadFilm2Name.textContent = file.name;
 
           switchFilm(filmNum);
       }
@@ -794,60 +872,29 @@ if (remoteId) {
       document.getElementById('subSyncBack').addEventListener('click', () => { subDelay -= 0.5; applySubDelay(); });
       document.getElementById('subSyncFwd').addEventListener('click', () => { subDelay += 0.5; applySubDelay(); });
       document.getElementById('subSyncReset').addEventListener('click', () => { subDelay = 0; applySubDelay(); });
-      fileSub.addEventListener('change', async (e) => { const file = e.target.files[0]; if (!file) return; let vttContent; try { const rawText = await file.text(); vttContent = parseSubtitles(file.name, rawText); } catch (err) { console.error('Failed to read subtitle file:', err); return; } const blob = new Blob([vttContent], { type: 'text/vtt' }); if (currentSubURL) URL.revokeObjectURL(currentSubURL); currentSubURL = URL.createObjectURL(blob); video.querySelectorAll('track').forEach(t => t.remove()); const track = document.createElement('track'); track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; video.appendChild(track); track.addEventListener('load', () => { const activeTrack = track.track; originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = 'showing'; player.toggleCaptions(true); }); const currentTime = player.currentTime; const isPlaying = !video.paused; player.source = { type: 'video', title: loadVideoBtn1.querySelector('.filename').textContent || 'CineLoom', sources: [{ src: (currentFilm === 1 ? film1.url : film2.url), type: (currentFilm === 1 ? film1.mime : film2.mime) }], tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] }; const onLoaded = () => { player.currentTime = currentTime; if (isPlaying) player.play().catch(()=>{}); player.toggleCaptions(true); const activeTrack = video.textTracks[0]; if (activeTrack) { originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; } video.removeEventListener('loadedmetadata', onLoaded); }; video.addEventListener('loadedmetadata', onLoaded); loadSubBtn.classList.add('has-file'); loadSubBtn.querySelector('.filename').textContent = file.name; });
+      fileSub.addEventListener('change', async (e) => { const file = e.target.files[0]; if (!file) return; let vttContent; try { const rawText = await file.text(); vttContent = parseSubtitles(file.name, rawText); } catch (err) { console.error('Failed to read subtitle file:', err); return; } const blob = new Blob([vttContent], { type: 'text/vtt' }); if (currentSubURL) URL.revokeObjectURL(currentSubURL); currentSubURL = URL.createObjectURL(blob); video.querySelectorAll('track').forEach(t => t.remove()); const track = document.createElement('track'); track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; video.appendChild(track); track.addEventListener('load', () => { const activeTrack = track.track; originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = 'showing'; player.toggleCaptions(true); }); const currentTime = player.currentTime; const isPlaying = !video.paused; player.source = { type: 'video', title: loadVideoBtn1.querySelector('.filename').textContent || 'CineLoom', sources: [{ src: (currentFilm === 1 ? film1.url : film2.url), type: (currentFilm === 1 ? film1.mime : film2.mime) }], tracks: [{ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }] }; const onLoaded = () => { player.currentTime = currentTime; if (isPlaying) player.play().catch(()=>{}); player.toggleCaptions(true); const activeTrack = video.textTracks[0]; if (activeTrack) { originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); subDelay = 0; document.getElementById('subSyncVal').textContent = '0.0s'; subSyncControls.style.display = 'flex'; } video.removeEventListener('loadedmetadata', onLoaded); }; video.addEventListener('loadedmetadata', onLoaded); loadSubBtn.classList.add('has-file'); loadSubBtn.querySelector('.filename').textContent = file.name; loadSubsName.textContent = file.name; });
       document.querySelectorAll('.style-btn[data-boost]').forEach(btn => btn.addEventListener('click', () => { const boost = parseFloat(btn.dataset.boost); if (gainNode) gainNode.gain.value = boost; localStorage.setItem('cl-boost', boost); document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }));
       const savedBoost = localStorage.getItem('cl-boost') || '3.0'; document.querySelectorAll('.style-btn[data-boost]').forEach(b => b.classList.toggle('active', b.dataset.boost === savedBoost));
-
-      // Unified Load Button & Drag/Drop Logic
-      const loadMediaBtn = document.getElementById('loadMediaBtn');
-      const unifiedFileInput = document.getElementById('unifiedFileInput');
-      const videoStage = document.querySelector('.video-stage');
-
-      function processFiles(files) {
-          let videoCount = 0;
-          let subFound = false;
-          let comFound = false;
+      
+      // Swap Films Logic
+      window.swapFilms = () => {
+          const temp = film1;
+          film1 = film2;
+          film2 = temp;
           
-          Array.from(files).forEach(file => {
-              const name = file.name.toLowerCase();
-              const isVideo = file.type.startsWith('video/') || name.endsWith('.mkv') || name.endsWith('.mp4') || name.endsWith('.webm') || name.endsWith('.avi') || name.endsWith('.mov');
-              const isSub = name.endsWith('.vtt') || name.endsWith('.srt') || name.endsWith('.sbv') || name.endsWith('.ass') || name.endsWith('.sub') || name.endsWith('.txt') || file.type === 'text/vtt';
-              const isAudio = file.type.startsWith('audio/');
-              
-              if (isVideo && videoCount === 0) {
-                  const dt = new DataTransfer();
-                  dt.items.add(file);
-                  fileVideo1.files = dt.files;
-                  fileVideo1.dispatchEvent(new Event('change'));
-                  videoCount++;
-              } else if (isVideo && videoCount === 1) {
-                  const dt = new DataTransfer();
-                  dt.items.add(file);
-                  fileVideo2.files = dt.files;
-                  fileVideo2.dispatchEvent(new Event('change'));
-                  videoCount++;
-              } else if (isSub && !subFound) {
-                  const dt = new DataTransfer();
-                  dt.items.add(file);
-                  fileSub.files = dt.files;
-                  fileSub.dispatchEvent(new Event('change'));
-                  subFound = true;
-              } else if (isAudio && !comFound) {
-                  const dt = new DataTransfer();
-                  dt.items.add(file);
-                  fileCom.files = dt.files;
-                  fileCom.dispatchEvent(new Event('change'));
-                  comFound = true;
-              }
-          });
-      }
+          loadVideoBtn1.querySelector('.filename').textContent = film1.name;
+          loadVideoBtn2.querySelector('.filename').textContent = film2.name;
+          loadVideoBtn1.classList.toggle('has-file', !!film1.url);
+          loadVideoBtn2.classList.toggle('has-file', !!film2.url);
+          
+          loadFilm1Name.textContent = film1.name;
+          loadFilm2Name.textContent = film2.name;
+          
+          switchFilm(1);
+      };
 
-      loadMediaBtn.addEventListener('click', () => unifiedFileInput.click());
-      unifiedFileInput.addEventListener('change', (e) => {
-          processFiles(e.target.files);
-          e.target.value = ''; // Reset
-      });
-
+      // Drag & Drop Logic
+      const videoStage = document.querySelector('.video-stage');
       videoStage.addEventListener('dragover', (e) => {
           e.preventDefault();
           videoStage.classList.add('drag-over');
@@ -859,11 +906,71 @@ if (remoteId) {
           e.preventDefault();
           videoStage.classList.remove('drag-over');
           if (e.dataTransfer.files.length > 0) {
-              processFiles(e.dataTransfer.files);
+              let videoCount = 0;
+              let subFound = false;
+              let comFound = false;
+              
+              Array.from(e.dataTransfer.files).forEach(file => {
+                  const name = file.name.toLowerCase();
+                  const isVideo = file.type.startsWith('video/') || name.endsWith('.mkv') || name.endsWith('.mp4') || name.endsWith('.webm') || name.endsWith('.avi') || name.endsWith('.mov');
+                  const isSub = name.endsWith('.vtt') || name.endsWith('.srt') || name.endsWith('.sbv') || name.endsWith('.ass') || name.endsWith('.sub') || name.endsWith('.txt') || file.type === 'text/vtt';
+                  const isAudio = file.type.startsWith('audio/');
+                  
+                  if (isVideo && videoCount === 0) {
+                      const dt = new DataTransfer();
+                      dt.items.add(file);
+                      fileVideo1.files = dt.files;
+                      fileVideo1.dispatchEvent(new Event('change'));
+                      videoCount++;
+                  } else if (isVideo && videoCount === 1) {
+                      const dt = new DataTransfer();
+                      dt.items.add(file);
+                      fileVideo2.files = dt.files;
+                      fileVideo2.dispatchEvent(new Event('change'));
+                      videoCount++;
+                  } else if (isSub && !subFound) {
+                      const dt = new DataTransfer();
+                      dt.items.add(file);
+                      fileSub.files = dt.files;
+                      fileSub.dispatchEvent(new Event('change'));
+                      subFound = true;
+                  } else if (isAudio && !comFound) {
+                      const dt = new DataTransfer();
+                      dt.items.add(file);
+                      fileCom.files = dt.files;
+                      fileCom.dispatchEvent(new Event('change'));
+                      comFound = true;
+                  }
+              });
           }
       });
     }
     setupPlayer(); 
+
+    // Load Dropdown Menu Logic
+    const loadMediaToggle = document.getElementById('loadMediaToggle');
+    const loadMenu = document.getElementById('loadMenu');
+    const fileVideo1 = document.querySelector('.file-input-video-1');
+    const fileVideo2 = document.querySelector('.file-input-video-2');
+    const fileSub = document.querySelector('.file-input-sub');
+    const fileCom = document.querySelector('.file-input-com');
+
+    loadMediaToggle.addEventListener('click', (e) => { 
+        e.stopPropagation(); 
+        const isOpen = loadMenu.classList.toggle('open'); 
+        loadMediaToggle.setAttribute('aria-expanded', isOpen);
+    });
+    document.addEventListener('click', (e) => { 
+        if (!loadMenu.contains(e.target) && !loadMediaToggle.contains(e.target)) { 
+            loadMenu.classList.remove('open'); 
+            loadMediaToggle.setAttribute('aria-expanded', 'false');
+        } 
+    });
+    document.getElementById('loadFilm1Item').addEventListener('click', () => { fileVideo1.click(); loadMenu.classList.remove('open'); });
+    document.getElementById('loadFilm2Item').addEventListener('click', () => { fileVideo2.click(); loadMenu.classList.remove('open'); });
+    document.getElementById('loadSubsItem').addEventListener('click', () => { fileSub.click(); loadMenu.classList.remove('open'); });
+    document.getElementById('loadCommentaryItem').addEventListener('click', () => { fileCom.click(); loadMenu.classList.remove('open'); });
+    document.getElementById('swapFilmsItem').addEventListener('click', () => { if (window.swapFilms) window.swapFilms(); loadMenu.classList.remove('open'); });
 
     const torrentBtn = document.getElementById('torrentBtn'); const torrentInput = document.getElementById('torrentInput'); const loadVideoBtn1 = document.querySelector('.load-video-btn[data-film="1"]'); const bufferingOverlay = document.getElementById('bufferingOverlay'); const bufferingText = document.getElementById('bufferingText'); const torrentSearchBtn = document.getElementById('torrentSearchBtn'); const torrentResults = document.getElementById('torrentResults');
 
