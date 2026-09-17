@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>CineLoom Player</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,11 +11,8 @@
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
-
-<!-- Firebase SDK (Compat for easy integration) -->
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95); --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6; --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4); --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15); --ease: cubic-bezier(0.4, 0, 0.2, 1); --blob-opacity: 0.15; --shadow-card: 0 10px 40px rgba(0,0,0,0.4); --plyr-color-main: var(--accent); --plyr-video-background: rgba(0,0,0,0.9); --plyr-menu-background: var(--bg-elev-3); --plyr-menu-color: var(--text); --plyr-menu-border-color: var(--line); --plyr-control-icon-size: 18px; --plyr-control-spacing: 12px; --plyr-control-radius: 6px; --plyr-font-family: 'Inter', sans-serif; --plyr-font-size-small: 13px; --plyr-font-size-base: 14px; }
@@ -47,20 +42,13 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .file-input { position: absolute; width: 0; height: 0; opacity: 0; }
 .site-footer { text-align: center; padding: 2rem 1rem; color: var(--text-dim); font-size: 0.75rem; opacity: 0.7; margin-top: auto; border-top: 1px solid var(--line); }
 .countdown-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 25; display: none; align-items: center; justify-content: center; } .countdown-overlay.active { display: flex; } .countdown-text { font-size: 12rem; font-weight: 900; color: #fff; text-shadow: 0 0 40px var(--accent); } @keyframes count-pulse { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
-.qr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10003; display: none; align-items: center; justify-content: center; padding: 2rem; } .qr-overlay.active { display: flex; } .qr-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px; display: flex; flex-direction: column; align-items: center; } .qr-box h3 { font-size: 1.5rem; margin-bottom: 1rem; } .qr-box p { color: var(--text-soft); margin-bottom: 1.5rem; } .remote-code-display { font-size: 2.5rem; font-weight: 800; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 1.5rem; font-family: 'Courier New', monospace; text-shadow: 0 0 15px var(--accent-glow); } .qr-code-img { width: 250px; height: 250px; border-radius: 12px; margin: 0 auto 1.5rem; display: block; background: #fff; padding: 10px; } .qr-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; }
-.qr-copy-btn { 
-  background: var(--accent); color: #fff; border: 1px solid var(--accent); 
-  padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; 
-  cursor: pointer; border-radius: 8px; transition: all 0.2s var(--ease); 
-}
-.qr-copy-btn:hover { background: var(--accent-2); border-color: var(--accent-2); }
+.qr-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10003; display: none; align-items: center; justify-content: center; padding: 2rem; } .qr-overlay.active { display: flex; } .qr-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 20px; padding: 3rem; text-align: center; max-width: 400px; display: flex; flex-direction: column; align-items: center; } .qr-box h3 { font-size: 1.5rem; margin-bottom: 1rem; } .qr-box p { color: var(--text-soft); margin-bottom: 1.5rem; } .remote-code-display { font-size: 2.5rem; font-weight: 800; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 1.5rem; font-family: 'Courier New', monospace; text-shadow: 0 0 15px var(--accent-glow); } .qr-code-img { width: 250px; height: 250px; border-radius: 12px; margin: 0 auto 1.5rem; display: block; background: #fff; padding: 10px; } .qr-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; flex: 1; }
+.qr-copy-btn { background: var(--accent); color: #fff; border: 1px solid var(--accent); padding: 0.75rem 2rem; font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; flex: 1; transition: all 0.2s var(--ease); } .qr-copy-btn:hover { background: var(--accent-2); border-color: var(--accent-2); }
 .host-status { margin-top: 1rem; font-size: 0.8rem; color: var(--text-dim); }
 .sub-sync-controls { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 15; display: flex; gap: 4px; align-items: center; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 4px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(8px); }
 .sub-sync-controls span { font-size: 0.75rem; color: #fff; min-width: 35px; text-align: center; font-weight: 600; }
 .sub-sync-controls .style-btn { padding: 4px 8px; font-size: 0.7rem; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 999px; cursor: pointer; }
 .sub-sync-controls .style-btn:hover { background: rgba(255,255,255,0.1); }
-
-/* Keyboard Shortcuts Overlay */
 .shortcuts-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); z-index: 10004; display: none; align-items: center; justify-content: center; }
 .shortcuts-overlay.active { display: flex; }
 .shortcuts-box { background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 16px; padding: 2rem; width: 90%; max-width: 500px; }
@@ -69,20 +57,15 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .shortcut-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--line); }
 .shortcut-item span { color: var(--text-soft); font-size: 0.9rem; }
 .shortcut-key { background: var(--bg); border: 1px solid var(--line-strong); border-radius: 4px; padding: 2px 8px; font-family: monospace; font-size: 0.8rem; color: var(--text); }
-
-/* Resume Overlay */
 .resume-overlay { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); border: 1px solid var(--line-strong); border-radius: 8px; padding: 1rem; display: none; flex-direction: column; gap: 0.5rem; z-index: 15; }
 .resume-overlay.show { display: flex; }
 .resume-text { color: #fff; font-size: 0.9rem; font-weight: 600; }
 .resume-btn { background: var(--accent); color: #fff; border: none; padding: 0.5rem 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; align-self: flex-start; }
-
 @media (max-width: 900px) { header { padding: 1rem 1.5rem; } main { padding: 0 1rem 2rem; } .remote-code-badge { display: none !important; } }
 </style>
 </head>
 <body>
-
 <div class="bg-blobs" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
-
 <header id="mainHeader">
   <a href="index.html" class="brand"><div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="rgba(34, 37, 43, 0.95)"/><path d="M38 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><path d="M82 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><rect x="32" y="38" width="56" height="64" rx="10" fill="#fff"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="#3b82f6"/><circle cx="60" cy="20" r="7" fill="#3b82f6"/></svg></div><span class="brand-text">CineLoom</span></a>
   <div class="header-actions">
@@ -98,7 +81,6 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
     </div>
   </div>
 </header>
-
 <main>
   <section class="hero"><h1>CineLoom</h1><p>Drag & drop or click load to begin. Stream torrents or control playback via your phone.</p></section>
   <section class="players">
@@ -133,10 +115,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
         <div class="buffering-overlay" id="bufferingOverlay"><div class="spinner"></div><span id="bufferingText">Buffering...</span></div>
         <div class="sub-sync-controls" id="subSyncControls" style="display: none;"><button class="style-btn" id="subSyncBack" type="button">-0.5s</button><span id="subSyncVal">0.0s</span><button class="style-btn" id="subSyncFwd" type="button">+0.5s</button><button class="style-btn" id="subSyncReset" type="button" style="margin-left: 4px;">Reset</button></div>
         <div class="countdown-overlay" id="countdownOverlay"><div class="countdown-text" id="countdownText"></div></div>
-        <div class="resume-overlay" id="resumeOverlay">
-          <div class="resume-text" id="resumeText">Continue watching?</div>
-          <button class="resume-btn" id="resumeBtn">Resume</button>
-        </div>
+        <div class="resume-overlay" id="resumeOverlay"><div class="resume-text" id="resumeText">Continue watching?</div><button class="resume-btn" id="resumeBtn">Resume</button></div>
       </div>
       <input type="file" class="file-input file-input-video-1" accept="*/*" aria-hidden="true" tabindex="-1">
       <input type="file" class="file-input file-input-video-2" accept="*/*" aria-hidden="true" tabindex="-1">
@@ -144,22 +123,20 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
     </div>
   </section>
 </main>
-
 <footer class="site-footer">CineLoom Suite by <span>Lee Williams</span></footer>
-
 <div class="qr-overlay" id="qrOverlay">
   <div class="qr-box">
-  <h3>Remote Control</h3>
-  <div class="remote-code-display" id="remoteCodeDisplay">------</div>
-  <p>Enter this code in the mobile app, or scan the QR code.</p>
-  <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code">
-  <div class="host-status" id="hostStatus">Initializing host...</div>
-  <div style="display: flex; gap: 1rem; width: 100%; margin-top: 1.5rem;">
-    <button class="qr-close-btn" id="qrCloseBtn" style="flex: 1;">Close</button>
-    <button class="qr-copy-btn" id="qrCopyBtn" style="flex: 1;">Copy Link</button>
+    <h3>Remote Control</h3>
+    <div class="remote-code-display" id="remoteCodeDisplay">------</div>
+    <p>Enter this code in the mobile app, or scan the QR code.</p>
+    <img id="qrCodeImg" class="qr-code-img" src="" alt="QR Code">
+    <div class="host-status" id="hostStatus">Initializing host...</div>
+    <div style="display: flex; gap: 1rem; width: 100%; margin-top: 1.5rem;">
+      <button class="qr-close-btn" id="qrCloseBtn" style="flex: 1;">Close</button>
+      <button class="qr-copy-btn" id="qrCopyBtn" style="flex: 1;">Copy Link</button>
+    </div>
   </div>
 </div>
-
 <div class="shortcuts-overlay" id="shortcutsOverlay">
   <div class="shortcuts-box">
     <h3>Keyboard Shortcuts</h3>
@@ -175,16 +152,15 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
     </div>
   </div>
 </div>
-
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v1.6.2 (Firebase Bulletproof) loaded");
+console.log("CineLoom Player v1.7.0 (Bulletproof Subtitles) loaded");
 
 // --- Firebase Initialization ---
 const firebaseConfig = {
   apiKey: "AIzaSyCWA08JzsS6o1zwyUotq1M31mnE_jdkHBI",
   authDomain: "cineloom-955c1.firebaseapp.com",
-  databaseURL: "https://cineloom-955c1-default-rtdb.europe-west1.firebasedatabase.app/",
+  databaseURL: "https://cineloom-955c1-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "cineloom-955c1",
   storageBucket: "cineloom-955c1.firebasestorage.app",
   messagingSenderId: "406285683934",
@@ -213,29 +189,6 @@ let subDelay = 0;
 let originalCues = [];
 let saveHistoryTimer = null;
 let movieData = null;
-
-async function fetchTrivia(title) {
-  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
-  try {
-    // Clean up the filename to search OMDb
-    let cleanTitle = title.replace(/^Streaming:\s*/, '').replace(/\.[^/.]+$/, '').replace(/[._]/g, ' ');
-    const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(cleanTitle)}&apikey=${apiKey}`);
-    const data = await res.json();
-    if (data.Response === 'True') {
-      movieData = {
-        director: data.Director,
-        actors: data.Actors,
-        awards: data.Awards,
-        plot: data.Plot
-      };
-    } else {
-      movieData = null;
-    }
-  } catch (e) {
-    console.error('Trivia fetch failed', e);
-    movieData = null;
-  }
-}
 
 // --- Subtitle Parsing & Sync Logic ---
 function parseSubtitles(filename, content) { const ext = filename.split('.').pop().toLowerCase(); if (ext === 'vtt') return content; if (ext === 'srt') return srtToVtt(content); if (ext === 'sbv') return sbvToVtt(content); if (ext === 'ass' || ext === 'ssa') return assToVtt(content); return srtToVtt(content); }
@@ -285,7 +238,7 @@ fileSub.addEventListener('change', async (e) => {
   document.getElementById('loadSubsName').textContent = file.name; 
 });
 
-// --- Watch History & Resume Logic ---
+// --- Watch History & Trivia ---
 function saveHistory(time) {
   const videoEl = document.getElementById('player');
   if (!videoEl || !videoEl.src) return;
@@ -293,7 +246,6 @@ function saveHistory(time) {
   if (key === 'cl-history-No file chosen' || key === 'cl-history-undefined') return;
   localStorage.setItem(key, JSON.stringify({ time: time, name: currentFilm === 1 ? film1.name : film2.name }));
 }
-
 function checkHistory() {
   const videoEl = document.getElementById('player');
   if (!videoEl) return;
@@ -308,55 +260,48 @@ function checkHistory() {
     }
   }
 }
-
 document.getElementById('resumeBtn').addEventListener('click', () => {
   const videoEl = document.getElementById('player');
   let key = `cl-history-${currentFilm === 1 ? film1.name : film2.name}`;
   const history = localStorage.getItem(key);
-  if (history && videoEl) {
-    const data = JSON.parse(history);
-    videoEl.currentTime = data.time;
-  }
+  if (history && videoEl) { videoEl.currentTime = JSON.parse(history).time; }
   document.getElementById('resumeOverlay').classList.remove('show');
 });
+
+async function fetchTrivia(title) {
+  const apiKey = localStorage.getItem('cl-omdb-key') || '65149319';
+  try {
+    let cleanTitle = title.replace(/^Streaming:\s*/, '').replace(/\.[^/.]+$/, '').replace(/[._]/g, ' ');
+    const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(cleanTitle)}&apikey=${apiKey}`);
+    const data = await res.json();
+    if (data.Response === 'True') {
+      movieData = { director: data.Director, actors: data.Actors, awards: data.Awards, plot: data.Plot };
+    } else { movieData = null; }
+  } catch (e) { movieData = null; }
+}
 
 // --- Player Setup ---
 function setupPlayer() {
   const video = document.getElementById('player'); 
   const fileVideo1 = playerContainer.querySelector('.file-input-video-1');
   const fileVideo2 = playerContainer.querySelector('.file-input-video-2');
-  
   const player = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], invertTime: true, toggleInvertTime: true });
   window.player = player;
-
   player.on('loadedmetadata', () => { idleState.classList.add('hidden'); checkHistory(); });
   player.on('error', () => { idleState.classList.add('hidden'); });
-  
-  video.addEventListener('ended', () => { 
-    if (currentFilm === 1 && film2.url) {
-      setTimeout(() => { switchFilm(2); video.play(); }, 2000);
-    }
-  });
-
+  video.addEventListener('ended', () => { if (currentFilm === 1 && film2.url) { setTimeout(() => { switchFilm(2); video.play(); }, 2000); } });
   video.addEventListener('timeupdate', () => {
     if (saveHistoryTimer) return;
-    saveHistoryTimer = setTimeout(() => {
-      saveHistory(video.currentTime);
-      saveHistoryTimer = null;
-    }, 5000);
+    saveHistoryTimer = setTimeout(() => { saveHistory(video.currentTime); saveHistoryTimer = null; }, 5000);
   });
 
   function switchFilm(filmNum) {
     currentFilm = filmNum;
     const f = filmNum === 1 ? film1 : film2;
     if (!f.url) return;
-    
     const tracks = [];
-    if (currentSubURL) {
-        tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true });
-    }
+    if (currentSubURL) { tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }); }
     player.source = { type: 'video', title: f.name, sources: [{ src: f.url, type: f.mime }], tracks: tracks };
-    
     const onLoaded = () => {
         const activeTrack = video.textTracks[0];
         if (activeTrack && originalCues.length > 0) {
@@ -370,18 +315,16 @@ function setupPlayer() {
   window.switchFilm = switchFilm;
 
   function handleVideoFileLoad(e, filmNum) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const filmObj = filmNum === 1 ? film1 : film2;
     if (filmObj.url) URL.revokeObjectURL(filmObj.url);
-    let mimeType = file.type || 'video/mp4';
-    filmObj.mime = mimeType;
-    filmObj.url = URL.createObjectURL(new Blob([file], { type: mimeType }));
+    filmObj.mime = file.type || 'video/mp4';
+    filmObj.url = URL.createObjectURL(new Blob([file], { type: filmObj.mime }));
     filmObj.name = file.name;
     document.getElementById(`loadFilm${filmNum}Name`).textContent = file.name;
     switchFilm(filmNum);
+    fetchTrivia(filmObj.name);
   }
-
   fileVideo1.addEventListener('change', (e) => handleVideoFileLoad(e, 1));
   fileVideo2.addEventListener('change', (e) => handleVideoFileLoad(e, 2));
 
@@ -390,6 +333,7 @@ function setupPlayer() {
     document.getElementById('loadFilm1Name').textContent = film1.name;
     document.getElementById('loadFilm2Name').textContent = film2.name;
     switchFilm(1);
+    fetchTrivia(film1.name);
   };
 
   const videoStage = document.querySelector('.video-stage');
@@ -426,21 +370,16 @@ document.getElementById('snapshotBtn').addEventListener('click', () => {
   canvas.width = video.videoWidth; canvas.height = video.videoHeight;
   try {
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/png');
-    sessionStorage.setItem('cineloom-snapshot', dataUrl); 
+    sessionStorage.setItem('cineloom-snapshot', canvas.toDataURL('image/png')); 
     window.location.href = 'poster.html';
-  } catch (e) { 
-    alert('Snapshot blocked due to cross-origin restrictions. Try downloading a frame manually.'); 
-  }
+  } catch (e) { alert('Snapshot blocked due to cross-origin restrictions.'); }
 });
 
 const settingsToggle = document.getElementById('settingsToggle'); const settingsPanel = document.getElementById('settingsPanel');
 settingsToggle.addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('open'); settingsToggle.classList.toggle('active'); });
 document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) { settingsPanel.classList.remove('open'); settingsToggle.classList.remove('active'); } });
-
 const omdbKeyInput = document.getElementById('omdbKeyInput'); const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; omdbKeyInput.value = savedOmdbKey; localStorage.setItem('cl-omdb-key', savedOmdbKey); omdbKeyInput.addEventListener('input', () => localStorage.setItem('cl-omdb-key', omdbKeyInput.value.trim()));
 
-// --- Keyboard Shortcuts Overlay ---
 const shortcutsOverlay = document.getElementById('shortcutsOverlay');
 const shortcutToggle = document.getElementById('shortcutToggle');
 shortcutToggle.addEventListener('click', () => shortcutsOverlay.classList.add('active'));
@@ -464,63 +403,47 @@ let commandRef = null;
 let statusRef = null;
 
 document.getElementById('remoteToggle').addEventListener('click', () => {
-  if (!db) {
-    alert("Firebase is not connected. Check your configuration and console for errors.");
-    return;
-  }
-
-  if (commandRef) {
-    qrOverlay.classList.add('active');
-    hostStatus.textContent = "Host Active! You can close this window.";
-    hostStatus.style.color = "#41d636";
-    return;
-  }
+  if (!db) { alert("Firebase is not connected. Check your config."); return; }
+  if (commandRef) { qrOverlay.classList.add('active'); hostStatus.textContent = "Host Active!"; hostStatus.style.color = "#41d636"; return; }
   
   remoteCodeBadge.classList.remove('show');
   currentRoomCode = Math.floor(100000 + Math.random() * 900000); 
   remoteCodeDisplay.textContent = currentRoomCode;
-  
   const currentPath = window.location.href; 
   const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
   document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${baseUrl}remote.html?room=${currentRoomCode}`)}`;
   qrOverlay.classList.add('active');
-  hostStatus.textContent = "Host Active! You can close this window.";
+  hostStatus.textContent = "Host Active!";
   hostStatus.style.color = "#41d636";
   remoteActiveDot.classList.add('show');
   remoteCodeBadge.textContent = currentRoomCode;
   remoteCodeBadge.classList.add('show');
   
-  // Setup Firebase References
   commandRef = db.ref(`cineloom/${currentRoomCode}/command`);
   statusRef = db.ref(`cineloom/${currentRoomCode}/status`);
   
-  // Listen for commands
   commandRef.on('value', (snapshot) => {
     const data = snapshot.val();
     if (!data) return;
-    
     remoteActiveDot.style.background = '#ff0000';
     setTimeout(() => remoteActiveDot.style.background = '', 200);
-    
     const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
     if (!videoEl) return;
-    
     try {
-      if (data.action === 'play1') { if (film1.url) window.switchFilm(1); videoEl.play().catch(e => console.error("Play failed:", e)); }
-      if (data.action === 'play2') { if (film2.url) window.switchFilm(2); videoEl.play().catch(e => console.error("Play failed:", e)); }
+      if (data.action === 'play1') { if (film1.url) window.switchFilm(1); videoEl.play().catch(e => console.error(e)); }
+      if (data.action === 'play2') { if (film2.url) window.switchFilm(2); videoEl.play().catch(e => console.error(e)); }
       if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
-      if (data.action === 'playPause') { if (videoEl.paused) videoEl.play().catch(e => console.error("Play failed:", e)); else videoEl.pause(); }
+      if (data.action === 'playPause') { if (videoEl.paused) videoEl.play().catch(e => console.error(e)); else videoEl.pause(); }
       if (data.action === 'fullscreen') { playerContainer.classList.toggle('web-fullscreen'); }
       if (data.action === 'seekBack') { videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); }
       if (data.action === 'seekFwd') { videoEl.currentTime = videoEl.currentTime + 10; }
       if (data.action === 'showtime') { document.getElementById('countdownBtn').click(); }
-      
       if (data.action === 'volumeUp') { videoEl.volume = Math.min(1, videoEl.volume + 0.1); }
       if (data.action === 'volumeDown') { videoEl.volume = Math.max(0, videoEl.volume - 0.1); }
       if (data.action === 'mute') { videoEl.muted = !videoEl.muted; }
       if (data.action === 'toggleSubs') { if (window.player) window.player.toggleCaptions(); }
-      if (data.action === 'subSyncBack') { const btn = document.getElementById('subSyncBack'); if (btn) btn.click(); }
-      if (data.action === 'subSyncFwd') { const btn = document.getElementById('subSyncFwd'); if (btn) btn.click(); }
+      if (data.action === 'subSyncBack') { document.getElementById('subSyncBack').click(); }
+      if (data.action === 'subSyncFwd') { document.getElementById('subSyncFwd').click(); }
       if (data.action === 'lights') { document.body.classList.toggle('cinema-mode'); }
       if (data.action === 'speed') {
           const speeds = [1, 1.25, 1.5, 2];
@@ -528,90 +451,55 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
           idx = (idx + 1) % speeds.length;
           videoEl.playbackRate = speeds[idx];
       }
-      if (data.action === 'skip90') { 
-          if (!isNaN(videoEl.duration) && isFinite(videoEl.duration)) {
-              videoEl.currentTime = Math.min(videoEl.duration, videoEl.currentTime + 90);
-          }
-      }
-    } catch (e) {
-      console.error('Remote Command Failed:', e);
-    }
+      if (data.action === 'skip90') { if (!isNaN(videoEl.duration)) videoEl.currentTime = Math.min(videoEl.duration, videoEl.currentTime + 90); }
+    } catch (e) { console.error('Remote Command Failed:', e); }
   });
   
-  // Start broadcasting heartbeat in the background
   statusInterval = setInterval(() => {
     const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
     let timeStr = "Paused";
     let volume = videoEl ? videoEl.volume : 1;
     let muted = videoEl ? videoEl.muted : false;
     let speed = videoEl ? videoEl.playbackRate : 1;
-    
     if (videoEl && !isNaN(videoEl.duration) && isFinite(videoEl.duration)) {
       let remaining = Math.max(0, videoEl.duration - videoEl.currentTime);
-      const hrs = Math.floor(remaining / 3600); 
-      const mins = Math.floor((remaining % 3600) / 60); 
-      const secs = Math.floor(remaining % 60);
-      if (!videoEl.paused) {
-        timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; 
-        if (hrs > 0) timeStr = `${hrs}h ${timeStr}`;
-      } else {
-        timeStr = `Paused (${mins}m ${secs}s left)`;
-      }
-    } else if (videoEl && !videoEl.paused) {
-      timeStr = "Live Stream";
-    }
-    
+      const hrs = Math.floor(remaining / 3600); const mins = Math.floor((remaining % 3600) / 60); const secs = Math.floor(remaining % 60);
+      if (!videoEl.paused) { timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; if (hrs > 0) timeStr = `${hrs}h ${timeStr}`; }
+      else { timeStr = `Paused (${mins}m ${secs}s left)`; }
+    } else if (videoEl && !videoEl.paused) { timeStr = "Live Stream"; }
     statusRef.set({ timeStr, volume, muted, speed, movieData }).catch(e => console.error("Firebase write failed:", e));
   }, 1000);
 });
 
 qrCloseBtn.addEventListener('click', () => { qrOverlay.classList.remove('active'); });
+
 // --- Copy Watch Party Link Logic ---
 document.getElementById('qrCopyBtn').addEventListener('click', async () => {
   const btn = document.getElementById('qrCopyBtn');
   const originalText = btn.textContent;
-  
-  // Construct the full URL
   const currentPath = window.location.href; 
   const baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
   const partyUrl = `${baseUrl}remote.html?room=${currentRoomCode}`;
-  
   try {
     await navigator.clipboard.writeText(partyUrl);
-    btn.textContent = 'Copied!';
-    btn.style.background = '#41d636';
-    btn.style.borderColor = '#41d636';
-    
-    setTimeout(() => {
-      btn.textContent = originalText;
-      btn.style.background = '';
-      btn.style.borderColor = '';
-    }, 2000);
+    btn.textContent = 'Copied!'; btn.style.background = '#41d636'; btn.style.borderColor = '#41d636';
+    setTimeout(() => { btn.textContent = originalText; btn.style.background = ''; btn.style.borderColor = ''; }, 2000);
   } catch (err) {
-    // Fallback for non-secure contexts (like local file:// testing)
-    const textArea = document.createElement('textarea');
-    textArea.value = partyUrl;
-    textArea.style.position = 'fixed';
-    textArea.style.opacity = 0;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      btn.textContent = 'Copied!';
-      setTimeout(() => { btn.textContent = originalText; }, 2000);
-    } catch (e) {
-      alert('Failed to copy. URL: ' + partyUrl);
-    }
+    const textArea = document.createElement('textarea'); textArea.value = partyUrl;
+    textArea.style.position = 'fixed'; textArea.style.opacity = 0;
+    document.body.appendChild(textArea); textArea.select();
+    try { document.execCommand('copy'); btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = originalText; }, 2000); }
+    catch (e) { alert('Failed to copy. URL: ' + partyUrl); }
     document.body.removeChild(textArea);
   }
 });
+
 // --- Torrents ---
 async function searchTorrents(query) {
   if (!query || query.trim().length < 3) return;
   const torrentResults = document.getElementById('torrentResults');
   torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Searching YTS...</span></div>'; 
   torrentResults.classList.add('show');
-  
   const ytsDomains = ['yts.mx', 'yts.lt'];
   const proxyBuilders = [
     (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
@@ -620,15 +508,10 @@ async function searchTorrents(query) {
     (url) => `https://jsonp.afeld.me/?url=${encodeURIComponent(url)}`,
     (url) => `https://thingproxy.freeboard.io/fetch/${url}`
   ];
-  
-  let data = null;
-  let success = false;
-  let lastError = null;
-  
+  let data = null; let success = false; let lastError = null;
   for (const domain of ytsDomains) {
     if (success) break;
     const apiUrl = `https://${domain}/api/v2/list_movies.json?query_term=${encodeURIComponent(query)}&limit=10`;
-    
     for (const buildProxy of proxyBuilders) {
       if (success) break;
       const proxyUrl = buildProxy(apiUrl);
@@ -636,18 +519,11 @@ async function searchTorrents(query) {
         const res = await fetch(proxyUrl);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         data = await res.json();
-        if (data && (data.status === 'ok' || data.status === 'error')) {
-          success = true;
-        }
-      } catch (e) { 
-        console.warn(`Fetch failed for ${domain}:`, e.message);
-        lastError = e;
-      }
+        if (data && (data.status === 'ok' || data.status === 'error')) { success = true; }
+      } catch (e) { console.warn(`Fetch failed for ${domain}:`, e.message); lastError = e; }
     }
   }
-
   torrentResults.innerHTML = '';
-  
   if (success && data) {
     if (data.status === 'ok' && data.data.movies && data.data.movies.length > 0) {
       data.data.movies.forEach(movie => {
@@ -663,13 +539,8 @@ async function searchTorrents(query) {
         });
         torrentResults.appendChild(item);
       });
-    } else {
-      torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>No torrents found for this title.</span></div>';
-    }
-  } else {
-    torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Search failed. All network proxies are down. Please paste a Magnet Link directly.</span></div>';
-    console.error("All CORS proxies failed. Last error:", lastError);
-  }
+    } else { torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>No torrents found for this title.</span></div>'; }
+  } else { torrentResults.innerHTML = '<div class="torrent-item" style="cursor:default;"><span>Search failed. Please paste a Magnet Link directly.</span></div>'; }
 }
 document.getElementById('torrentSearchBtn').addEventListener('click', () => { const query = document.getElementById('torrentInput').value.trim(); if (query.startsWith('magnet:')) startTorrentStream(query); else searchTorrents(query); });
 
@@ -688,18 +559,13 @@ function startTorrentStream(magnet) {
       if (err) { alert('Error streaming torrent.'); bufferingOverlay.classList.remove('show'); return; }
       elem.id = 'player'; elem.setAttribute('playsinline', '');
       videoStage.insertBefore(elem, tempContainer); tempContainer.remove();
-      
-      film1.url = elem.src; 
-      film1.mime = 'video/mp4'; 
-      film1.name = `Streaming: ${file.name}`;
-      fetchTrivia(film1.name);
-      fetchTrivia(film2.name);
+      film1.url = elem.src; film1.mime = 'video/mp4'; film1.name = `Streaming: ${file.name}`;
       document.getElementById('loadFilm1Name').textContent = film1.name;
-      
       elem.addEventListener('waiting', () => { bufferingText.textContent = 'Buffering...'; bufferingOverlay.classList.add('show'); });
       elem.addEventListener('playing', () => bufferingOverlay.classList.remove('show'));
       elem.addEventListener('canplay', () => bufferingOverlay.classList.remove('show'));
       setupPlayer(); idleState.classList.add('hidden');
+      fetchTrivia(film1.name);
     });
   });
 }
