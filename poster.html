@@ -24,9 +24,9 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .header-actions { display: flex; gap: 0.5rem; align-items: center; }
 .btn { background: var(--accent); color: #fff; border: none; padding: 0.6rem 1.2rem; font-family: inherit; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; text-decoration: none; font-size: 0.9rem; } .btn:hover { background: var(--accent-2); } .btn-secondary { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); } .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
-/* Poster Modal (Adapted for standalone page) */
+/* Poster Modal */
 .poster-overlay { position: relative; flex: 1; background: var(--bg); overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 1; pointer-events: auto; }
-.poster-modal { display: grid; grid-template-columns: 340px 1fr; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 16px; overflow: hidden; width: 100%; max-width: 1200px; height: calc(100vh - 100px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.poster-modal { display: grid; grid-template-columns: 340px 1fr; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 16px; overflow: hidden; width: 100%; max-width: 1400px; height: calc(100vh - 100px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
 .poster-editor { padding: 1.5rem; overflow-y: auto; border-right: 1px solid var(--line); background: var(--bg-elev-2); min-height: 0; }
 .poster-editor h2 { font-size: 1.25rem; margin-bottom: 0.25rem; color: var(--text); font-weight: 600; }
 .poster-subtitle { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1.5rem; }
@@ -70,6 +70,17 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: var(--text-soft); border-radius: 50%; transition: transform 0.2s var(--ease); }
 .toggle-switch.active { background: var(--accent); }
 .toggle-switch.active::after { transform: translateX(20px); background: #fff; }
+
+.size-control { display: flex; flex-direction: column; gap: 0.5rem; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; }
+.size-control label { display: flex; justify-content: space-between; font-size: 0.8rem; text-transform: uppercase; color: var(--text-dim); font-weight: 600; }
+.size-control input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--accent); }
+
+.font-upload-wrap { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.font-upload-wrap label { flex: 1; margin: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.6rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; border-radius: 6px; transition: all 0.15s var(--ease); }
+.font-upload-wrap label:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.font-upload-wrap input[type="file"] { display: none; }
+.font-upload-wrap svg { width: 14px; height: 14px; stroke: currentColor; }
+
 .format-toggle-row { display: flex; gap: 6px; margin-bottom: 0.5rem; }
 .format-btn { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-soft); padding: 6px 0; font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
 .format-btn:hover { border-color: var(--line-strong); color: var(--text); background: var(--bg-elev-2); }
@@ -92,13 +103,13 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .poster-export-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .poster-close-btn { background: transparent; border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.75rem 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
 .poster-close-btn:hover { border-color: var(--text-soft); color: var(--text); }
-.poster-preview-wrap { padding: 2rem; background-color: var(--bg); background-image: radial-gradient(var(--line-strong) 1px, transparent 1px); background-size: 24px 24px; overflow: auto; min-height: 0; text-align: center; position: relative; display: flex; justify-content: center; align-items: flex-start; }
-.zoom-controls { position: sticky; bottom: 20px; margin: 0 auto; z-index: 10; display: flex; gap: 4px; align-items: center; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: max-content; }
+.poster-preview-wrap { padding: 2rem; background-color: var(--bg); background-image: radial-gradient(var(--line-strong) 1px, transparent 1px); background-size: 24px 24px; overflow: auto; min-height: 0; text-align: center; position: relative; display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; align-items: flex-start; }
+.zoom-controls { position: sticky; bottom: 20px; left: 100%; margin: 0 auto; z-index: 10; display: flex; gap: 4px; align-items: center; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: max-content; }
 .zoom-controls .style-btn { padding: 6px 12px; font-size: 0.75rem; border: none; background: transparent; }
 .zoom-controls .style-btn:hover { background: var(--bg-elev-2); }
 
 /* Poster Sheet Styles */
-.poster-sheet { background-color: #fff; background-size: cover; background-position: center; color: #111; width: 210mm; min-height: 297mm; padding: 22mm 20mm; display: inline-flex; flex-direction: column; text-align: left; font-family: 'Inter', sans-serif; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; transform-origin: top center; margin: 0 auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.poster-sheet { --text-scale: 1; background-color: #fff; background-size: cover; background-position: center; color: #111; width: 210mm; min-height: 297mm; padding: 22mm 20mm; display: inline-flex; flex-direction: column; text-align: left; font-family: 'Inter', sans-serif; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; transform-origin: top center; margin: 0 auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: visible; }
 .poster-sheet.format-916 { width: 1080px; min-height: 1920px; padding: 80px 60px; }
 .ps-overlay { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .poster-sheet .ps-top { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid currentColor; padding-bottom: 0.6rem; margin-bottom: 1.5rem; }
@@ -118,10 +129,6 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .ps-rating.show { display: block; }
 .ps-blurb { font-family: 'Georgia', serif; font-style: italic; font-size: 1.2rem; text-align: center; margin: 2rem 0; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; padding: 1rem 0; opacity: 0.8; display: none; outline: none; }
 .ps-blurb.show { display: block; }
-.poster-sheet.double-feature .ps-title { font-size: 3.2rem; }
-.poster-sheet.double-feature .ps-tagline { font-size: 1.1rem; }
-.poster-sheet.double-feature .ps-title-poster { width: 20mm; height: 30mm; }
-.poster-sheet.double-feature .ps-plot { font-size: 0.8rem; }
 .poster-sheet .ps-divider { display: flex; align-items: center; gap: 1rem; margin: 0.5rem 0; opacity: 0.4; }
 .poster-sheet .ps-divider::before, .poster-sheet .ps-divider::after { content: ''; flex: 1; height: 1px; background: currentColor; }
 .poster-sheet .ps-divider span { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 700; }
@@ -136,6 +143,23 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .film-grain-overlay { position: absolute; inset: 0; z-index: 4; pointer-events: none; display: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='noise'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23noise)' opacity='0.15'/></svg>"); opacity: 0.2; mix-blend-mode: multiply; }
 .film-grain-overlay.show { display: block; }
 [contenteditable]:focus { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* Text Alignment Settings */
+.poster-sheet.align-left .ps-title, .poster-sheet.align-left .ps-tagline, .poster-sheet.align-left .ps-plot, .poster-sheet.align-left .ps-blurb, .poster-sheet.align-left .ps-notes, .poster-sheet.align-left .ps-meta-item { text-align: left !important; }
+.poster-sheet.align-center .ps-title, .poster-sheet.align-center .ps-tagline, .poster-sheet.align-center .ps-plot, .poster-sheet.align-center .ps-blurb, .poster-sheet.align-center .ps-notes, .poster-sheet.align-center .ps-meta-item { text-align: center !important; }
+.poster-sheet.align-right .ps-title, .poster-sheet.align-right .ps-tagline, .poster-sheet.align-right .ps-plot, .poster-sheet.align-right .ps-blurb, .poster-sheet.align-right .ps-notes, .poster-sheet.align-right .ps-meta-item { text-align: right !important; }
+.poster-sheet.align-justify .ps-title, .poster-sheet.align-justify .ps-tagline, .poster-sheet.align-justify .ps-plot, .poster-sheet.align-justify .ps-blurb, .poster-sheet.align-justify .ps-notes, .poster-sheet.align-justify .ps-meta-item { text-align: justify !important; }
+
+/* Dynamic Text Scaling */
+.ps-title { font-size: calc(4.5rem * var(--text-scale)); }
+.format-916 .ps-title { font-size: calc(4rem * var(--text-scale)); }
+.ps-tagline { font-size: calc(1.3rem * var(--text-scale)); }
+.ps-plot { font-size: calc(0.9rem * var(--text-scale)); }
+.ps-label, .ps-event, .ps-divider span, .ps-meta-item .k { font-size: calc(0.8rem * var(--text-scale)); }
+.ps-meta-item .v { font-size: calc(1rem * var(--text-scale)); }
+.ps-blurb { font-size: calc(1.2rem * var(--text-scale)); }
+.ps-notes { font-size: calc(0.9rem * var(--text-scale)); }
+.ps-brand { font-size: calc(0.85rem * var(--text-scale)); }
 
 /* Theme Styles */
 .poster-sheet.theme-minimal { background-color: #fff; color: #111; } .poster-sheet.theme-minimal .ps-overlay { background: rgba(255,255,255,0.85); }
@@ -155,8 +179,29 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 .poster-sheet.theme-valentine { background-color: #fff0f5; color: #c71585; border: 2px solid #c71585; } .poster-sheet.theme-valentine .ps-overlay { background: rgba(255, 240, 245, 0.85); } .poster-sheet.theme-valentine .ps-title { font-family: 'Georgia', serif; color: #c71585; } .poster-sheet.theme-valentine .ps-tagline { color: #8b0000; } .poster-sheet.theme-valentine .ps-top, .poster-sheet.theme-valentine .ps-footer { border-color: #c71585; } .poster-sheet.theme-valentine .ps-label, .poster-sheet.theme-valentine .ps-meta-item .k, .poster-sheet.theme-valentine .ps-divider span, .poster-sheet.theme-valentine .ps-event { color: #8b0000; opacity: 0.7; }
 .poster-sheet.theme-newyear { background-color: #000; color: #fff; border: 1px solid #c0c0c0; } .poster-sheet.theme-newyear .ps-overlay { background: rgba(0, 0, 0, 0.85); } .poster-sheet.theme-newyear .ps-title { font-family: 'Inter', sans-serif; font-weight: 800; background: linear-gradient(to right, #c0c0c0 0%, #fff 50%, #ffd700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; } .poster-sheet.theme-newyear .ps-tagline { color: #c0c0c0; } .poster-sheet.theme-newyear .ps-top, .poster-sheet.theme-newyear .ps-footer { border-color: #c0c0c0; } .poster-sheet.theme-newyear .ps-label, .poster-sheet.theme-newyear .ps-meta-item .k, .poster-sheet.theme-newyear .ps-divider span, .poster-sheet.theme-newyear .ps-event { color: #ffd700; opacity: 0.9; }
 
-/* Print Rules */
-@media print { @page { size: A4; margin: 0; } body * { visibility: hidden !important; } .poster-sheet, .poster-sheet * { visibility: visible !important; } .poster-sheet { position: absolute; left: 0; top: 0; box-shadow: none; transform: none !important; margin: 0 !important; border: none !important; } .poster-overlay { position: static !important; background: none !important; backdrop-filter: none !important; padding: 0 !important; } .poster-modal, .poster-editor, .poster-preview-wrap { display: contents !important; background: none !important; border: none !important; padding: 0 !important; text-align: left !important; } }
+/* Print Rules - Bulletproof Layout */
+@media print { 
+  @page { size: A4; margin: 0; } 
+  body { background: white !important; margin: 0 !important; padding: 0 !important; }
+  header, .poster-editor, .zoom-controls { display: none !important; }
+  .poster-overlay { display: block !important; overflow: visible !important; position: static !important; padding: 0 !important; background: none !important; height: auto !important; flex: initial !important; }
+  .poster-modal { display: block !important; height: auto !important; width: auto !important; max-width: none !important; border: none !important; border-radius: 0 !important; overflow: visible !important; box-shadow: none !important; background: none !important; }
+  .poster-preview-wrap { display: block !important; overflow: visible !important; padding: 0 !important; background: none !important; background-image: none !important; text-align: left !important; flex-direction: initial !important; gap: 0 !important; }
+  .poster-sheet { 
+    display: block !important; 
+    box-shadow: none !important; 
+    transform: none !important; 
+    margin: 0 !important; 
+    border: none !important; 
+    overflow: hidden !important; 
+    width: 210mm !important;
+    min-height: 297mm !important;
+    page-break-after: always;
+  } 
+  .poster-sheet:last-child { 
+    page-break-after: auto;
+  } 
+}
 @media (max-width: 900px) { .poster-modal { grid-template-columns: 1fr; height: 95vh; } .poster-editor { border-right: none; border-bottom: 1px solid var(--line); max-height: 40vh; } header { padding: 1rem 1.5rem; } .brand-text { font-size: 1.1rem; } .brand-logo svg { height: 32px; } }
 </style>
 </head>
@@ -177,7 +222,7 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
 <div class="poster-overlay" id="posterOverlay">
   <div class="poster-modal">
     <div class="poster-editor">
-      <h2 id="posterEditorTitle">Poster Maker</h2><p class="poster-subtitle">Leave Film 2 blank for a single feature poster. Click text on the poster to edit directly.</p>
+      <h2 id="posterEditorTitle">Poster Maker</h2><p class="poster-subtitle">Enter Film 2 details to automatically generate a separate side-by-side A4 poster.</p>
       <div class="poster-fields">
         <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Auto-Fill from OMDb</div>
         <div class="search-row"><div class="autocomplete-container"><input type="text" id="search1" class="autocomplete-input" placeholder="Search for Film 1..."><div class="autocomplete-results" id="search1Results"></div></div><button type="button" class="clear-poster-btn" data-clear-poster="1" aria-label="Clear Film 1 Poster Image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
@@ -188,7 +233,11 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
         <div class="poster-dropdown" id="posterThemeDropdown"><button type="button" class="dropdown-toggle" id="posterThemeToggle"><span class="dropdown-label">Minimal</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="dropdown-menu" id="posterThemeMenu"><button type="button" class="dropdown-item active" data-poster-theme="theme-minimal">Minimal</button><button type="button" class="dropdown-item" data-poster-theme="theme-neon">Neon Stream</button><button type="button" class="dropdown-item" data-poster-theme="theme-noir">Cinema Noir</button><button type="button" class="dropdown-item" data-poster-theme="theme-golden">Golden Hour</button><button type="button" class="dropdown-item" data-poster-theme="theme-marquee">Marquee</button><button type="button" class="dropdown-item" data-poster-theme="theme-retro">Retro Pop</button><button type="button" class="dropdown-item" data-poster-theme="theme-blueprint">Blueprint</button><button type="button" class="dropdown-item" data-poster-theme="theme-artdeco">Art Deco</button><button type="button" class="dropdown-item" data-poster-theme="theme-vhs">VHS Retro</button><button type="button" class="dropdown-item" data-poster-theme="theme-orange">Orange Crush</button><button type="button" class="dropdown-item" data-poster-theme="theme-midblue">Midnight Blue</button><button type="button" class="dropdown-item" data-poster-theme="theme-typewriter">Typewriter</button><button type="button" class="dropdown-item" data-poster-theme="theme-halloween">Halloween</button><button type="button" class="dropdown-item" data-poster-theme="theme-christmas">Christmas</button><button type="button" class="dropdown-item" data-poster-theme="theme-valentine">Valentine's</button><button type="button" class="dropdown-item" data-poster-theme="theme-newyear">New Year's</button><button type="button" class="dropdown-item" data-poster-theme="theme-custom">Custom Colors</button></div></div>
         <div class="custom-color-picker" id="customColorPicker"><label>Background <input type="color" id="customBg" value="#0b0e17"></label><label>Text Color <input type="color" id="customText" value="#ffffff"></label><label>Accent Color <input type="color" id="customAccent" value="#5fb3f5"></label></div>
         
-        <!-- NEW: Filter Dropdown -->
+        <div class="size-control">
+          <label>Global Text Size <span id="sizeValue">100%</span></label>
+          <input type="range" id="textScaleSlider" min="0.5" max="1.5" value="1" step="0.05">
+        </div>
+
         <div class="poster-dropdown" id="filterDropdown">
             <button type="button" class="dropdown-toggle" id="filterToggle"><span class="dropdown-label" id="filterLabel">No Filter</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
             <div class="dropdown-menu" id="filterMenu">
@@ -201,7 +250,70 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
             </div>
         </div>
 
-        <div class="poster-dropdown" id="fontDropdown"><button type="button" class="dropdown-toggle" id="fontToggle"><span class="dropdown-label" id="fontLabel">Theme Default</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div class="dropdown-menu" id="fontMenu"><button type="button" class="dropdown-item active" data-font="default">Theme Default</button><button type="button" class="dropdown-item" data-font="'Georgia', serif">Elegant Serif</button><button type="button" class="dropdown-item" data-font="'Inter', sans-serif">Modern Sans</button><button type="button" class="dropdown-item" data-font="'Impact', sans-serif">Classic Impact</button><button type="button" class="dropdown-item" data-font="'Courier New', monospace">Typewriter</button><button type="button" class="dropdown-item" data-font="'Brush Script MT', cursive">Script</button></div></div>
+        <div class="poster-dropdown" id="fontDropdown">
+            <button type="button" class="dropdown-toggle" id="fontToggle"><span class="dropdown-label" id="fontLabel">Theme Default</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="dropdown-menu" id="fontMenu">
+                <button type="button" class="dropdown-item active" data-font="default">Theme Default</button>
+                <button type="button" class="dropdown-item" data-font="'Georgia', serif">Elegant Serif</button>
+                <button type="button" class="dropdown-item" data-font="'Inter', sans-serif">Modern Sans</button>
+                <button type="button" class="dropdown-item" data-font="'Impact', sans-serif">Classic Impact</button>
+                <button type="button" class="dropdown-item" data-font="'Courier New', monospace">Typewriter</button>
+                <button type="button" class="dropdown-item" data-font="'Brush Script MT', cursive">Script</button>
+            </div>
+        </div>
+
+        <div class="font-upload-wrap">
+            <label>Upload Custom Font <input type="file" id="customFontUpload" accept=".ttf,.otf,.woff,.woff2"></label>
+        </div>
+
+        <div class="poster-dropdown" id="alignDropdown">
+            <button type="button" class="dropdown-toggle" id="alignToggle"><span class="dropdown-label" id="alignLabel">Left Aligned</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="dropdown-menu" id="alignMenu">
+                <button type="button" class="dropdown-item active" data-align="left">Left Aligned</button>
+                <button type="button" class="dropdown-item" data-align="center">Centered</button>
+                <button type="button" class="dropdown-item" data-align="right">Right Aligned</button>
+                <button type="button" class="dropdown-item" data-align="justify">Justified</button>
+            </div>
+        </div>
+
+        <!-- Advanced Text Styling -->
+        <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>Advanced Text Styling</div>
+        <div class="poster-dropdown" id="styleTargetDropdown">
+            <button type="button" class="dropdown-toggle" id="styleTargetToggle"><span class="dropdown-label" id="styleTargetLabel">Select Text Block</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="dropdown-menu" id="styleTargetMenu">
+                <button type="button" class="dropdown-item" data-target="psTitle1">Film 1 Title</button>
+                <button type="button" class="dropdown-item" data-target="psTagline1">Film 1 Tagline</button>
+                <button type="button" class="dropdown-item" data-target="psPlot1">Film 1 Plot</button>
+                <button type="button" class="dropdown-item" data-target="psTitle2">Film 2 Title</button>
+                <button type="button" class="dropdown-item" data-target="psTagline2">Film 2 Tagline</button>
+                <button type="button" class="dropdown-item" data-target="psPlot2">Film 2 Plot</button>
+                <button type="button" class="dropdown-item" data-target="psBlurb">Critic Blurb</button>
+                <button type="button" class="dropdown-item" data-target="psNotes">Event Notes</button>
+            </div>
+        </div>
+        
+        <div class="poster-dropdown" id="advFontDropdown" style="display: none;">
+            <button type="button" class="dropdown-toggle" id="advFontToggle"><span class="dropdown-label" id="advFontLabel">Inherit Theme</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="dropdown-menu" id="advFontMenu">
+                <button type="button" class="dropdown-item active" data-adv-font="inherit">Inherit Theme</button>
+                <button type="button" class="dropdown-item" data-adv-font="'Georgia', serif">Elegant Serif</button>
+                <button type="button" class="dropdown-item" data-adv-font="'Inter', sans-serif">Modern Sans</button>
+                <button type="button" class="dropdown-item" data-adv-font="'Impact', sans-serif">Classic Impact</button>
+                <button type="button" class="dropdown-item" data-adv-font="'Courier New', monospace">Typewriter</button>
+                <button type="button" class="dropdown-item" data-adv-font="'Brush Script MT', cursive">Script</button>
+            </div>
+        </div>
+
+        <div class="size-control" id="advSizeControl" style="display: none;">
+          <label>Specific Size <span id="advSizeValue">100%</span></label>
+          <input type="range" id="advSizeSlider" min="0.5" max="3" value="1" step="0.05">
+        </div>
+
+        <div class="custom-color-picker show" id="advColorControl" style="display: none; flex-direction: row; align-items: center; justify-content: space-between;">
+            <label style="margin: 0;">Specific Color</label>
+            <input type="color" id="advColorPicker" value="#ffffff">
+        </div>
+
         <div class="toggle-row"><span>Film Grain Overlay</span><div class="toggle-switch" id="grainToggle"></div></div>
         <div class="toggle-row"><span>QR Code (Trailer Link)</span><div class="toggle-switch" id="qrToggle"></div></div>
         
@@ -209,25 +321,36 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
         <div class="backdrop-upload-wrap"><label>Upload Backdrop <input type="file" id="posterBackdrop" accept="image/*"></label><button type="button" class="backdrop-btn" id="posterClearBackdrop" aria-label="Clear Backdrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
         
         <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>Film One</div>
-        <label>Film 1 Title <input type="text" id="posterTitle1" placeholder="The Grand Feature"></label><label>Film 1 Tagline <input type="text" id="posterTagline1" placeholder="Genre / Age Rating"></label><label>Film 1 Plot <textarea id="posterPlot1" placeholder="Plot summary..."></textarea></label>
+        <label>Film 1 Title <input type="text" id="posterTitle1" placeholder="The Grand Feature"></label>
+        <label>Film 1 Tagline <input type="text" id="posterTagline1" placeholder="Genre / Age Rating"></label>
+        <label>Film 1 Runtime (mins) <input type="text" id="posterRuntime1" placeholder="e.g. 120 min"></label>
+        <label>Film 1 Plot <textarea id="posterPlot1" placeholder="Plot summary..."></textarea></label>
         
-        <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>Film Two (Optional)</div>
-        <label>Film 2 Title <input type="text" id="posterTitle2" placeholder="The Second Act"></label><label>Film 2 Tagline <input type="text" id="posterTagline2" placeholder="Genre / Age Rating"></label><label>Film 2 Plot <textarea id="posterPlot2" placeholder="Plot summary..."></textarea></label>
+        <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>Film Two (Generates 2nd Poster)</div>
+        <label>Film 2 Title <input type="text" id="posterTitle2" placeholder="The Second Act"></label>
+        <label>Film 2 Tagline <input type="text" id="posterTagline2" placeholder="Genre / Age Rating"></label>
+        <label>Film 2 Start Time <input type="text" id="posterTime2" placeholder="Auto-calculates"></label>
+        <label>Film 2 Plot <textarea id="posterPlot2" placeholder="Plot summary..."></textarea></label>
         
         <div class="section-divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Event Details</div>
-        <label>Date <input type="text" id="posterDate" placeholder="Thursday, 14 March"></label><label>Time <input type="text" id="posterTime" placeholder="7:30 PM"></label><label>Venue <input type="text" id="posterVenue" placeholder="The Living Room"></label><label>Critic Blurb <input type="text" id="posterBlurb" placeholder="A breathtaking masterpiece."></label><label>QR Code Link <input type="text" id="posterQRLink" placeholder="https://youtube.com/..."></label><label>Event Notes <textarea id="posterNotes" placeholder="Bring snacks. BYOB. Doors open 30 minutes before showtime."></textarea></label><label>Footer Label (Optional) <input type="text" id="posterFooter" placeholder="Add custom footer text..."></label>
+        <label>Date <input type="text" id="posterDate" placeholder="Thursday, 14 March"></label>
+        <label>Film 1 / Event Start Time <input type="text" id="posterTime" placeholder="7:30 PM"></label>
+        <label>Venue <input type="text" id="posterVenue" placeholder="The Living Room"></label>
+        <label>Critic Blurb <input type="text" id="posterBlurb" placeholder="A breathtaking masterpiece."></label>
+        <label>QR Code Link <input type="text" id="posterQRLink" placeholder="https://youtube.com/..."></label>
+        <label>Event Notes <textarea id="posterNotes" placeholder="Bring snacks. BYOB. Doors open 30 minutes before showtime."></textarea></label>
+        <label>Footer Label (Optional) <input type="text" id="posterFooter" placeholder="Add custom footer text..."></label>
       </div>
     </div>
     
     <div class="poster-preview-wrap">
-      <div class="poster-sheet theme-minimal" id="posterSheet">
+      <!-- Poster 1 -->
+      <div class="poster-sheet theme-minimal align-left" id="posterSheet">
         <div class="ps-overlay"></div><div class="film-grain-overlay" id="filmGrain"></div>
         <div class="ps-top"><div class="ps-brand">CineLoom Presents</div><div class="ps-event" id="psEvent" contenteditable="true">Film Night</div></div>
         <div class="ps-content">
           <div class="ps-blurb" id="psBlurb" contenteditable="true"></div>
           <div class="ps-film-block" id="psFilm1"><div class="ps-label">Film One</div><div class="ps-title-row"><img class="ps-title-poster" id="psPoster1" src="" crossorigin="anonymous"><div class="ps-title" id="psTitle1" contenteditable="true">Film Title</div></div><div class="ps-rating" id="psRating1"></div><div class="ps-tagline" id="psTagline1" contenteditable="true"></div><div class="ps-plot" id="psPlot1" contenteditable="true"></div></div>
-          <div class="ps-divider" id="psFilmDivider"><span>Also Showing</span></div>
-          <div class="ps-film-block" id="psFilm2"><div class="ps-label">Film Two</div><div class="ps-title-row"><img class="ps-title-poster" id="psPoster2" src="" crossorigin="anonymous"><div class="ps-title" id="psTitle2" contenteditable="true"></div></div><div class="ps-rating" id="psRating2"></div><div class="ps-tagline" id="psTagline2" contenteditable="true"></div><div class="ps-plot" id="psPlot2" contenteditable="true"></div></div>
         </div>
         <div class="ps-meta">
           <div class="ps-meta-item"><span class="k">Date</span><span class="v" id="psDate" contenteditable="true">—</span></div>
@@ -236,6 +359,21 @@ header { display: flex; justify-content: space-between; padding: 1.25rem 2rem; a
         </div>
         <div class="ps-notes" id="psNotes" contenteditable="true"></div>
         <div class="ps-footer" id="psFooterWrap" style="display: none;"><span class="ps-mark" id="psFooter" contenteditable="true"></span><img class="ps-qr" id="psQR" src="" crossorigin="anonymous"></div>
+      </div>
+      
+      <!-- Poster 2 -->
+      <div class="poster-sheet theme-minimal align-left" id="posterSheet2" style="display: none;">
+        <div class="ps-overlay"></div><div class="film-grain-overlay" id="filmGrain2"></div>
+        <div class="ps-top"><div class="ps-brand">CineLoom Presents</div><div class="ps-event" id="psEvent2" contenteditable="true">Film Night</div></div>
+        <div class="ps-content">
+          <div class="ps-film-block" id="psFilm2"><div class="ps-label">Film Two</div><div class="ps-title-row"><img class="ps-title-poster" id="psPoster2" src="" crossorigin="anonymous"><div class="ps-title" id="psTitle2" contenteditable="true"></div></div><div class="ps-rating" id="psRating2"></div><div class="ps-tagline" id="psTagline2" contenteditable="true"></div><div class="ps-plot" id="psPlot2" contenteditable="true"></div></div>
+        </div>
+        <div class="ps-meta">
+          <div class="ps-meta-item"><span class="k">Date</span><span class="v" id="psDate2" contenteditable="true">—</span></div>
+          <div class="ps-meta-item"><span class="k">Time</span><span class="v" id="psTime2" contenteditable="true">—</span></div>
+          <div class="ps-meta-item"><span class="k">Venue</span><span class="v" id="psVenue2" contenteditable="true">—</span></div>
+        </div>
+        <div class="ps-footer" id="psFooterWrap2" style="display: none;"><span class="ps-mark" id="psFooter2" contenteditable="true"></span><img class="ps-qr" id="psQR2" src="" crossorigin="anonymous"></div>
       </div>
       <div class="zoom-controls"><button class="style-btn" id="zoomOut">-</button><button class="style-btn" id="zoomReset">Auto</button><button class="style-btn" id="zoomIn">+</button></div>
     </div>
@@ -248,9 +386,55 @@ const omdbKeyInput = document.getElementById('omdbKeyInput') || document.createE
 const savedOmdbKey = localStorage.getItem('cl-omdb-key') || '65149319'; 
 localStorage.setItem('cl-omdb-key', savedOmdbKey);
 
-const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterPdfBtn = document.getElementById('posterPdfBtn'); const posterSheet = document.getElementById('posterSheet'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
-const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
-const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), film2Block: document.getElementById('psFilm2'), filmDivider: document.getElementById('psFilmDivider'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), event: document.getElementById('psEvent') };
+const posterPrintBtn = document.getElementById('posterPrintBtn'); const posterExportBtn = document.getElementById('posterExportBtn'); const posterPdfBtn = document.getElementById('posterPdfBtn'); const posterSheet = document.getElementById('posterSheet'); const posterSheet2 = document.getElementById('posterSheet2'); const backdropInput = document.getElementById('posterBackdrop'); const clearBackdropBtn = document.getElementById('posterClearBackdrop');
+const posterFields = { title1: document.getElementById('posterTitle1'), tagline1: document.getElementById('posterTagline1'), runtime1: document.getElementById('posterRuntime1'), plot1: document.getElementById('posterPlot1'), title2: document.getElementById('posterTitle2'), tagline2: document.getElementById('posterTagline2'), time2: document.getElementById('posterTime2'), plot2: document.getElementById('posterPlot2'), date: document.getElementById('posterDate'), time: document.getElementById('posterTime'), venue: document.getElementById('posterVenue'), blurb: document.getElementById('posterBlurb'), qrLink: document.getElementById('posterQRLink'), notes: document.getElementById('posterNotes'), footer: document.getElementById('posterFooter') };
+const posterPreview = { title1: document.getElementById('psTitle1'), tagline1: document.getElementById('psTagline1'), plot1: document.getElementById('psPlot1'), title2: document.getElementById('psTitle2'), tagline2: document.getElementById('psTagline2'), plot2: document.getElementById('psPlot2'), date: document.getElementById('psDate'), time: document.getElementById('psTime'), time2: document.getElementById('psTime2'), venue: document.getElementById('psVenue'), blurb: document.getElementById('psBlurb'), rating1: document.getElementById('psRating1'), rating2: document.getElementById('psRating2'), qr: document.getElementById('psQR'), qr2: document.getElementById('psQR2'), notes: document.getElementById('psNotes'), footer: document.getElementById('psFooter'), footerWrap: document.getElementById('psFooterWrap'), footer2: document.getElementById('psFooter2'), footerWrap2: document.getElementById('psFooterWrap2'), event: document.getElementById('psEvent'), event2: document.getElementById('psEvent2'), date2: document.getElementById('psDate2'), venue2: document.getElementById('psVenue2') };
+
+function calculateFilm2StartTime() {
+    const timeStr = posterFields.time.value;
+    const runtimeStr = posterFields.runtime1.value;
+    
+    // If fields are missing, don't auto-calculate
+    if (!timeStr || !runtimeStr) return;
+    
+    // Extract minutes from runtime string (e.g., "120 min", "120")
+    const minsMatch = runtimeStr.match(/(\d+)/);
+    const mins = minsMatch ? parseInt(minsMatch[1]) : 0;
+    if (mins === 0) return;
+    
+    // Parse time string (e.g., "7:30 PM", "7:30pm", "19:30")
+    const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+    if (!timeMatch) return;
+    
+    let hours = parseInt(timeMatch[1]);
+    let minutes = parseInt(timeMatch[2]);
+    const period = timeMatch[3] ? timeMatch[3].toUpperCase() : null;
+    
+    // Convert to 24-hour format for math
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    
+    // Create date object to handle minute/hour rollover safely
+    let date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    
+    // Add runtime
+    date.setMinutes(date.getMinutes() + mins);
+    
+    // Format back to 12-hour clock
+    let newHours = date.getHours();
+    let newMinutes = date.getMinutes();
+    let ampm = newHours >= 12 ? 'PM' : 'AM';
+    newHours = newHours % 12;
+    if (newHours === 0) newHours = 12; // Handle midnight
+    newMinutes = newMinutes < 10 ? '0' + newMinutes : newMinutes;
+    
+    const newTimeStr = `${newHours}:${newMinutes} ${ampm}`;
+    
+    // Auto-fill the input field and the preview
+    posterFields.time2.value = newTimeStr;
+    posterPreview.time2.textContent = newTimeStr;
+}
 
 function updatePosterPreview() {
   posterPreview.title1.textContent = posterFields.title1.value || 'Film Title';
@@ -266,18 +450,26 @@ function updatePosterPreview() {
   const footerText = posterFields.footer.value || '';
   posterPreview.footer.textContent = footerText;
   posterPreview.footerWrap.style.display = footerText.trim() !== '' ? 'flex' : 'none';
+  posterPreview.footer2.textContent = footerText;
+  posterPreview.footerWrap2.style.display = footerText.trim() !== '' ? 'flex' : 'none';
 
+  // Logic for Separate Poster 2
   if (posterFields.title2.value.trim() !== '') {
-    posterSheet.classList.add('double-feature');
-    posterPreview.film2Block.style.display = 'flex';
-    posterPreview.filmDivider.style.display = 'flex';
+    posterSheet2.style.display = 'inline-flex';
     posterPreview.title2.textContent = posterFields.title2.value;
     posterPreview.tagline2.textContent = posterFields.tagline2.value || '';
     posterPreview.plot2.textContent = posterFields.plot2.value || '';
+    
+    // Sync global event details to Poster 2, EXCEPT Time which is handled by calculateFilm2StartTime
+    posterPreview.date2.textContent = posterFields.date.value || '—';
+    posterPreview.time2.textContent = posterFields.time2.value || '—';
+    posterPreview.venue2.textContent = posterFields.venue.value || '—';
+    posterPreview.event2.textContent = posterPreview.event.textContent;
+    
+    // Trigger auto-calculation on any update
+    calculateFilm2StartTime();
   } else {
-    posterSheet.classList.remove('double-feature');
-    posterPreview.film2Block.style.display = 'none';
-    posterPreview.filmDivider.style.display = 'none';
+    posterSheet2.style.display = 'none';
   }
   applyZoom();
 }
@@ -291,7 +483,10 @@ Object.keys(posterFields).forEach(key => {
     if (document.activeElement !== preview) {
       preview.textContent = input.value;
       if (key === 'blurb') preview.classList.toggle('show', input.value.trim() !== '');
-      if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+      if (key === 'footer') {
+        posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+        posterPreview.footerWrap2.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+      }
     }
     updatePosterPreview();
   });
@@ -299,29 +494,259 @@ Object.keys(posterFields).forEach(key => {
   if (preview.isContentEditable) {
     preview.addEventListener('input', () => {
       input.value = preview.textContent;
-      if (key === 'footer') posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+      if (key === 'footer') {
+        posterPreview.footerWrap.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+        posterPreview.footerWrap2.style.display = input.value.trim() !== '' ? 'flex' : 'none';
+      }
     });
   }
 });
 
+// Explicit listeners for time calculation triggers
+posterFields.time.addEventListener('input', calculateFilm2StartTime);
+posterFields.runtime1.addEventListener('input', calculateFilm2StartTime);
+
+// Sync Event Name between both posters
+posterPreview.event.addEventListener('input', () => {
+  posterPreview.event2.textContent = posterPreview.event.textContent;
+});
+posterPreview.event2.addEventListener('input', () => {
+  posterPreview.event.textContent = posterPreview.event2.textContent;
+});
+
+// Global Text Size Logic
+const textScaleSlider = document.getElementById('textScaleSlider');
+const sizeValue = document.getElementById('sizeValue');
+textScaleSlider.addEventListener('input', (e) => {
+    const scale = e.target.value;
+    posterSheet.style.setProperty('--text-scale', scale);
+    posterSheet2.style.setProperty('--text-scale', scale);
+    sizeValue.textContent = `${Math.round(scale * 100)}%`;
+    applyZoom();
+});
+
 const themeDisplayNames = { 'theme-minimal': 'Minimal', 'theme-neon': 'Neon Stream', 'theme-noir': 'Cinema Noir', 'theme-golden': 'Golden Hour', 'theme-marquee': 'Marquee', 'theme-retro': 'Retro Pop', 'theme-blueprint': 'Blueprint', 'theme-artdeco': 'Art Deco', 'theme-vhs': 'VHS Retro', 'theme-orange': 'Orange Crush', 'theme-midblue': 'Midnight Blue', 'theme-typewriter': 'Typewriter', 'theme-halloween': 'Halloween', 'theme-christmas': 'Christmas', 'theme-valentine': "Valentine's", 'theme-newyear': "New Year's", 'theme-custom': 'Custom Colors' };
-function setPosterTheme(themeClass, themeName) { const allThemes = Object.keys(themeDisplayNames); posterSheet.classList.remove(...allThemes); posterSheet.classList.add(themeClass); if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } setTimeout(applyZoom, 10); }
-function applyCustomTheme() { if (!posterSheet.classList.contains('theme-custom')) return; const bg = document.getElementById('customBg').value; const text = document.getElementById('customText').value; const accent = document.getElementById('customAccent').value; posterSheet.style.backgroundColor = bg; posterSheet.style.color = text; posterSheet.style.borderColor = accent; const overlay = posterSheet.querySelector('.ps-overlay'); const r = parseInt(bg.slice(1,3), 16); const g = parseInt(bg.slice(3,5), 16); const b = parseInt(bg.slice(5,7), 16); overlay.style.background = `rgba(${r}, ${g}, ${b}, 0.85)`; posterSheet.querySelectorAll('.ps-label, .ps-event, .ps-divider span, .ps-meta-item .k').forEach(el => el.style.color = accent); }
+function setPosterTheme(themeClass, themeName) { 
+    const allThemes = Object.keys(themeDisplayNames); 
+    [posterSheet, posterSheet2].forEach(sheet => {
+        sheet.classList.remove(...allThemes); 
+        sheet.classList.add(themeClass);
+    });
+    if (themeClass === 'theme-custom') { applyCustomTheme(); document.getElementById('customColorPicker').classList.add('show'); } else { document.getElementById('customColorPicker').classList.remove('show'); } 
+    document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(b => b.classList.remove('active')); 
+    const activeBtn = document.querySelector(`.dropdown-item[data-poster-theme="${themeClass}"]`); 
+    if (activeBtn) { activeBtn.classList.add('active'); posterThemeLabel.textContent = themeName; } 
+    setTimeout(applyZoom, 10); 
+}
+function applyCustomTheme() { 
+    const bg = document.getElementById('customBg').value; const text = document.getElementById('customText').value; const accent = document.getElementById('customAccent').value;
+    [posterSheet, posterSheet2].forEach(sheet => {
+        if (!sheet.classList.contains('theme-custom')) return;
+        sheet.style.backgroundColor = bg; sheet.style.color = text; sheet.style.borderColor = accent; 
+        const overlay = sheet.querySelector('.ps-overlay'); 
+        const r = parseInt(bg.slice(1,3), 16); const g = parseInt(bg.slice(3,5), 16); const b = parseInt(bg.slice(5,7), 16); 
+        overlay.style.background = `rgba(${r}, ${g}, ${b}, 0.85)`; 
+        sheet.querySelectorAll('.ps-label, .ps-event, .ps-divider span, .ps-meta-item .k').forEach(el => el.style.color = accent);
+    });
+}
 ['customBg', 'customText', 'customAccent'].forEach(id => document.getElementById(id).addEventListener('input', applyCustomTheme));
 
+// Global Font Dropdown Logic (Event Delegation)
 const fontDropdown = document.getElementById('fontDropdown'); const fontToggle = document.getElementById('fontToggle'); const fontMenu = document.getElementById('fontMenu'); const fontLabel = document.getElementById('fontLabel');
 fontToggle.addEventListener('click', (e) => { e.stopPropagation(); fontDropdown.classList.toggle('open'); });
 document.addEventListener('click', (e) => { if (!fontDropdown.contains(e.target)) fontDropdown.classList.remove('open'); });
-document.querySelectorAll('.dropdown-item[data-font]').forEach(btn => btn.addEventListener('click', () => { const font = btn.dataset.font; const name = btn.textContent; document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); fontLabel.textContent = name; fontDropdown.classList.remove('open'); document.querySelectorAll('.ps-title').forEach(el => { if (font === 'default') el.style.fontFamily = ''; else el.style.fontFamily = font; }); }));
+fontMenu.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dropdown-item[data-font]');
+    if (!btn) return;
+    const font = btn.dataset.font; const name = btn.textContent; 
+    document.querySelectorAll('.dropdown-item[data-font]').forEach(b => b.classList.remove('active')); 
+    btn.classList.add('active'); 
+    fontLabel.textContent = name; 
+    fontDropdown.classList.remove('open'); 
+    document.querySelectorAll('.ps-title, .ps-tagline, .ps-plot, .ps-blurb, .ps-notes').forEach(el => { if (font === 'default') el.style.fontFamily = ''; else el.style.fontFamily = font; });
+});
 
-const grainToggle = document.getElementById('grainToggle'); const filmGrain = document.getElementById('filmGrain');
-grainToggle.addEventListener('click', () => { grainToggle.classList.toggle('active'); filmGrain.classList.toggle('show'); });
+// Custom Font Upload Logic
+const customFontUpload = document.getElementById('customFontUpload');
+customFontUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const fontUrl = event.target.result;
+        const customFontName = 'CustomFont_' + Date.now();
+        let styleTag = document.getElementById('dynamicFontStyles');
+        if (!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = 'dynamicFontStyles';
+            document.head.appendChild(styleTag);
+        }
+        styleTag.innerHTML = `@font-face { font-family: '${customFontName}'; src: url('${fontUrl}'); }`;
+        
+        const menus = [
+            { menu: fontMenu, attr: 'data-font' },
+            { menu: document.getElementById('advFontMenu'), attr: 'data-adv-font' }
+        ];
+        
+        menus.forEach(m => {
+            let customBtn = m.menu.querySelector('[data-custom-font="true"]');
+            if (!customBtn) {
+                customBtn = document.createElement('button');
+                customBtn.type = 'button';
+                customBtn.className = 'dropdown-item';
+                customBtn.dataset.customFont = 'true';
+                m.menu.appendChild(customBtn);
+            }
+            customBtn.dataset[m.attr.split('-')[1]] = `'${customFontName}', sans-serif`;
+            customBtn.textContent = 'Custom: ' + file.name;
+        });
+        
+        fontMenu.querySelector('[data-custom-font="true"]').click();
+    };
+    reader.readAsDataURL(file);
+});
+
+// Alignment Dropdown Logic
+const alignDropdown = document.getElementById('alignDropdown');
+const alignToggle = document.getElementById('alignToggle');
+const alignMenu = document.getElementById('alignMenu');
+const alignLabel = document.getElementById('alignLabel');
+alignToggle.addEventListener('click', (e) => { e.stopPropagation(); alignDropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!alignDropdown.contains(e.target)) alignDropdown.classList.remove('open'); });
+document.querySelectorAll('.dropdown-item[data-align]').forEach(btn => btn.addEventListener('click', () => { 
+    const align = btn.dataset.align; 
+    document.querySelectorAll('.dropdown-item[data-align]').forEach(b => b.classList.remove('active')); 
+    btn.classList.add('active'); 
+    alignLabel.textContent = btn.textContent; 
+    alignDropdown.classList.remove('open'); 
+    const allAligns = ['align-left', 'align-center', 'align-right', 'align-justify'];
+    posterSheet.classList.remove(...allAligns);
+    posterSheet2.classList.remove(...allAligns);
+    posterSheet.classList.add(`align-${align}`);
+    posterSheet2.classList.add(`align-${align}`);
+}));
+
+// Advanced Text Styling Logic
+const styleTargetDropdown = document.getElementById('styleTargetDropdown');
+const styleTargetToggle = document.getElementById('styleTargetToggle');
+const styleTargetMenu = document.getElementById('styleTargetMenu');
+const styleTargetLabel = document.getElementById('styleTargetLabel');
+const advFontDropdown = document.getElementById('advFontDropdown');
+const advFontToggle = document.getElementById('advFontToggle');
+const advFontMenu = document.getElementById('advFontMenu');
+const advFontLabel = document.getElementById('advFontLabel');
+const advSizeControl = document.getElementById('advSizeControl');
+const advSizeSlider = document.getElementById('advSizeSlider');
+const advSizeValue = document.getElementById('advSizeValue');
+const advColorControl = document.getElementById('advColorControl');
+const advColorPicker = document.getElementById('advColorPicker');
+let currentAdvTarget = null;
+
+styleTargetToggle.addEventListener('click', (e) => { e.stopPropagation(); styleTargetDropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!styleTargetDropdown.contains(e.target)) styleTargetDropdown.classList.remove('open'); });
+
+styleTargetMenu.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dropdown-item[data-target]');
+    if (!btn) return;
+    const targetId = btn.dataset.target;
+    currentAdvTarget = document.getElementById(targetId);
+    
+    document.querySelectorAll('.dropdown-item[data-target]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    styleTargetLabel.textContent = btn.textContent;
+    styleTargetDropdown.classList.remove('open');
+    
+    advFontDropdown.style.display = 'block';
+    advSizeControl.style.display = 'flex';
+    advColorControl.style.display = 'flex';
+    
+    advSizeSlider.value = currentAdvTarget.style.getPropertyValue('--text-scale') || 1;
+    advSizeValue.textContent = `${Math.round(advSizeSlider.value * 100)}%`;
+    advColorPicker.value = rgbToHex(currentAdvTarget.style.color) || '#ffffff';
+});
+
+advFontToggle.addEventListener('click', (e) => { e.stopPropagation(); advFontDropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!advFontDropdown.contains(e.target)) advFontDropdown.classList.remove('open'); });
+
+advFontMenu.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dropdown-item[data-adv-font]');
+    if (!btn || !currentAdvTarget) return;
+    const font = btn.dataset.advFont; 
+    const name = btn.textContent; 
+    document.querySelectorAll('.dropdown-item[data-adv-font]').forEach(b => b.classList.remove('active')); 
+    btn.classList.add('active'); 
+    advFontLabel.textContent = name; 
+    advFontDropdown.classList.remove('open'); 
+    
+    if (font === 'inherit') currentAdvTarget.style.fontFamily = '';
+    else currentAdvTarget.style.fontFamily = font;
+});
+
+advSizeSlider.addEventListener('input', (e) => {
+    if (!currentAdvTarget) return;
+    const scale = e.target.value;
+    currentAdvTarget.style.setProperty('--text-scale', scale);
+    advSizeValue.textContent = `${Math.round(scale * 100)}%`;
+    applyZoom();
+});
+
+advColorPicker.addEventListener('input', (e) => {
+    if (!currentAdvTarget) return;
+    currentAdvTarget.style.color = e.target.value;
+});
+
+function rgbToHex(rgb) {
+    if (!rgb) return null;
+    if (rgb.startsWith('#')) return rgb;
+    const result = rgb.match(/\d+/g);
+    if (!result) return null;
+    return '#' + result.map(x => {
+        const hex = parseInt(x).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    }).join('');
+}
+
+const grainToggle = document.getElementById('grainToggle'); const filmGrain = document.getElementById('filmGrain'); const filmGrain2 = document.getElementById('filmGrain2');
+grainToggle.addEventListener('click', () => { 
+    grainToggle.classList.toggle('active'); 
+    filmGrain.classList.toggle('show'); 
+    filmGrain2.classList.toggle('show'); 
+});
 
 const qrToggle = document.getElementById('qrToggle');
-qrToggle.addEventListener('click', () => { qrToggle.classList.toggle('active'); const show = qrToggle.classList.contains('active'); posterPreview.qr.classList.toggle('show', show); if (show) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
-posterFields.qrLink.addEventListener('input', () => { if (qrToggle.classList.contains('active')) { const link = posterFields.qrLink.value || 'https://www.google.com'; posterPreview.qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; } });
+qrToggle.addEventListener('click', () => { 
+    qrToggle.classList.toggle('active'); 
+    const show = qrToggle.classList.contains('active'); 
+    posterPreview.qr.classList.toggle('show', show); 
+    posterPreview.qr2.classList.toggle('show', show); 
+    if (show) { 
+        const link = posterFields.qrLink.value || 'https://www.google.com'; 
+        const src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; 
+        posterPreview.qr.src = src; 
+        posterPreview.qr2.src = src;
+    } 
+});
+posterFields.qrLink.addEventListener('input', () => { 
+    if (qrToggle.classList.contains('active')) { 
+        const link = posterFields.qrLink.value || 'https://www.google.com'; 
+        const src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(link)}`; 
+        posterPreview.qr.src = src; 
+        posterPreview.qr2.src = src;
+    } 
+});
 
-document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if (btn.dataset.format === '916') posterSheet.classList.add('format-916'); else posterSheet.classList.remove('format-916'); applyZoom(); }));
+document.querySelectorAll('.format-btn').forEach(btn => btn.addEventListener('click', () => { 
+    document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active')); 
+    btn.classList.add('active'); 
+    if (btn.dataset.format === '916') { 
+        posterSheet.classList.add('format-916'); 
+        posterSheet2.classList.add('format-916'); 
+    } else { 
+        posterSheet.classList.remove('format-916'); 
+        posterSheet2.classList.remove('format-916'); 
+    } 
+    applyZoom(); 
+}));
 
 function debounce(func, delay) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
 async function fetchSuggestions(query, target) { const apiKey = localStorage.getItem('cl-omdb-key'); if (!apiKey || query.trim().length < 3) { hideResults(target); return; } try { const res = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=${apiKey}&type=movie`); const data = await res.json(); const resultsContainer = document.getElementById(`search${target}Results`); resultsContainer.innerHTML = ''; if (data.Response === 'True' && data.Search) { data.Search.slice(0, 5).forEach(movie => { const item = document.createElement('div'); item.className = 'autocomplete-item'; item.innerHTML = `<img src="${movie.Poster !== 'N/A' ? movie.Poster : ''}" alt=""><div class="auto-info"><span class="auto-title">${movie.Title}</span><span class="auto-year">${movie.Year}</span></div>`; item.addEventListener('click', () => fetchMovieDetails(movie.imdbID, target)); resultsContainer.appendChild(item); }); resultsContainer.classList.add('show'); } else { hideResults(target); } } catch (e) { hideResults(target); } }
@@ -334,12 +759,18 @@ async function fetchMovieDetails(imdbID, target) {
     const res = await fetch(`https://www.omdbapi.com/?i=${imdbID}&apikey=${apiKey}&plot=full`); const data = await res.json();
     if (data.Response === 'True') {
       if (target === '1') {
-        posterFields.title1.value = data.Title || ''; posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot1.value = data.Plot || '';
+        posterFields.title1.value = data.Title || ''; 
+        posterFields.tagline1.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); 
+        posterFields.plot1.value = data.Plot || '';
+        posterFields.runtime1.value = data.Runtime || ''; // Auto-fill runtime
         if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster1'); img.src = data.Poster; img.classList.add('show'); }
         posterPreview.rating1.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
         posterPreview.rating1.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
+        calculateFilm2StartTime(); // Trigger calculation once runtime is fetched
       } else {
-        posterFields.title2.value = data.Title || ''; posterFields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); posterFields.plot2.value = data.Plot || '';
+        posterFields.title2.value = data.Title || ''; 
+        posterFields.tagline2.value = `${data.Genre || ''} | ${data.Rated || 'NR'}`.trim(); 
+        posterFields.plot2.value = data.Plot || '';
         if (data.Poster && data.Poster !== 'N/A') { const img = document.getElementById('psPoster2'); img.src = data.Poster; img.classList.add('show'); }
         posterPreview.rating2.textContent = data.imdbRating && data.imdbRating !== 'N/A' ? `★ ${data.imdbRating} / 10` : '';
         posterPreview.rating2.classList.toggle('show', data.imdbRating && data.imdbRating !== 'N/A');
@@ -355,19 +786,18 @@ document.getElementById('search2').addEventListener('input', debounce((e) => fet
 document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-container')) { hideResults('1'); hideResults('2'); } });
 document.querySelectorAll('.clear-poster-btn').forEach(btn => btn.addEventListener('click', () => { const img = document.getElementById(`psPoster${btn.dataset.clearPoster}`); img.src = ''; img.classList.remove('show'); }));
 let currentBackdropURL = null;
-backdropInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = URL.createObjectURL(file); posterSheet.style.backgroundImage = `url(${currentBackdropURL})`; });
-clearBackdropBtn.addEventListener('click', () => { if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; backdropInput.value = ''; });
+backdropInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = URL.createObjectURL(file); const bgUrl = `url(${currentBackdropURL})`; posterSheet.style.backgroundImage = bgUrl; posterSheet2.style.backgroundImage = bgUrl; });
+clearBackdropBtn.addEventListener('click', () => { if (currentBackdropURL) URL.revokeObjectURL(currentBackdropURL); currentBackdropURL = null; posterSheet.style.backgroundImage = 'none'; posterSheet2.style.backgroundImage = 'none'; backdropInput.value = ''; });
 const posterThemeDropdown = document.getElementById('posterThemeDropdown'); const posterThemeToggle = document.getElementById('posterThemeToggle'); const posterThemeMenu = document.getElementById('posterThemeMenu'); const posterThemeLabel = posterThemeToggle.querySelector('.dropdown-label');
 posterThemeToggle.addEventListener('click', (e) => { e.stopPropagation(); posterThemeDropdown.classList.toggle('open'); });
 document.addEventListener('click', (e) => { if (!posterThemeDropdown.contains(e.target)) posterThemeDropdown.classList.remove('open'); });
 document.querySelectorAll('.dropdown-item[data-poster-theme]').forEach(btn => btn.addEventListener('click', () => { setPosterTheme(btn.dataset.posterTheme, btn.textContent); posterThemeDropdown.classList.remove('open'); }));
 
-// NEW: Filter Logic
+// Filter Logic
 const filterDropdown = document.getElementById('filterDropdown');
 const filterToggle = document.getElementById('filterToggle');
 const filterMenu = document.getElementById('filterMenu');
 const filterLabel = document.getElementById('filterLabel');
-
 filterToggle.addEventListener('click', (e) => { e.stopPropagation(); filterDropdown.classList.toggle('open'); });
 document.addEventListener('click', (e) => { if (!filterDropdown.contains(e.target)) filterDropdown.classList.remove('open'); });
 document.querySelectorAll('.dropdown-item[data-filter]').forEach(btn => {
@@ -377,58 +807,95 @@ document.querySelectorAll('.dropdown-item[data-filter]').forEach(btn => {
         btn.classList.add('active');
         filterLabel.textContent = btn.textContent;
         filterDropdown.classList.remove('open');
-        // Apply filter to the backdrop (but not the text content)
         posterSheet.style.filter = filter;
+        posterSheet2.style.filter = filter;
     });
 });
 
 let posterZoom = 0.75;
-function applyZoom() { const unscaledHeight = posterSheet.offsetHeight; const emptySpace = unscaledHeight * (1 - posterZoom); posterSheet.style.marginBottom = `-${emptySpace}px`; posterSheet.style.transform = `scale(${posterZoom})`; document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; }
+function applyZoom() { 
+    [posterSheet, posterSheet2].forEach(sheet => {
+        if (sheet.style.display === 'none') return;
+        const unscaledHeight = sheet.offsetHeight; 
+        const emptySpace = unscaledHeight * (1 - posterZoom); 
+        sheet.style.marginBottom = `-${emptySpace}px`; 
+        sheet.style.transform = `scale(${posterZoom})`; 
+    });
+    document.getElementById('zoomReset').textContent = `${Math.round(posterZoom * 100)}%`; 
+}
 document.getElementById('zoomIn').addEventListener('click', () => { posterZoom = Math.min(2, posterZoom + 0.1); applyZoom(); });
 document.getElementById('zoomOut').addEventListener('click', () => { posterZoom = Math.max(0.25, posterZoom - 0.1); applyZoom(); });
 document.getElementById('zoomReset').addEventListener('click', () => { posterZoom = 0.75; applyZoom(); });
 
 posterPrintBtn.addEventListener('click', () => { updatePosterPreview(); setTimeout(() => window.print(), 100); });
 
-// NEW: Export to PDF
-posterPdfBtn.addEventListener('click', () => {
+// Export to Multi-Page PDF (Loops through visible posters)
+posterPdfBtn.addEventListener('click', async () => {
     posterPdfBtn.textContent = 'Generating...';
-    const currentTransform = posterSheet.style.transform;
-    posterSheet.style.transform = 'none';
-    posterSheet.style.marginBottom = '0';
+    const sheets = [posterSheet];
+    if (posterSheet2.style.display !== 'none') sheets.push(posterSheet2);
     
-    html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
-        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-        pdf.save('cineloom-poster.pdf');
+    const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+    const pdfWidth = 210;
+    const pdfHeight = 297;
+    let firstPage = true;
+
+    try {
+        for (const sheet of sheets) {
+            const currentTransform = sheet.style.transform;
+            sheet.style.transform = 'none';
+            sheet.style.marginBottom = '0';
+            
+            const canvas = await html2canvas(sheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false });
+            const imgData = canvas.toDataURL('image/png');
+            const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            if (!firstPage) pdf.addPage();
+            firstPage = false;
+
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+            heightLeft -= pdfHeight;
+
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pdfHeight;
+            }
+            
+            sheet.style.transform = currentTransform;
+        }
         
+        pdf.save('cineloom-poster.pdf');
         posterPdfBtn.textContent = 'Export PDF';
-        posterSheet.style.transform = currentTransform;
         applyZoom();
-    }).catch(err => { 
+    } catch (err) { 
         console.error('PDF Export failed', err); 
         alert('PDF Export failed. Try the Print option instead.'); 
         posterPdfBtn.textContent = 'Export PDF'; 
-        posterSheet.style.transform = currentTransform; 
         applyZoom(); 
-    });
+    }
 });
 
+// Export PNG (Currently exports Poster 1 only to avoid zip file complexity)
 posterExportBtn.addEventListener('click', () => {
   posterExportBtn.textContent = 'Rendering...';
   const currentTransform = posterSheet.style.transform;
   posterSheet.style.transform = 'none';
   html2canvas(posterSheet, { scale: 2, useCORS: true, backgroundColor: null, logging: false }).then(canvas => {
-    const link = document.createElement('a'); link.download = 'cineloom-poster.png'; link.href = canvas.toDataURL('image/png'); link.click();
+    const link = document.createElement('a'); link.download = 'cineloom-poster-1.png'; link.href = canvas.toDataURL('image/png'); link.click();
     posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform;
   }).catch(err => { console.error('Export failed', err); alert('Export failed due to CORS restrictions on the poster image. Try the Print option or use a custom backdrop upload.'); posterExportBtn.textContent = 'Export PNG'; posterSheet.style.transform = currentTransform; });
 });
 
-// Check for snapshot
 const snapshot = sessionStorage.getItem('cineloom-snapshot');
 if (snapshot) {
-  posterSheet.style.backgroundImage = `url('${snapshot}')`;
+  const bgUrl = `url('${snapshot}')`;
+  posterSheet.style.backgroundImage = bgUrl;
+  posterSheet2.style.backgroundImage = bgUrl;
   sessionStorage.removeItem('cineloom-snapshot');
 }
 

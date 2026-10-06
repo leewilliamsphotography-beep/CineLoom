@@ -17,8 +17,24 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --bg: #08090b; --bg-elev: rgba(20, 22, 26, 0.6); --bg-elev-2: rgba(28, 30, 36, 0.7); --bg-elev-3: rgba(34, 37, 43, 0.95); --text: #fff; --text-soft: #a0a4a8; --text-dim: #62666d; --accent: #3b82f6; --accent-2: #8b5cf6; --accent-soft: rgba(59, 130, 246, 0.1); --accent-glow: rgba(59, 130, 246, 0.4); --line: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.15); --ease: cubic-bezier(0.4, 0, 0.2, 1); --blob-opacity: 0.15; --shadow-card: 0 10px 40px rgba(0,0,0,0.4); --plyr-color-main: var(--accent); --plyr-video-background: rgba(0,0,0,0.9); --plyr-menu-background: var(--bg-elev-3); --plyr-menu-color: var(--text); --plyr-menu-border-color: var(--line); --plyr-control-icon-size: 18px; --plyr-control-spacing: 12px; --plyr-control-radius: 6px; --plyr-font-family: 'Inter', sans-serif; --plyr-font-size-small: 13px; --plyr-font-size-base: 14px; }
+
+/* Seasonal Themes */
+[data-theme="halloween"] { --accent: #ff7518; --accent-2: #8b008b; --accent-soft: rgba(255, 117, 24, 0.1); --accent-glow: rgba(255, 117, 24, 0.4); }
+[data-theme="christmas"] { --accent: #ef4146; --accent-2: #0a8c4a; --accent-soft: rgba(239, 65, 70, 0.1); --accent-glow: rgba(239, 65, 70, 0.4); }
+[data-theme="autumn"] { --accent: #d2691e; --accent-2: #8b4513; --accent-soft: rgba(210, 105, 30, 0.1); --accent-glow: rgba(210, 105, 30, 0.4); }
+[data-theme="winter"] { --accent: #00bfff; --accent-2: #4682b4; --accent-soft: rgba(0, 191, 255, 0.1); --accent-glow: rgba(0, 191, 255, 0.4); }
+[data-theme="valentine"] { --accent: #ff1493; --accent-2: #c71585; --accent-soft: rgba(255, 20, 147, 0.1); --accent-glow: rgba(255, 20, 147, 0.4); }
+[data-theme="spring"] { --accent: #32cd32; --accent-2: #98fb98; --accent-soft: rgba(50, 205, 50, 0.1); --accent-glow: rgba(50, 205, 50, 0.4); }
+[data-theme="summer"] { --accent: #ffa500; --accent-2: #ffff00; --accent-soft: rgba(255, 165, 0, 0.1); --accent-glow: rgba(255, 165, 0, 0.4); }
+
 html, body { color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background: var(--bg); overflow-x: hidden; display: flex; flex-direction: column; }
-.bg-blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg); } .blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: var(--blob-opacity); animation: float 30s ease-in-out infinite; } .blob-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -100px; } .blob-2 { width: 400px; height: 400px; background: var(--accent-2); bottom: -100px; right: -100px; animation-delay: -5s; } .blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: 50%; animation-delay: -10s; opacity: calc(var(--blob-opacity) * 0.5); } @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -20px) scale(1.1); } 66% { transform: translate(-20px, 30px) scale(0.9); } }
+.bg-blobs { position: fixed; inset: 0; z-index: -2; overflow: hidden; background: var(--bg); } .blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: var(--blob-opacity); animation: float 30s ease-in-out infinite; } .blob-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -100px; } .blob-2 { width: 400px; height: 400px; background: var(--accent-2); bottom: -100px; right: -100px; animation-delay: -5s; } .blob-3 { width: 300px; height: 300px; background: var(--accent); top: 40%; left: 50%; animation-delay: -10s; opacity: calc(var(--blob-opacity) * 0.5); } @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -20px) scale(1.1); } 66% { transform: translate(-20px, 30px) scale(0.9); } }
+
+/* Seasonal Effects */
+.seasonal-fx { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.seasonal-fx .fx-item { position: absolute; top: -50px; animation: fall linear infinite; opacity: 0.8; font-size: 1.5rem; }
+@keyframes fall { 0% { transform: translateY(-10vh) rotate(0deg); } 100% { transform: translateY(110vh) rotate(360deg); } }
+
 *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 video::cue { font-size: 1.8em; background: rgba(0,0,0,0.85); color: #fff; text-shadow: 0 0 3px #000; line-height: 1.4; padding: 0.1em 0.3em; border-radius: 4px; }
 header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; position: sticky; top: 0; z-index: 1000; background: transparent; border-bottom: 1px solid transparent; } header.scrolled { background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(16px); border-bottom-color: var(--line); }
@@ -36,10 +52,18 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .load-dropdown { position: relative; display: flex; } .load-menu { position: absolute; top: calc(100% + 8px); right: 0; width: 240px; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 8px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(24px); z-index: 100; display: none; flex-direction: column; gap: 2px; } .load-menu.open { display: flex; } .load-item { background: transparent; border: 1px solid transparent; color: var(--text-soft); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.85rem; cursor: pointer; border-radius: 6px; text-align: left; display: flex; align-items: center; gap: 0.6rem; width: 100%; } .load-item:hover { background: var(--accent-soft); color: var(--accent); } .load-item-content { display: flex; flex-direction: column; gap: 2px; overflow: hidden; } .load-item-label { font-size: 0.85rem; font-weight: 600; color: var(--text); } .load-item-filename { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .load-menu-divider { height: 1px; background: var(--line); margin: 4px 0; }
 .torrent-row { position: relative; display: flex; gap: 0.5rem; padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--line); } .torrent-input { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.6rem 0.75rem; font-family: inherit; font-size: 0.9rem; border-radius: 6px; } .torrent-input:focus { outline: none; border-color: var(--accent); } .torrent-btn, .torrent-search-btn { background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; } .torrent-btn { background: var(--accent); border-color: var(--accent); color: #fff; } .torrent-btn:hover { background: var(--accent-2); }
 .torrent-results { position: absolute; top: 55px; left: 1.25rem; right: 1.25rem; background: var(--bg-elev-3); border: 1px solid var(--line-strong); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); z-index: 100; max-height: 300px; overflow-y: auto; display: none; flex-direction: column; padding: 4px; } .torrent-results.show { display: flex; } .torrent-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem; border-radius: 4px; cursor: pointer; } .torrent-item:hover { background: var(--bg-elev-2); }
-.video-stage { position: relative; aspect-ratio: 16/9; background: #000; overflow: hidden; } .video-stage.drag-over { outline: 2px dashed var(--accent); outline-offset: -10px; } .video-stage video { width: 100%; height: 100%; display: block; background: #000; cursor: pointer; }
+
+/* Dual Player Layout - Stacked Crossfade */
+.video-stage { position: relative; aspect-ratio: 16/9; background: #000; overflow: hidden; display: block; } 
+.video-stage.drag-over { outline: 2px dashed var(--accent); outline-offset: -10px; } 
+.video-wrapper { position: absolute; top: 0; bottom: 0; left: 0; width: 100%; transition: opacity 0.5s var(--ease); background: #000; z-index: 1; overflow: hidden; }
+.video-wrapper.is-hidden { opacity: 0; pointer-events: none; z-index: 0; }
+.video-wrapper video, .video-wrapper .plyr { width: 100%; height: 100%; display: block; background: #000; cursor: pointer; }
+.player-label { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: var(--accent); z-index: 10; pointer-events: none; }
+
 .plyr--video .plyr__controls { background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); padding: 20px 10px 10px; backdrop-filter: blur(8px); transition: opacity 0.3s ease; } .plyr--video .plyr__control--overlaid { background: var(--accent); color: #fff; border-radius: 50%; box-shadow: 0 0 20px var(--accent-glow); transition: opacity 0.3s ease; }
 .plyr--hide-controls .plyr__controls, .plyr--hide-controls .plyr__control--overlaid { opacity: 0 !important; pointer-events: none !important; }
-.idle-broadcast-state { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; overflow: hidden; } .idle-broadcast-state.hidden { display: none; }
+.idle-broadcast-state { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 6; overflow: hidden; } .idle-broadcast-state.hidden { display: none; }
 .buffering-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 20; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: #fff; font-weight: 600; font-size: 1.1rem; } .buffering-overlay.show { display: flex; } .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
 .file-input { position: absolute; width: 0; height: 0; opacity: 0; }
 .site-footer { text-align: center; padding: 2rem 1rem; color: var(--text-dim); font-size: 0.75rem; opacity: 0.7; margin-top: auto; border-top: 1px solid var(--line); }
@@ -84,9 +108,29 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .api-key-input { width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 0.5rem 0.75rem; font-family: inherit; font-size: 0.8rem; border-radius: 6px; margin-bottom: 0.5rem; }
 @media (max-width: 900px) { header { padding: 1rem 1.5rem; } main { padding: 0 1rem 2rem; } .remote-code-badge { display: none !important; } }
 </style>
+<script>
+  // Auto Seasonal Theme Detection
+  (function() {
+    const month = new Date().getMonth();
+    let theme = 'cyber'; // Default fallback
+    if (month === 9) theme = 'halloween';      // October
+    else if (month === 10) theme = 'autumn';   // November
+    else if (month === 11) theme = 'christmas';// December
+    else if (month === 0) theme = 'winter';    // January
+    else if (month === 1) theme = 'valentine'; // February
+    else if (month >= 2 && month <= 4) theme = 'spring'; // Mar-May
+    else if (month >= 5 && month <= 7) theme = 'summer'; // Jun-Aug
+    else if (month === 8) theme = 'autumn';    // September
+    
+    if (!localStorage.getItem('cl-theme')) {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+  })();
+</script>
 </head>
 <body>
 <div class="bg-blobs" aria-hidden="true"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+<div class="seasonal-fx" id="seasonalFx"></div>
 
 <header id="mainHeader">
   <a href="index.html" class="brand"><div class="brand-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="rgba(34, 37, 43, 0.95)"/><path d="M38 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><path d="M82 42 L60 24" fill="none" stroke="#3b82f6" stroke-width="3"/><rect x="32" y="38" width="56" height="64" rx="10" fill="#fff"/><rect x="48" y="94" width="24" height="5" rx="2.5" fill="#3b82f6"/><circle cx="60" cy="20" r="7" fill="#3b82f6"/></svg></div><span class="brand-text">CineLoom</span></a>
@@ -121,7 +165,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
               <div class="load-menu-divider"></div>
               <button class="load-item" id="loadSubsItem"><span class="load-item-content"><span class="load-item-label">Load Subtitles</span><span class="load-item-filename" id="loadSubsName">No file chosen</span></span></button>
               <div class="load-menu-divider"></div>
-              <button class="load-item" id="swapFilmsItem"><span class="load-item-content"><span class="load-item-label">Swap Films 1 & 2</span></span></button>
+              <button class="load-item" id="swapFilmsItem"><span class="load-item-content"><span class="load-item-label">Toggle Film 1 / 2</span></span></button>
             </div>
           </div>
           <button class="snapshot-btn" id="snapshotBtn">Snapshot</button>
@@ -135,7 +179,15 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
         <div class="torrent-results" id="torrentResults"></div>
       </div>
       <div class="video-stage" id="videoStage">
-        <video id="player" playsinline></video>
+        <div class="video-wrapper" id="vw1">
+          <div class="player-label">Film 1</div>
+          <video id="player1" playsinline></video>
+        </div>
+        <div class="video-wrapper is-hidden" id="vw2">
+          <div class="player-label">Film 2</div>
+          <video id="player2" playsinline></video>
+        </div>
+
         <div class="idle-broadcast-state" id="idleState"><div style="color:#e0e0e0; font-size:1.5rem; font-weight:700; letter-spacing:0.1em;">CineLoom Broadcast</div></div>
         <div class="buffering-overlay" id="bufferingOverlay"><div class="spinner"></div><span id="bufferingText">Buffering...</span></div>
         <div class="sub-sync-controls" id="subSyncControls" style="display: none;"><button class="style-btn" id="subSyncBack" type="button">-0.5s</button><span id="subSyncVal">0.0s</span><button class="style-btn" id="subSyncFwd" type="button">+0.5s</button><button class="style-btn" id="subSyncReset" type="button" style="margin-left: 4px;">Reset</button></div>
@@ -197,15 +249,70 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v2.2.0 (Ultimate Clean) loaded");
+console.log("CineLoom Player v3.3 (Queue Auto-Play + Seasons) loaded");
+
+// Populate Seasonal FX
+(function() {
+    const fxContainer = document.getElementById('seasonalFx');
+    const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
+    const emojis = {
+        halloween: ['🎃', '👻', '🦇', '🕸️', '🕷️'],
+        christmas: ['❄️', '🎄', '🎅', '🎁', '⛄'],
+        autumn: ['🍂', '🍁', '🌰'],
+        winter: ['❄️', '⛄', '🧣'],
+        valentine: ['❤️', '💖', '💕', '💘'],
+        spring: ['🌸', '🌼', '🌷', '🐰'],
+        summer: ['☀️', '🍉', '🏖️', '😎'],
+        cyber: ['✨', '🎬', '🎞️']
+    };
+    const selectedEmojis = emojis[theme] || emojis.cyber;
+    for (let i = 0; i < 25; i++) {
+        const span = document.createElement('span');
+        span.className = 'fx-item';
+        span.textContent = selectedEmojis[Math.floor(Math.random() * selectedEmojis.length)];
+        span.style.left = Math.random() * 100 + 'vw';
+        span.style.animationDuration = (Math.random() * 5 + 5) + 's';
+        span.style.animationDelay = (Math.random() * 5) + 's';
+        span.style.fontSize = (Math.random() * 1 + 1) + 'rem';
+        fxContainer.appendChild(span);
+    }
+})();
+
 const playerContainer = document.getElementById('playerContainer'); 
 const idleState = document.getElementById('idleState'); 
 const bufferingOverlay = document.getElementById('bufferingOverlay'); 
 const bufferingText = document.getElementById('bufferingText');
+
 let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
-let currentFilm = 1, currentSubURL = null, subDelay = 0, originalCues = [], saveHistoryTimer = null, movieData = null;
+let focusedFilm = 1, currentSubURL = null, subDelay = 0, originalCues = [], saveHistoryTimer = null, movieData = null;
 let audioContext, gainNode, audioAnalyser, compressorNode, makeupGainNode, audioInitialized = false;
+
+const plyrConfig = { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], invertTime: true, toggleInvertTime: true };
+window.player1 = new Plyr(document.getElementById('player1'), plyrConfig);
+window.player2 = new Plyr(document.getElementById('player2'), plyrConfig);
+
+function getActiveVideo() { return focusedFilm === 1 ? document.getElementById('player1') : document.getElementById('player2'); }
+function getActivePlayer() { return focusedFilm === 1 ? window.player1 : window.player2; }
+
+// Layout Logic: Stacked / Crossfade
+function updateLayout() {
+    const vw1 = document.getElementById('vw1');
+    const vw2 = document.getElementById('vw2');
+    
+    // If the focused film has no URL, switch focus to the other one if it exists
+    if (focusedFilm === 1 && !film1.url && film2.url) focusedFilm = 2;
+    if (focusedFilm === 2 && !film2.url && film1.url) focusedFilm = 1;
+    if (!film1.url && !film2.url) focusedFilm = 1; // Default
+    
+    vw1.classList.toggle('is-hidden', focusedFilm !== 1);
+    vw2.classList.toggle('is-hidden', focusedFilm !== 2);
+}
+
+function focusFilm(filmNum) {
+    focusedFilm = filmNum;
+    updateLayout();
+}
 
 // Subtitles
 function parseSubtitles(filename, content) { const ext = filename.split('.').pop().toLowerCase(); if (ext === 'vtt') return content; if (ext === 'srt') return srtToVtt(content); if (ext === 'sbv') return sbvToVtt(content); if (ext === 'ass' || ext === 'ssa') return assToVtt(content); return srtToVtt(content); }
@@ -216,12 +323,15 @@ function assToVtt(content) { let vtt = 'WEBVTT\n\n'; const lines = content.split
 function formatAssTime(t) { if (!t) return ''; let parts = t.split(':'); while(parts.length < 3) parts.unshift('00'); let secParts = parts[2].split('.'); return `${parts[0].padStart(2,'0')}:${parts[1].padStart(2,'0')}:${secParts[0].padStart(2,'0')}.${(secParts[1] || '0').padEnd(3,'0')}`; }
 
 function applySubDelay() { 
-  const videoEl = document.getElementById('player');
-  const track = videoEl.textTracks[0]; 
-  if (!track || track.cues.length === 0 || originalCues.length === 0) return; 
-  for (let i = 0; i < track.cues.length; i++) { const cue = track.cues[i]; cue.startTime = Math.max(0, originalCues[i].start + subDelay); cue.endTime = Math.max(0, originalCues[i].end + subDelay); } 
+  [1, 2].forEach(filmNum => {
+    const videoEl = document.getElementById('player' + filmNum);
+    if (!videoEl) return;
+    const track = videoEl.textTracks[0]; 
+    if (!track || track.cues.length === 0 || originalCues.length === 0) return; 
+    for (let i = 0; i < track.cues.length; i++) { const cue = track.cues[i]; cue.startTime = Math.max(0, originalCues[i].start + subDelay); cue.endTime = Math.max(0, originalCues[i].end + subDelay); } 
+  });
   document.getElementById('subSyncVal').textContent = (subDelay > 0 ? '+' : '') + subDelay.toFixed(1) + 's';
-  localStorage.setItem(`cl-sub-delay-${currentFilm === 1 ? film1.name : film2.name}`, subDelay.toString());
+  localStorage.setItem(`cl-sub-delay-${focusedFilm === 1 ? film1.name : film2.name}`, subDelay.toString());
 }
 document.getElementById('subSyncBack').addEventListener('click', () => { subDelay -= 0.5; applySubDelay(); });
 document.getElementById('subSyncFwd').addEventListener('click', () => { subDelay += 0.5; applySubDelay(); });
@@ -234,24 +344,33 @@ fileSub.addEventListener('change', async (e) => {
     let vttContent; 
     try { const rawText = await file.text(); vttContent = parseSubtitles(file.name, rawText.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n')); } catch (err) { console.error('Failed to read subtitle file:', err); alert('Could not read subtitle file.'); return; } 
     const blob = new Blob([vttContent], { type: 'text/vtt' }); if (currentSubURL) URL.revokeObjectURL(currentSubURL); currentSubURL = URL.createObjectURL(blob); 
-    const videoEl = document.getElementById('player');
-    if (!videoEl) { alert('Please load a video first.'); return; }
-    videoEl.querySelectorAll('track').forEach(t => t.remove()); 
-    const track = document.createElement('track'); 
-    track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; 
-    videoEl.appendChild(track); 
+    
+    const video1 = document.getElementById('player1');
+    const video2 = document.getElementById('player2');
+    [video1, video2].forEach(videoEl => {
+      if (!videoEl) return;
+      videoEl.querySelectorAll('track').forEach(t => t.remove()); 
+      const track = document.createElement('track'); 
+      track.kind = 'subtitles'; track.label = 'Subtitles'; track.srclang = 'en'; track.src = currentSubURL; track.default = true; 
+      videoEl.appendChild(track); 
+    });
+
     let cuesLoaded = false;
     const checkCues = setInterval(() => {
-      const activeTrack = videoEl.textTracks[0];
+      const activeTrack = video1.textTracks[0];
       if (activeTrack && activeTrack.cues && activeTrack.cues.length > 0) {
         cuesLoaded = true; clearInterval(checkCues);
         originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); 
-        const savedDelay = localStorage.getItem(`cl-sub-delay-${currentFilm === 1 ? film1.name : film2.name}`);
+        const savedDelay = localStorage.getItem(`cl-sub-delay-${focusedFilm === 1 ? film1.name : film2.name}`);
         subDelay = savedDelay ? parseFloat(savedDelay) : 0;
         document.getElementById('subSyncVal').textContent = (subDelay > 0 ? '+' : '') + subDelay.toFixed(1) + 's'; 
         document.getElementById('subSyncControls').style.display = 'flex'; 
-        for (let i = 0; i < videoEl.textTracks.length; i++) videoEl.textTracks[i].mode = 'showing'; 
-        if (window.player) window.player.toggleCaptions(true);
+        
+        for (let i = 0; i < video1.textTracks.length; i++) video1.textTracks[i].mode = 'showing'; 
+        for (let i = 0; i < video2.textTracks.length; i++) video2.textTracks[i].mode = 'showing'; 
+        
+        if (window.player1) window.player1.toggleCaptions(true);
+        if (window.player2) window.player2.toggleCaptions(true);
         applySubDelay();
       }
     }, 100);
@@ -261,34 +380,109 @@ fileSub.addEventListener('change', async (e) => {
 });
 
 // History & Trivia
-function saveHistory(time) { const videoEl = document.getElementById('player'); if (!videoEl || !videoEl.src) return; let key = `cl-history-${currentFilm === 1 ? film1.name : film2.name}`; if (key.includes('No file')) return; localStorage.setItem(key, JSON.stringify({ time: time })); }
-function checkHistory() { const videoEl = document.getElementById('player'); if (!videoEl) return; let key = `cl-history-${currentFilm === 1 ? film1.name : film2.name}`; if (key.includes('No file')) return; const history = localStorage.getItem(key); if (history) { const data = JSON.parse(history); if (data.time > 10) { document.getElementById('resumeText').textContent = `Resume from ${Math.floor(data.time / 60)}m ${Math.floor(data.time % 60)}s?`; document.getElementById('resumeOverlay').classList.add('show'); } } }
-document.getElementById('resumeBtn').addEventListener('click', () => { const videoEl = document.getElementById('player'); let key = `cl-history-${currentFilm === 1 ? film1.name : film2.name}`; const history = localStorage.getItem(key); if (history && videoEl) { videoEl.currentTime = JSON.parse(history).time; } document.getElementById('resumeOverlay').classList.remove('show'); });
+function saveHistory(time) { const videoEl = getActiveVideo(); if (!videoEl || !videoEl.src) return; let key = `cl-history-${focusedFilm === 1 ? film1.name : film2.name}`; if (key.includes('No file')) return; localStorage.setItem(key, JSON.stringify({ time: time })); }
+function checkHistory() { const videoEl = getActiveVideo(); if (!videoEl) return; let key = `cl-history-${focusedFilm === 1 ? film1.name : film2.name}`; if (key.includes('No file')) return; const history = localStorage.getItem(key); if (history) { const data = JSON.parse(history); if (data.time > 10) { document.getElementById('resumeText').textContent = `Resume from ${Math.floor(data.time / 60)}m ${Math.floor(data.time % 60)}s?`; document.getElementById('resumeOverlay').classList.add('show'); } } }
+document.getElementById('resumeBtn').addEventListener('click', () => { const videoEl = getActiveVideo(); let key = `cl-history-${focusedFilm === 1 ? film1.name : film2.name}`; const history = localStorage.getItem(key); if (history && videoEl) { videoEl.currentTime = JSON.parse(history).time; } document.getElementById('resumeOverlay').classList.remove('show'); });
 async function fetchTrivia(title) { try { let cleanTitle = title.replace(/^Streaming:\s*/, '').replace(/\.[^/.]+$/, '').replace(/[._]/g, ' '); const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(cleanTitle)}&apikey=${localStorage.getItem('cl-omdb-key') || '65149319'}`); const data = await res.json(); if (data.Response === 'True') { movieData = { director: data.Director, actors: data.Actors, awards: data.Awards, plot: data.Plot }; } } catch (e) {} }
 
 // Player Setup
-function setupPlayer() {
-  const video = document.getElementById('player'); 
-  const fileVideo1 = playerContainer.querySelector('.file-input-video-1');
-  const fileVideo2 = playerContainer.querySelector('.file-input-video-2');
-  const player = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'captions', 'pip', 'airplay', 'fullscreen'], invertTime: true, toggleInvertTime: true });
-  window.player = player;
+function setupPlayerEvents(player, filmNum) {
+  const videoEl = document.getElementById('player' + filmNum);
   player.on('loadedmetadata', () => { idleState.classList.add('hidden'); checkHistory(); });
   player.on('error', () => { idleState.classList.add('hidden'); });
-  video.addEventListener('ended', () => { if (currentFilm === 1 && film2.url) { setTimeout(() => { switchFilm(2); video.play(); }, 2000); } });
-  video.addEventListener('timeupdate', () => { if (saveHistoryTimer) return; saveHistoryTimer = setTimeout(() => { saveHistory(video.currentTime); saveHistoryTimer = null; }, 5000); });
-  function switchFilm(filmNum) { currentFilm = filmNum; const f = filmNum === 1 ? film1 : film2; if (!f.url) return; const tracks = []; if (currentSubURL) { tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }); } player.source = { type: 'video', title: f.name, sources: [{ src: f.url, type: f.mime }], tracks: tracks }; const onLoaded = () => { const activeTrack = video.textTracks[0]; if (activeTrack && originalCues.length > 0) { originalCues = Array.from(activeTrack.cues).map(c => ({ start: c.startTime, end: c.endTime })); applySubDelay(); } video.removeEventListener('loadedmetadata', onLoaded); }; video.addEventListener('loadedmetadata', onLoaded); }
-  window.switchFilm = switchFilm;
-  function handleVideoFileLoad(e, filmNum) { const file = e.target.files[0]; if (!file) return; const filmObj = filmNum === 1 ? film1 : film2; if (filmObj.url) URL.revokeObjectURL(filmObj.url); filmObj.mime = file.type || 'video/mp4'; filmObj.url = URL.createObjectURL(new Blob([file], { type: filmObj.mime })); filmObj.name = file.name; document.getElementById(`loadFilm${filmNum}Name`).textContent = file.name; switchFilm(filmNum); fetchTrivia(filmObj.name); }
-  fileVideo1.addEventListener('change', (e) => handleVideoFileLoad(e, 1));
-  fileVideo2.addEventListener('change', (e) => handleVideoFileLoad(e, 2));
-  window.swapFilms = () => { const temp = film1; film1 = film2; film2 = temp; document.getElementById('loadFilm1Name').textContent = film1.name; document.getElementById('loadFilm2Name').textContent = film2.name; switchFilm(1); fetchTrivia(film1.name); };
-  const videoStage = document.getElementById('videoStage');
-  videoStage.addEventListener('dragover', (e) => { e.preventDefault(); videoStage.classList.add('drag-over'); });
-  videoStage.addEventListener('dragleave', () => videoStage.classList.remove('drag-over'));
-  videoStage.addEventListener('drop', (e) => { e.preventDefault(); videoStage.classList.remove('drag-over'); if (e.dataTransfer.files.length > 0) { let videoCount = 0; Array.from(e.dataTransfer.files).forEach(file => { const isVideo = file.type.startsWith('video/'); const isSub = file.name.match(/\.(vtt|srt|sbv|ass|sub|txt)$/i); if (isVideo && videoCount === 0) { fileVideo1.files = e.dataTransfer.files; fileVideo1.dispatchEvent(new Event('change')); videoCount++; } else if (isVideo && videoCount === 1) { fileVideo2.files = e.dataTransfer.files; fileVideo2.dispatchEvent(new Event('change')); videoCount++; } else if (isSub) { fileSub.files = e.dataTransfer.files; fileSub.dispatchEvent(new Event('change')); } }); } });
+  videoEl.addEventListener('timeupdate', () => { 
+    if (saveHistoryTimer) return; 
+    saveHistoryTimer = setTimeout(() => { 
+      saveHistory(videoEl.currentTime); 
+      saveHistoryTimer = null; 
+    }, 5000); 
+  });
+  
+  if (filmNum === 1) {
+    videoEl.addEventListener('ended', () => {
+      // Auto-play second film when first finishes
+      if (film2.url) {
+        focusFilm(2);
+        setTimeout(() => { window.player2.play(); }, 600);
+      }
+    });
+  }
 }
-setupPlayer();
+setupPlayerEvents(window.player1, 1);
+setupPlayerEvents(window.player2, 2);
+
+function handleVideoFileLoad(e, filmNum) { 
+  const file = e.target.files[0]; if (!file) return; 
+  const filmObj = filmNum === 1 ? film1 : film2; 
+  if (filmObj.url) URL.revokeObjectURL(filmObj.url); 
+  filmObj.mime = file.type || 'video/mp4'; 
+  filmObj.url = URL.createObjectURL(new Blob([file], { type: filmObj.mime })); 
+  filmObj.name = file.name; 
+  document.getElementById(`loadFilm${filmNum}Name`).textContent = file.name; 
+  
+  // Load source into player
+  const p = filmNum === 1 ? window.player1 : window.player2; 
+  const tracks = []; 
+  if (currentSubURL) { tracks.push({ kind: 'subtitles', label: 'Subtitles', srclang: 'en', src: currentSubURL, default: true }); } 
+  p.source = { type: 'video', title: filmObj.name, sources: [{ src: filmObj.url, type: filmObj.mime }], tracks: tracks }; 
+  
+  const otherFilmObj = filmNum === 1 ? film2 : film1;
+  // Only focus the new film if the other film isn't already loaded.
+  // This allows you to load Film 2 in the background without interrupting Film 1.
+  if (!otherFilmObj.url) {
+      focusFilm(filmNum);
+  } else {
+      updateLayout();
+  }
+  fetchTrivia(filmObj.name); 
+}
+document.querySelector('.file-input-video-1').addEventListener('change', (e) => handleVideoFileLoad(e, 1));
+document.querySelector('.file-input-video-2').addEventListener('change', (e) => handleVideoFileLoad(e, 2));
+
+// Toggle between Film 1 and Film 2 manually
+window.toggleFocus = () => { 
+  if (film1.url && film2.url) {
+      const newFocus = focusedFilm === 1 ? 2 : 1;
+      const oldPlayer = getActivePlayer();
+      const newPlayer = newFocus === 1 ? window.player1 : window.player2;
+      
+      oldPlayer.pause();
+      focusFilm(newFocus);
+      newPlayer.play();
+  } else if (film1.url) {
+      focusFilm(1);
+  } else if (film2.url) {
+      focusFilm(2);
+  }
+};
+
+const videoStage = document.getElementById('videoStage');
+videoStage.addEventListener('dragover', (e) => { e.preventDefault(); videoStage.classList.add('drag-over'); });
+videoStage.addEventListener('dragleave', () => videoStage.classList.remove('drag-over'));
+videoStage.addEventListener('drop', (e) => { 
+  e.preventDefault(); videoStage.classList.remove('drag-over'); 
+  if (e.dataTransfer.files.length > 0) { 
+    let videoCount = 0; 
+    Array.from(e.dataTransfer.files).forEach(file => { 
+      const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mkv|webm|mp4|avi|mov|m4v)$/i); 
+      const isSub = file.name.match(/\.(vtt|srt|sbv|ass|sub|txt)$/i); 
+      if (isVideo && videoCount === 0) { 
+          const dt = new DataTransfer(); dt.items.add(file); document.querySelector('.file-input-video-1').files = dt.files; 
+          document.querySelector('.file-input-video-1').dispatchEvent(new Event('change')); 
+          videoCount++; 
+      } 
+      else if (isVideo && videoCount === 1) { 
+          const dt = new DataTransfer(); dt.items.add(file); document.querySelector('.file-input-video-2').files = dt.files; 
+          document.querySelector('.file-input-video-2').dispatchEvent(new Event('change')); 
+          videoCount++; 
+      } 
+      else if (isSub) { 
+          const dt = new DataTransfer(); dt.items.add(file); document.querySelector('.file-input-sub').files = dt.files; 
+          document.querySelector('.file-input-sub').dispatchEvent(new Event('change')); 
+      } 
+    }); 
+  } 
+});
 
 // UI Listeners
 const loadMediaToggle = document.getElementById('loadMediaToggle'); const loadMenu = document.getElementById('loadMenu');
@@ -297,8 +491,12 @@ document.addEventListener('click', (e) => { if (!loadMenu.contains(e.target) && 
 document.getElementById('loadFilm1Item').addEventListener('click', () => { document.querySelector('.file-input-video-1').click(); loadMenu.classList.remove('open'); });
 document.getElementById('loadFilm2Item').addEventListener('click', () => { document.querySelector('.file-input-video-2').click(); loadMenu.classList.remove('open'); });
 document.getElementById('loadSubsItem').addEventListener('click', () => { document.querySelector('.file-input-sub').click(); loadMenu.classList.remove('open'); });
-document.getElementById('swapFilmsItem').addEventListener('click', () => { if (window.swapFilms) window.swapFilms(); loadMenu.classList.remove('open'); });
-document.getElementById('snapshotBtn').addEventListener('click', () => { const video = document.getElementById('player'); if (!video.src || video.error) { alert('Please load a video first.'); return; } try { const canvas = document.createElement('canvas'); canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height); sessionStorage.setItem('cineloom-snapshot', canvas.toDataURL('image/png')); window.location.href = 'poster.html'; } catch (e) { alert('Snapshot blocked.'); } });
+document.getElementById('swapFilmsItem').addEventListener('click', () => { if (window.toggleFocus) window.toggleFocus(); loadMenu.classList.remove('open'); });
+document.getElementById('snapshotBtn').addEventListener('click', () => { 
+  const video = getActiveVideo(); 
+  if (!video.src || video.error) { alert('Please load a video first.'); return; } 
+  try { const canvas = document.createElement('canvas'); canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height); sessionStorage.setItem('cineloom-snapshot', canvas.toDataURL('image/png')); window.location.href = 'poster.html'; } catch (e) { alert('Snapshot blocked.'); } 
+});
 const settingsToggle = document.getElementById('settingsToggle'); const settingsPanel = document.getElementById('settingsPanel');
 settingsToggle.addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('open'); settingsToggle.classList.toggle('active'); });
 document.addEventListener('click', (e) => { if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) { settingsPanel.classList.remove('open'); settingsToggle.classList.remove('active'); } });
@@ -319,20 +517,61 @@ document.getElementById('compressorToggle').addEventListener('click', (e) => {
   const settings = document.getElementById('compressorSettings');
   if (isActive) { settings.style.display = 'flex'; initAudioBoost(); } else { settings.style.display = 'none'; }
   if (audioContext && compressorNode) {
-    if (isActive) { gainNode.disconnect(audioAnalyser); gainNode.connect(compressorNode); compressorNode.connect(makeupGainNode); makeupGainNode.connect(audioAnalyser); } 
-    else { gainNode.disconnect(compressorNode); gainNode.connect(audioAnalyser); compressorNode.disconnect(makeupGainNode); makeupGainNode.disconnect(audioAnalyser); }
+    if (isActive) { 
+      gainNode.disconnect(audioAnalyser); 
+      gainNode.connect(compressorNode); 
+      compressorNode.connect(makeupGainNode); 
+      makeupGainNode.connect(audioAnalyser); 
+    } else { 
+      gainNode.disconnect(compressorNode); 
+      gainNode.connect(audioAnalyser); 
+      compressorNode.disconnect(makeupGainNode); 
+      makeupGainNode.disconnect(audioAnalyser); 
+    }
   }
 });
-function initAudioBoost() { if (audioInitialized) return; try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); const video = document.getElementById('player'); const source = audioContext.createMediaElementSource(video); gainNode = audioContext.createGain(); audioAnalyser = audioContext.createGain(); compressorNode = audioContext.createDynamicsCompressor(); makeupGainNode = audioContext.createGain(); source.connect(gainNode); gainNode.connect(audioAnalyser); audioAnalyser.connect(audioContext.destination); audioInitialized = true; } catch (e) { console.warn("Audio boost failed:", e); } }
+function initAudioBoost() { 
+  if (audioInitialized) return; 
+  try { 
+    audioContext = new (window.AudioContext || window.webkitAudioContext)(); 
+    gainNode = audioContext.createGain(); 
+    audioAnalyser = audioContext.createGain(); 
+    compressorNode = audioContext.createDynamicsCompressor(); 
+    makeupGainNode = audioContext.createGain(); 
+    gainNode.connect(audioAnalyser); 
+    audioAnalyser.connect(audioContext.destination); 
+    
+    const v1 = document.getElementById('player1');
+    const v2 = document.getElementById('player2');
+    if (v1) {
+      const src1 = audioContext.createMediaElementSource(v1);
+      src1.connect(gainNode);
+    }
+    if (v2) {
+      const src2 = audioContext.createMediaElementSource(v2);
+      src2.connect(gainNode);
+    }
+    audioInitialized = true; 
+  } catch (e) { console.warn("Audio boost failed:", e); } 
+}
 document.getElementById('compThreshold').addEventListener('input', (e) => { if (compressorNode) compressorNode.threshold.value = parseFloat(e.target.value); });
 document.getElementById('compRatio').addEventListener('input', (e) => { if (compressorNode) compressorNode.ratio.value = parseFloat(e.target.value); });
 document.getElementById('compGain').addEventListener('input', (e) => { if (makeupGainNode) makeupGainNode.gain.value = parseFloat(e.target.value); });
 
 // Auto-Hide
 let hideTimer;
-const videoStage = document.getElementById('videoStage');
-videoStage.addEventListener('mousemove', () => { clearTimeout(hideTimer); document.body.style.cursor = 'auto'; const plyr = document.querySelector('.plyr'); if (plyr) plyr.classList.remove('plyr--hide-controls'); hideTimer = setTimeout(() => { const vid = document.getElementById('player'); if (vid && !vid.paused) { document.body.style.cursor = 'none'; if (plyr) plyr.classList.add('plyr--hide-controls'); } }, 2500); });
-videoStage.addEventListener('mouseleave', () => { const vid = document.getElementById('player'); if (vid && !vid.paused) { document.body.style.cursor = 'none'; const plyr = document.querySelector('.plyr'); if (plyr) plyr.classList.add('plyr--hide-controls'); } });
+videoStage.addEventListener('mousemove', () => { 
+  clearTimeout(hideTimer); document.body.style.cursor = 'auto'; 
+  document.querySelectorAll('.plyr').forEach(plyr => plyr.classList.remove('plyr--hide-controls')); 
+  hideTimer = setTimeout(() => { 
+    const vid = getActiveVideo(); 
+    if (vid && !vid.paused) { document.body.style.cursor = 'none'; document.querySelectorAll('.plyr').forEach(plyr => plyr.classList.add('plyr--hide-controls')); } 
+  }, 2500); 
+});
+videoStage.addEventListener('mouseleave', () => { 
+  const vid = getActiveVideo(); 
+  if (vid && !vid.paused) { document.body.style.cursor = 'none'; document.querySelectorAll('.plyr').forEach(plyr => plyr.classList.add('plyr--hide-controls')); } 
+});
 
 // MQTT Remote
 const qrOverlay = document.getElementById('qrOverlay'); const qrCloseBtn = document.getElementById('qrCloseBtn'); const remoteCodeDisplay = document.getElementById('remoteCodeDisplay'); const hostStatus = document.getElementById('hostStatus'); const remoteActiveDot = document.getElementById('remoteActiveDot'); const remoteCodeBadge = document.getElementById('remoteCodeBadge');
@@ -351,12 +590,12 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
       if (topic === cmdTopic) {
         const data = JSON.parse(message.toString());
         remoteActiveDot.style.background = '#ff0000'; setTimeout(() => remoteActiveDot.style.background = '', 200);
-        const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
+        const videoEl = getActiveVideo();
         if (!videoEl) return;
         try {
-          if (data.action === 'play1') { if (film1.url) window.switchFilm(1); videoEl.play().catch(e => console.error(e)); }
-          if (data.action === 'play2') { if (film2.url) window.switchFilm(2); videoEl.play().catch(e => console.error(e)); }
-          if (data.action === 'swapFilms') { if (window.swapFilms) window.swapFilms(); }
+          if (data.action === 'play1') { if (film1.url) { window.player2.pause(); focusFilm(1); window.player1.play(); } }
+          if (data.action === 'play2') { if (film2.url) { window.player1.pause(); focusFilm(2); window.player2.play(); } }
+          if (data.action === 'swapFilms') { if (window.toggleFocus) window.toggleFocus(); }
           if (data.action === 'playPause') { if (videoEl.paused) videoEl.play().catch(e => console.error(e)); else videoEl.pause(); }
           if (data.action === 'fullscreen') { playerContainer.classList.toggle('web-fullscreen'); }
           if (data.action === 'seekBack') { videoEl.currentTime = Math.max(0, videoEl.currentTime - 10); }
@@ -365,7 +604,7 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
           if (data.action === 'volumeUp') { videoEl.volume = Math.min(1, videoEl.volume + 0.1); }
           if (data.action === 'volumeDown') { videoEl.volume = Math.max(0, videoEl.volume - 0.1); }
           if (data.action === 'mute') { videoEl.muted = !videoEl.muted; }
-          if (data.action === 'toggleSubs') { if (window.player) window.player.toggleCaptions(); }
+          if (data.action === 'toggleSubs') { if (getActivePlayer()) getActivePlayer().toggleCaptions(); }
           if (data.action === 'subSyncBack') { document.getElementById('subSyncBack').click(); }
           if (data.action === 'subSyncFwd') { document.getElementById('subSyncFwd').click(); }
           if (data.action === 'lights') { document.body.classList.toggle('cinema-mode'); }
@@ -377,7 +616,7 @@ document.getElementById('remoteToggle').addEventListener('click', () => {
     mqttClient.subscribe(cmdTopic, { qos: 1 });
     timeUpdateInterval = setInterval(() => {
       if (mqttClient && mqttClient.connected) {
-        const videoEl = document.querySelector('.video-stage video') || document.getElementById('player');
+        const videoEl = getActiveVideo();
         let timeStr = "Paused"; let volume = videoEl ? videoEl.volume : 1; let muted = videoEl ? videoEl.muted : false; let speed = videoEl ? videoEl.playbackRate : 1;
         if (videoEl && !isNaN(videoEl.duration) && isFinite(videoEl.duration)) { let remaining = Math.max(0, videoEl.duration - videoEl.currentTime); const hrs = Math.floor(remaining / 3600); const mins = Math.floor((remaining % 3600) / 60); const secs = Math.floor(remaining % 60); if (!videoEl.paused) { timeStr = `${mins.toString().padStart(2, '0')}m ${secs.toString().padStart(2, '0')}s`; if (hrs > 0) timeStr = `${hrs}h ${timeStr}`; } else { timeStr = `Paused (${mins}m ${secs}s left)`; } } else if (videoEl && !videoEl.paused) { timeStr = "Live Stream"; }
         mqttClient.publish(timeTopic, JSON.stringify({ timeStr, volume, muted, speed, movieData }));
@@ -427,30 +666,52 @@ function startTorrentStream(magnet) {
   window.torrentClient.add(magnet, (torrent) => {
     const file = torrent.files.find(f => f.name.endsWith('.mp4') || f.name.endsWith('.webm') || f.name.endsWith('.m4v') || f.name.endsWith('.mkv'));
     if (!file) { alert("No playable video file found."); bufferingOverlay.classList.remove('show'); return; }
-    const videoStage = document.querySelector('.video-stage');
-    const oldVideo = document.getElementById('player'); if (oldVideo) oldVideo.remove();
-    const tempContainer = document.createElement('div'); videoStage.insertBefore(tempContainer, videoStage.firstChild);
-    file.appendTo(tempContainer, { autoplay: false, controls: false }, (err, elem) => {
+    
+    const videoEl = document.getElementById('player1');
+    file.renderTo(videoEl, { autoplay: false, controls: false }, (err, elem) => {
       if (err) { alert('Error streaming torrent.'); bufferingOverlay.classList.remove('show'); return; }
-      elem.id = 'player'; elem.setAttribute('playsinline', '');
-      videoStage.insertBefore(elem, tempContainer); tempContainer.remove();
-      film1.url = elem.src; film1.mime = 'video/mp4'; film1.name = `Streaming: ${file.name}`;
+      
+      film1.url = elem.src; 
+      film1.mime = 'video/mp4'; 
+      film1.name = `Streaming: ${file.name}`;
       document.getElementById('loadFilm1Name').textContent = film1.name;
+      
       elem.addEventListener('waiting', () => { bufferingText.textContent = 'Buffering...'; bufferingOverlay.classList.add('show'); });
       elem.addEventListener('playing', () => bufferingOverlay.classList.remove('show'));
       elem.addEventListener('canplay', () => bufferingOverlay.classList.remove('show'));
-      setupPlayer(); idleState.classList.add('hidden'); fetchTrivia(film1.name);
+      
+      focusFilm(1);
+      idleState.classList.add('hidden'); 
+      fetchTrivia(film1.name);
     });
   });
 }
 
 const countdownBtn = document.getElementById('countdownBtn'); const countdownOverlay = document.getElementById('countdownOverlay'); const countdownText = document.getElementById('countdownText');
-countdownBtn.addEventListener('click', () => { let count = 5; countdownOverlay.classList.add('active'); countdownText.textContent = count; const interval = setInterval(() => { count--; if (count > 0) { countdownText.textContent = count; } else { clearInterval(interval); countdownText.textContent = 'PLAY'; setTimeout(() => { countdownOverlay.classList.remove('active'); const vid = document.getElementById('player'); if (vid) vid.play(); }, 800); } }, 1000); });
+countdownBtn.addEventListener('click', () => { 
+  let count = 5; 
+  countdownOverlay.classList.add('active'); 
+  countdownText.textContent = count; 
+  const interval = setInterval(() => { 
+    count--; 
+    if (count > 0) { countdownText.textContent = count; } 
+    else { 
+      clearInterval(interval); 
+      countdownText.textContent = 'PLAY'; 
+      setTimeout(() => { 
+        countdownOverlay.classList.remove('active'); 
+        const vid = getActiveVideo(); 
+        if (vid) vid.play(); 
+      }, 800); 
+    } 
+  }, 1000); 
+});
 
 // Refresh Protection
 window.addEventListener('beforeunload', (event) => {
-  const video = document.getElementById('player');
-  if ((video && video.src && video.src !== window.location.href) || (window.torrentClient && window.torrentClient.torrents && window.torrentClient.torrents.length > 0)) { event.preventDefault(); event.returnValue = ''; }
+  const v1 = document.getElementById('player1');
+  const v2 = document.getElementById('player2');
+  if ((v1 && v1.src && v1.src !== window.location.href) || (v2 && v2.src && v2.src !== window.location.href) || (window.torrentClient && window.torrentClient.torrents && window.torrentClient.torrents.length > 0)) { event.preventDefault(); event.returnValue = ''; }
 });
 </script>
 </body>

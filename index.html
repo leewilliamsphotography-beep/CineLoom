@@ -55,6 +55,26 @@ footer { text-align: center; padding: 2rem; color: var(--text-dim); font-size: 0
 .cmd-item:hover, .cmd-item.selected { background: var(--accent-soft); color: var(--accent); }
 .cmd-item svg { width: 20px; height: 20px; }
 </style>
+<script>
+  // Auto Seasonal Theme Detection
+  (function() {
+    const month = new Date().getMonth();
+    let theme = 'cyber'; // Default fallback
+    if (month === 9) theme = 'halloween'; // October
+        else if (month === 10) theme = 'autumn';    // November
+        else if (month === 11) theme = 'christmas';  // December
+        else if (month === 0) theme = 'winter';     // January
+        else if (month === 1) theme = 'valentine';  // February
+        else if (month >= 2 && month <= 4) theme = 'spring'; // Mar-May
+        else if (month >= 5 && month <= 7) theme = 'summer'; // Jun-Aug
+        else if (month === 8) theme = 'autumn'; // September
+        
+        // Only apply if the user hasn't manually chosen a theme
+          if (!localStorage.getItem('cl-theme')) {
+              document.documentElement.setAttribute('data-theme', theme);
+          }
+      })();
+</script>
 </head>
 <body>
 
