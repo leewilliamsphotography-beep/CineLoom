@@ -101,10 +101,15 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 .info-box { padding: 2rem; position: relative; }
 .info-close-btn { position: absolute; top: 1rem; right: 1rem; background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s var(--ease); z-index: 2; }
 .info-close-btn:hover { border-color: var(--accent); color: var(--accent); }
-.info-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+.info-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
 .info-tab-btn { flex: 1; background: var(--bg-elev-2); border: 1px solid var(--line-strong); color: var(--text-soft); padding: 0.5rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.15s var(--ease); }
 .info-tab-btn:hover { border-color: var(--accent); color: var(--accent); }
 .info-tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.info-search { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+.info-search input { flex: 1; background: var(--bg); border: 1px solid var(--line-strong); color: var(--text); padding: 0.5rem 0.75rem; font-family: inherit; font-size: 0.85rem; border-radius: 6px; }
+.info-search input:focus { outline: none; border-color: var(--accent); }
+.info-search button { background: var(--accent); border: none; color: #fff; padding: 0 1rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: background 0.2s var(--ease); }
+.info-search button:hover { background: var(--accent-2); }
 .info-poster { width: 100%; max-width: 200px; border-radius: 8px; margin: 0 auto 1.5rem; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 .info-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; text-align: center; }
 .info-meta { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center; justify-content: center; flex-wrap: wrap; }
@@ -252,6 +257,10 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
       <button class="info-tab-btn active" data-film="1">Film 1</button>
       <button class="info-tab-btn" data-film="2">Film 2</button>
     </div>
+    <div class="info-search">
+      <input type="text" id="infoSearchInput" placeholder="Enter exact movie title...">
+      <button id="infoSearchBtn">Fetch</button>
+    </div>
     <div id="infoContent"></div>
   </div>
 </div>
@@ -302,7 +311,7 @@ main { padding: 0 2rem 2rem; max-width: 900px; margin: 0 auto; position: relativ
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 <script>
-console.log("CineLoom Player v4.3 (Info Panel Tabs) loaded");
+console.log("CineLoom Player v4.4 (Manual Movie Search) loaded");
 
 const playerContainer = document.getElementById('playerContainer'); 
 const idleState = document.getElementById('idleState'); 
@@ -313,6 +322,7 @@ let film1 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let film2 = { url: null, name: 'No file chosen', mime: 'video/mp4' };
 let focusedFilm = 1, currentSubURL = null, subDelay = 0, originalCues = [], saveHistoryTimer = null;
 let movieData1 = null, movieData2 = null;
+let currentInfoTab = 1;
 let audioContext, gainNode, audioAnalyser, compressorNode, makeupGainNode, audioInitialized = false;
 
 // --- Theme & FX Engine ---
@@ -527,9 +537,12 @@ function checkHistory() { const videoEl = getActiveVideo(); if (!videoEl) return
 document.getElementById('resumeBtn').addEventListener('click', () => { const videoEl = getActiveVideo(); let key = `cl-history-${focusedFilm === 1 ? film1.name : film2.name}`; const history = localStorage.getItem(key); if (history && videoEl) { videoEl.currentTime = JSON.parse(history).time; } document.getElementById('resumeOverlay').classList.remove('show'); });
 
 // OMDb Integration
-async function fetchTrivia(title, filmNum) {
+async function fetchTrivia(title, filmNum, isManual = false) {
     try {
-        let cleanTitle = title.replace(/^Streaming:\s*/, '').replace(/\.[^/.]+$/, '').replace(/[._]/g, ' ');
+        let cleanTitle = title;
+        if (!isManual) {
+            cleanTitle = title.replace(/^Streaming:\s*/, '').replace(/\.[^/.]+$/, '').replace(/[._]/g, ' ');
+        }
         const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(cleanTitle)}&apikey=${localStorage.getItem('cl-omdb-key') || '65149319'}`);
         const data = await res.json();
         let fetchedData = null;
@@ -544,10 +557,8 @@ async function fetchTrivia(title, filmNum) {
         if (filmNum === 1) movieData1 = fetchedData;
         else if (filmNum === 2) movieData2 = fetchedData;
 
-        // If the info panel is open and showing this film, update it live
-        if (document.getElementById('infoOverlay').classList.contains('open')) {
-            const activeTab = document.querySelector('.info-tab-btn.active')?.dataset.film;
-            if (parseInt(activeTab) === filmNum) updateMovieInfoUI(filmNum);
+        if (document.getElementById('infoOverlay').classList.contains('open') && currentInfoTab === filmNum) {
+            updateMovieInfoUI(filmNum);
         }
     } catch (e) {}
 }
@@ -556,7 +567,7 @@ function updateMovieInfoUI(filmNum) {
     const data = filmNum === 1 ? movieData1 : movieData2;
     const content = document.getElementById('infoContent');
     if (!data) {
-        content.innerHTML = `<div class="info-error">No movie data available for Film ${filmNum}. Make sure your OMDb API key is correct in settings and the file name is recognizable.</div>`;
+        content.innerHTML = `<div class="info-error">No movie data available for Film ${filmNum}. Use the search box above to fetch it manually.</div>`;
         return;
     }
     content.innerHTML = `
@@ -576,11 +587,17 @@ function updateMovieInfoUI(filmNum) {
 }
 
 document.getElementById('infoBtn').addEventListener('click', () => {
-    // Set active tab to the currently focused film
     document.querySelectorAll('.info-tab-btn').forEach(btn => {
         btn.classList.toggle('active', parseInt(btn.dataset.film) === focusedFilm);
     });
-    updateMovieInfoUI(focusedFilm);
+    currentInfoTab = focusedFilm;
+    
+    const activeFilm = focusedFilm === 1 ? film1 : film2;
+    let preFill = activeFilm.name.replace(/^Streaming:\s*/, '').replace(/\.[^/.]+$/, '').replace(/[._]/g, ' ');
+    if (preFill === 'No file chosen') preFill = '';
+    document.getElementById('infoSearchInput').value = preFill;
+    
+    updateMovieInfoUI(currentInfoTab);
     document.getElementById('infoOverlay').classList.add('open');
 });
 document.getElementById('infoCloseBtn').addEventListener('click', () => document.getElementById('infoOverlay').classList.remove('open'));
@@ -589,8 +606,29 @@ document.querySelectorAll('.info-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.info-tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        updateMovieInfoUI(parseInt(btn.dataset.film));
+        currentInfoTab = parseInt(btn.dataset.film);
+        
+        const activeFilm = currentInfoTab === 1 ? film1 : film2;
+        let preFill = activeFilm.name.replace(/^Streaming:\s*/, '').replace(/\.[^/.]+$/, '').replace(/[._]/g, ' ');
+        if (preFill === 'No file chosen') preFill = '';
+        document.getElementById('infoSearchInput').value = preFill;
+        
+        updateMovieInfoUI(currentInfoTab);
     });
+});
+
+document.getElementById('infoSearchBtn').addEventListener('click', () => {
+    const query = document.getElementById('infoSearchInput').value.trim();
+    if (query) {
+        document.getElementById('infoContent').innerHTML = `<div class="info-error">Fetching data for "${query}"...</div>`;
+        fetchTrivia(query, currentInfoTab, true);
+    }
+});
+
+document.getElementById('infoSearchInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('infoSearchBtn').click();
+    }
 });
 
 // Player Setup
